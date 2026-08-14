@@ -1,6 +1,0 @@
-{
-  "/manifest.webmanifest/route": "app/manifest.webmanifest/route.js",
-  "/admin/products/new/page": "app/admin/products/new/page.js",
-  "/(storefront)/page": "app/(storefront)/page.js",
-  "/(storefront)/our-story/page": "app/(storefront)/our-story/page.js"
-}
