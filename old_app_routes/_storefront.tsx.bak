@@ -1,0 +1,55 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { money, products } from '@/lib/catalog';
+import { useCommerce } from '@/components/commerce-provider';
+import FAQ from '@/components/faq';
+import AmbientParticles from '@/components/ambient-particles';
+
+function Icon({ children }: { children: React.ReactNode }) { return <span className="icon">{children}</span>; }
+
+export default function Storefront() {
+  const { count, add, setOpen } = useCommerce();
+  const [search, setSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [subscribed, setSubscribed] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const [menu, setMenu] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setLoaded(true), 1400); return () => clearTimeout(t); }, []);
+  return <main>
+    {!loaded && <div className="loader"><div className="loader-leaf">✦</div><p>MIRACLE TREE</p><div className="load-line"><i /></div><small>GROWING SOMETHING GOOD · 100%</small></div>}
+    <div className="grain" />
+    <nav className="nav">
+      <a className="wordmark" href="#top">miracle<span>tree</span><i /></a>
+      <div className={'nav-links ' + (menu ? 'show' : '')}><Link href="/shop">Shop</Link><Link href="/collections">Collections</Link><Link href="/our-story">Our story</Link><Link href="/journal">Journal</Link></div>
+      <div className="nav-actions"><button aria-label="Search" onClick={() => setSearch(true)}><Icon>⌕</Icon></button><button aria-label="Open bag" onClick={() => setOpen(true)}><Icon>♧</Icon><b>{count}</b></button><button className="hamb" onClick={() => setMenu(!menu)} aria-label="Menu">≡</button></div>
+    </nav>
+
+    <section className="hero" id="top">
+      <AmbientParticles />
+      <div className="hero-copy"><p className="eyebrow">India&apos;s original moringa specialists</p><h1>Small leaves.<br/><em>Big ritual.</em></h1><p className="hero-text">Moringa-led everyday foods and wellness essentials, made to bring a little more goodness to every day.</p><a href="#ritual" className="button">Explore moringa <span>↗</span></a></div>
+      <figure className="hero-visual"><div className="hero-photo"/><figcaption>Satpura, India <span>22°07′N / 78°08′E</span></figcaption></figure>
+      <div className="hero-note"><span>01</span><p>Grown slowly.<br/>Made with care.</p></div>
+      <div className="scroll-cue"><span/> Discover our world</div>
+    </section>
+
+    <section className="manifesto" id="story"><p className="eyebrow">The miracle of moringa</p><h2>A remarkable tree,<br/>made part of <em>every day.</em></h2><div className="manifesto-grid"><p>From leaf powders and tablets to bars and comforting soups, we make moringa easy to welcome into your life — one small ritual at a time.</p><a href="#journal" className="text-link">Our moringa story <span>→</span></a><div className="stat"><b>27</b><span>Ways to bring<br/>moringa home</span></div></div></section>
+
+    <section className="landscape"><div className="land-image"/><div className="land-copy"><p className="eyebrow">Grown with reverence</p><h2>A story that starts<br/>under the <em>canopy.</em></h2><p>We source at the rhythm of the seasons, partnering with growers who know every inch of their land.</p><button className="circle-button">Discover<br/>the source <span>↗</span></button></div><div className="land-caption">SATPURA, INDIA · 22° 07' N</div></section>
+
+    <section className="collection" id="ritual"><div className="section-head"><div><p className="eyebrow">The Miracle Tree collection</p><h2>For every kind<br/>of <em>everyday.</em></h2></div><Link className="text-link" href="/shop">Shop all products <span>→</span></Link></div><div className="product-grid">{products.map((product, i) => <article className={'product-card ' + product.tone} style={{ '--card-index': i } as React.CSSProperties} key={product.name}><Link href={`/products/${product.slug}`} className="product-image" style={{ backgroundImage: `url(${product.image})` }}><span>0{i + 1}</span></Link><button className="card-add" aria-label={'Add ' + product.name} onClick={() => add(product)}>+</button><div className="product-info"><div><Link href={`/products/${product.slug}`}><h3>{product.name}</h3></Link><p>{product.type}</p></div><strong>{money(product.price)}</strong></div></article>)}</div></section>
+
+    <section className="quote"><div className="quote-mark">“</div><blockquote>Small, beautiful rituals that make the ordinary feel <em>golden.</em></blockquote><p>— VOGUE WELLNESS EDIT</p></section>
+
+    <section className="ritual-block"><div className="ritual-product"><div className="sun-disc"/><div className="pouch"><small>MIRACLE TREE</small><strong>MORINGA<br/>LEAF</strong><i>PURE · SIMPLE · EVERYDAY</i></div></div><div className="ritual-copy"><p className="eyebrow">The daily green</p><h2>Make room for<br/>your <em>moringa.</em></h2><p>One ingredient. Many ways to use it. Stir it into smoothies, mix it into meals, or make it the greenest part of your morning.</p><Link className="button light" href="/products/moringa-leaf-powder-hpd-dried">Meet the leaf powder <span>↗</span></Link></div></section>
+
+    <section className="journal" id="journal"><div className="section-head"><div><p className="eyebrow">Notes from the field</p><h2>Made for <em>curiosity.</em></h2></div><a className="text-link" href="#read">Read the journal <span>→</span></a></div><div className="journal-grid"><article className="journal-card large"><div className="journal-image one"/><p>THE FIELD NOTES · 04.18.24</p><h3>Why the healthiest thing you can do might be slowing down.</h3></article><article className="journal-card"><div className="journal-image two"/><p>INGREDIENT STORIES · 03.05.24</p><h3>The quiet power of a very green leaf.</h3></article></div></section>
+    <FAQ />
+
+    <section className={'newsletter ' + (subscribed ? 'subscribed' : '')}><div><p className="eyebrow">A little closer to the earth</p><h2>Good things<br/>are <em>growing.</em></h2></div><form onSubmit={(e) => { e.preventDefault(); setSubscribed(true); }}><label htmlFor="email">{subscribed ? 'You’re on the list' : 'Join our occasional notes'}</label><div><input id="email" type="email" required disabled={subscribed} placeholder={subscribed ? 'Thank you — see you soon.' : 'Your email address'}/><button aria-label="Submit" disabled={subscribed}>{subscribed ? '✦' : '→'}</button></div><small>{subscribed ? 'A small green leaf has found its way to you.' : 'By subscribing, you agree to receive thoughtful things from us.'}</small></form></section>
+    <footer><a className="wordmark" href="#top">miracle<span>tree</span><i /></a><p>© 2025 MIRACLE TREE. ROOTED IN INDIA.</p><div><a href="#instagram">Instagram</a><Link href="/contact">Contact</Link><Link href="/policies/privacy">Privacy</Link><Link href="/policies/shipping">Shipping</Link></div></footer>
+
+    <div className={'overlay ' + (search ? 'active' : '')}><button className="close" onClick={() => setSearch(false)}>×</button><p className="eyebrow">Find your ritual</p><input autoFocus={search} value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Search products"/>{searchQuery ? <div className="search-results">{products.filter((product) => `${product.name} ${product.type}`.toLowerCase().includes(searchQuery.toLowerCase())).map((product) => <Link onClick={() => setSearch(false)} href={`/products/${product.slug}`} key={product.slug}><span>{product.name}</span><b>{money(product.price)}</b></Link>)}{!products.some((product) => `${product.name} ${product.type}`.toLowerCase().includes(searchQuery.toLowerCase())) && <p>No products found. Try “moringa”.</p>}</div> : <div className="suggestions"><span>Popular</span><button onClick={() => setSearchQuery('moringa')}>Moringa Powder</button><button onClick={() => setSearchQuery('tablet')}>Tablets</button><button onClick={() => setSearchQuery('bar')}>Energy Bars</button></div>}</div>
+  </main>;
+}
