@@ -4,20 +4,13 @@ import { useState, useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import Image from 'next/image';
 
+import { useCart } from './CartProvider';
+
 export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
   const drawerRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   
-  // Dummy cart state for UI demonstration
-  const cartItems = [
-    {
-      id: 1,
-      name: 'Cold-Pressed Moringa Oil',
-      price: 2200,
-      image: 'https://images.unsplash.com/photo-1615397323171-897dbb25dfdd?q=80&w=2940&auto=format&fit=crop',
-      quantity: 1
-    }
-  ];
+  const { cart: cartItems, updateQuantity, cartTotal } = useCart();
 
   useEffect(() => {
     if (!drawerRef.current || !overlayRef.current) return;
@@ -66,19 +59,24 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean, onClo
                   <p className="text-xs text-gray-500 font-mono">₹{item.price}</p>
                 </div>
                 <div className="flex items-center gap-4">
-                  <button className="text-lg">-</button>
+                  <button onClick={() => updateQuantity(item.id.toString(), item.quantity - 1)} className="text-lg">-</button>
                   <span className="text-sm font-mono">{item.quantity}</span>
-                  <button className="text-lg">+</button>
+                  <button onClick={() => updateQuantity(item.id.toString(), item.quantity + 1)} className="text-lg">+</button>
                 </div>
               </div>
             </div>
           ))}
+          {cartItems.length === 0 && (
+            <div className="flex-1 flex items-center justify-center text-sm uppercase tracking-widest text-gray-500">
+              Your cart is empty
+            </div>
+          )}
         </div>
         
         <div className="p-8 border-t border-gray-200 bg-white">
           <div className="flex justify-between items-center mb-6">
             <span className="text-sm font-medium uppercase tracking-widest">Subtotal</span>
-            <span className="font-mono text-lg">₹2200</span>
+            <span className="font-mono text-lg">₹{cartTotal.toFixed(2)}</span>
           </div>
           <button className="w-full bg-black text-white py-5 text-sm uppercase tracking-widest font-medium hover:bg-brand-green-700 transition-colors">
             Checkout

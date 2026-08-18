@@ -100,45 +100,47 @@ export default function HeroSection({ content }: { content?: any }) {
   const secondHalf = content?.heading ? headingWords.slice(Math.ceil(headingWords.length / 2)).join(' ') : 'Considered.';
 
   return (
-    <section ref={containerRef} className="relative h-screen w-full overflow-hidden bg-brand-forest-700 text-white z-0">
-      <div className="absolute inset-0 w-full h-full">
-        <Image
-          ref={imageRef}
-          src="https://images.unsplash.com/photo-1596755389378-c31d21fd1273?q=80&w=2800&auto=format&fit=crop"
-          alt="Luxury botanical skincare"
-          fill
-          priority
-          className="object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-brand-forest-700/60 via-transparent to-brand-forest-700/80 pointer-events-none" />
-      </div>
-
-      <div className="absolute inset-0 flex flex-col items-center justify-center text-white z-20 px-4 mt-16 perspective-[1000px]">
-        <p ref={subtitleRef} className="text-[10px] md:text-xs uppercase font-sans font-bold mb-8 text-brand-gold tracking-[0.3em]">
-          {content?.subheading || "The pure power of moringa"}
-        </p>
-        
-        <div className="overflow-hidden py-2">
-          <h1 ref={title1Ref} className="text-7xl md:text-9xl lg:text-[12rem] font-serif leading-[0.85] tracking-tighter text-center text-brand-pearl">
-            {firstHalf}
-          </h1>
-        </div>
-        
-        <div className="overflow-hidden py-2 mb-12">
-          <h1 ref={title2Ref} className="text-7xl md:text-9xl lg:text-[12rem] font-serif leading-[0.85] tracking-tighter text-center text-brand-gold italic">
-            {secondHalf}
-          </h1>
+    <div className="relative w-full h-screen z-0">
+      <section ref={containerRef} className="relative h-screen w-full overflow-hidden bg-brand-forest-700 text-white">
+        <div className="absolute inset-0 w-full h-full">
+          <Image
+            ref={imageRef}
+            src={content?.image || "https://images.unsplash.com/photo-1596755389378-c31d21fd1273?q=80&w=2800&auto=format&fit=crop"}
+            alt="Luxury botanical skincare"
+            fill
+            priority
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-brand-green-900/60 via-brand-green-700/30 to-brand-gold/40 pointer-events-none mix-blend-overlay" />
         </div>
 
-        <div ref={ctaRef} className="mt-8 flex flex-col sm:flex-row gap-6 items-center">
-          <button className="px-12 py-5 bg-brand-pearl text-brand-forest-700 rounded-full font-sans text-sm font-bold tracking-widest uppercase hover:scale-105 hover:bg-white transition-all duration-500 shadow-xl">
-            {content?.primaryButtonText || "Shop Collection"}
-          </button>
-          <button className="px-12 py-5 border border-brand-pearl/30 text-brand-pearl rounded-full font-sans text-sm font-bold tracking-widest uppercase hover:bg-brand-pearl/10 hover:border-brand-pearl transition-all duration-500">
-            {content?.secondaryButtonText || "Our Story"}
-          </button>
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-white z-20 px-4 mt-16 perspective-[1000px]">
+          <p ref={subtitleRef} className="text-[10px] md:text-xs uppercase font-sans font-bold mb-8 text-brand-gold tracking-[0.3em]">
+            {content?.subheading || "The pure power of moringa"}
+          </p>
+          
+          <div className="overflow-hidden py-2">
+            <h1 ref={title1Ref} className="text-5xl md:text-7xl lg:text-8xl xl:text-[9rem] font-serif leading-[0.85] tracking-tighter text-center text-brand-pearl">
+              {firstHalf}
+            </h1>
+          </div>
+          
+          <div className="overflow-hidden py-2 mb-8 md:mb-12">
+            <h1 ref={title2Ref} className="text-5xl md:text-7xl lg:text-8xl xl:text-[9rem] font-serif leading-[0.85] tracking-tighter text-center text-brand-gold italic">
+              {secondHalf}
+            </h1>
+          </div>
+
+          <div ref={ctaRef} className="mt-4 md:mt-8 flex flex-col sm:flex-row gap-4 md:gap-6 items-center">
+            <button className="px-12 py-5 bg-brand-pearl text-brand-forest-700 rounded-full font-sans text-sm font-bold tracking-widest uppercase hover:scale-105 hover:bg-white transition-all duration-500 shadow-xl">
+              {content?.primaryButtonText || "Shop Collection"}
+            </button>
+            <button className="px-12 py-5 border border-brand-pearl/30 text-brand-pearl rounded-full font-sans text-sm font-bold tracking-widest uppercase hover:bg-brand-pearl/10 hover:border-brand-pearl transition-all duration-500">
+              {content?.secondaryButtonText || "Our Story"}
+            </button>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
   );
 }

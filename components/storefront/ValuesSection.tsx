@@ -91,26 +91,30 @@ export default function ValuesSection({ content }: { content?: any }) {
   }));
 
   return (
-    <section className="py-40 bg-brand-pearl relative z-10 rounded-t-[3rem] -mt-10" ref={sectionRef}>
+    <section className="py-40 bg-white relative z-10 rounded-t-[3rem] -mt-10" ref={sectionRef}>
       <div className="max-w-[1600px] mx-auto px-6 md:px-12">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-24 perspective-[1000px]">
-          <h2 ref={titleRef} className="text-5xl md:text-7xl font-serif text-brand-forest-700 leading-none tracking-tight origin-bottom max-w-2xl">
+        <div className="flex flex-col md:flex-row justify-start items-end gap-12 lg:gap-24 mb-24 perspective-[1000px]">
+          <h2 ref={titleRef} className="text-5xl md:text-7xl font-serif text-transparent bg-clip-text bg-gradient-to-r from-[#E91E63] via-[#FF9800] to-brand-green-500 leading-none tracking-tight origin-bottom max-w-2xl pb-2">
             {content?.heading || "The Foundation of Our Craft."}
           </h2>
-          <p className="text-brand-forest-700/60 max-w-md font-sans text-lg mt-8 md:mt-0 md:text-right">
+          <p className="text-gray-600 max-w-md font-sans text-lg mt-8 md:mt-0">
             We believe that true wellness stems from the purest ingredients, treated with immense respect from soil to skin.
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-20 border-t border-brand-forest-700/10 pt-20">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 border-t border-gray-100 pt-20">
           {renderValues.map((value: any, idx: number) => {
+            const colors = ['text-[#00BCD4] border-[#00BCD4]/20', 'text-[#FF9800] border-[#FF9800]/20', 'text-brand-green-500 border-brand-green-500/20'];
+            const hoverColors = ['group-hover:bg-[#00BCD4]', 'group-hover:bg-[#FF9800]', 'group-hover:bg-brand-green-500'];
+            const titleColors = ['text-[#00BCD4]', 'text-[#FF9800]', 'text-brand-green-500'];
+            
             return (
-              <div key={idx} className="value-card group">
-                <div className="w-16 h-16 rounded-full border border-brand-forest-700/20 flex items-center justify-center mb-8 text-brand-forest-700 group-hover:bg-brand-gold group-hover:text-white group-hover:border-transparent transition-all duration-500 ease-out">
+              <div key={idx} className="value-card group bg-white rounded-3xl p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.12)] hover:-translate-y-2 transition-all duration-500 ease-out">
+                <div className={`w-16 h-16 rounded-full border flex items-center justify-center mb-8 ${colors[idx % 3]} ${hoverColors[idx % 3]} group-hover:text-white group-hover:border-transparent transition-all duration-500 ease-out`}>
                   {value.icon}
                 </div>
-                <h3 className="text-2xl font-serif text-brand-forest-700 mb-4">{value.title}</h3>
-                <p className="text-brand-forest-700/70 font-sans text-lg leading-relaxed">{value.description}</p>
+                <h3 className={`text-2xl font-serif mb-4 ${titleColors[idx % 3]}`}>{value.title}</h3>
+                <p className="text-gray-600 font-sans text-lg leading-relaxed">{value.description}</p>
               </div>
             );
           })}

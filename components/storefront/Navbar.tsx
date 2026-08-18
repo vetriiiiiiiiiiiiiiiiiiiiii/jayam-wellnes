@@ -5,12 +5,14 @@ import Link from 'next/link';
 import gsap from 'gsap';
 import MagneticButton from './MagneticButton';
 import CartDrawer from './CartDrawer';
+import { useCart } from './CartProvider';
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const { cartCount } = useCart();
   
   const menuRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
@@ -61,8 +63,8 @@ export default function Navbar() {
       >
         <div className="max-w-[1400px] mx-auto px-6 flex justify-between items-center h-24">
           <div className="flex-1 flex items-center gap-8">
-            <Link href="/" className="hover:opacity-80 transition-opacity" onClick={() => setMenuOpen(false)}>
-              <img src="/miracletree-logo.jpeg" alt="Miracle Tree" className="h-12 w-auto object-contain mix-blend-multiply" />
+            <Link href="/" className="hover:opacity-80 transition-opacity bg-white/95 rounded-xl p-1.5 shadow-lg backdrop-blur-md" onClick={() => setMenuOpen(false)}>
+              <img src="/miracletree-logo.jpeg" alt="Miracle Tree" className="h-10 w-auto object-contain" />
             </Link>
             
             <MagneticButton>
@@ -94,7 +96,7 @@ export default function Navbar() {
                 onClick={() => setCartOpen(true)}
                 className="text-xs uppercase tracking-[0.2em] font-medium hover:opacity-60 transition-opacity"
               >
-                Cart (0)
+                Cart ({cartCount})
               </button>
             </MagneticButton>
           </div>
@@ -107,7 +109,7 @@ export default function Navbar() {
         className="fixed top-0 left-0 w-full h-screen bg-brand-pearl z-[90] -translate-y-full flex flex-col justify-center px-12 md:px-32"
       >
         <div className="flex flex-col gap-4 max-w-4xl">
-          {['Shop', 'Our Story', 'Journal', 'Contact'].map((item, i) => (
+          {['Shop', 'Collections', 'Our Story', 'Journal', 'Contact'].map((item, i) => (
             <div key={item} className="overflow-hidden py-2">
               <Link 
                 href={`/${item.toLowerCase().replace(' ', '-')}`}

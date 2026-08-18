@@ -4,9 +4,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
 import MagneticButton from './MagneticButton';
+import { useCart } from './CartProvider';
 
 export default function ProductCard({ product, index }: { product: any, index: number }) {
   const [isHovered, setIsHovered] = useState(false);
+  const { addToCart } = useCart();
 
   // Fallback images since Unsplash images were giving 404s
   const defaultImage = "https://images.unsplash.com/photo-1615397323171-897dbb25dfdd?q=80&w=2940&auto=format&fit=crop";
@@ -48,7 +50,13 @@ export default function ProductCard({ product, index }: { product: any, index: n
       {/* Floating Apple-style Pill Add to Cart */}
       <div className="absolute bottom-28 left-1/2 -translate-x-1/2 z-20 pointer-events-none opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 ease-[cubic-bezier(0.19,1,0.22,1)] delay-100">
         <MagneticButton>
-          <button className="px-8 py-3 bg-white/90 backdrop-blur-md rounded-full text-black text-xs uppercase tracking-[0.2em] font-medium shadow-2xl pointer-events-auto hover:bg-black hover:text-white transition-colors duration-300">
+          <button 
+            onClick={(e) => {
+              e.preventDefault();
+              addToCart({ id: product.id, name: product.name, price: product.price, image: defaultImage });
+            }}
+            className="px-8 py-3 bg-white/90 backdrop-blur-md rounded-full text-black text-xs uppercase tracking-[0.2em] font-medium shadow-2xl pointer-events-auto hover:bg-black hover:text-white transition-colors duration-300"
+          >
             Quick Add
           </button>
         </MagneticButton>

@@ -1,5 +1,6 @@
 import prisma from "@/lib/db";
 import { format } from "date-fns";
+import Link from "next/link";
 
 export default async function AdminOrdersPage() {
   const orders = await prisma.order.findMany({
@@ -35,7 +36,9 @@ export default async function AdminOrdersPage() {
             <tbody className="divide-y divide-gray-200">
               {orders.map((order) => (
                 <tr key={order.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 font-mono text-gray-600">#{order.orderNumber}</td>
+                  <td className="px-6 py-4 font-mono text-brand-green-600 font-medium">
+                    <Link href={`/admin/orders/${order.id}`}>#{order.orderNumber}</Link>
+                  </td>
                   <td className="px-6 py-4 text-gray-600">{format(new Date(order.createdAt), "MMM d, yyyy")}</td>
                   <td className="px-6 py-4 text-gray-900 font-medium">
                     {order.user?.name || "Guest"}
@@ -44,11 +47,15 @@ export default async function AdminOrdersPage() {
                   <td className="px-6 py-4">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                       order.status === "PENDING" ? "bg-yellow-100 text-yellow-800" :
-                      order.status === "COMPLETED" ? "bg-green-100 text-green-800" :
+                      order.status === "COMPLETED" || order.status === "DELIVERED" ? "bg-green-100 text-green-800" :
+                      order.status === "SHIPPED" ? "bg-blue-100 text-blue-800" :
                       "bg-gray-100 text-gray-800"
                     }`}>
                       {order.status}
                     </span>
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <Link href={`/admin/orders/${order.id}`} className="text-brand-green-600 hover:text-brand-green-700 text-sm font-medium">Manage →</Link>
                   </td>
                 </tr>
               ))}

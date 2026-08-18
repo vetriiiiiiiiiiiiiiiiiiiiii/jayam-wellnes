@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import QuickAddButton from './QuickAddButton';
 
 export default function HorizontalProducts({ products }: { products: any[] }) {
   if (!products || products.length === 0) return null;
@@ -54,11 +55,7 @@ export default function HorizontalProducts({ products }: { products: any[] }) {
                   </div>
 
                   {/* Add to Cart Hover Button */}
-                  <div className="absolute bottom-4 left-4 right-4 translate-y-12 opacity-0 transition-all duration-500 ease-out group-hover:translate-y-0 group-hover:opacity-100 z-10">
-                    <button className="w-full bg-brand-forest-700/90 backdrop-blur-md text-brand-pearl py-4 rounded-full font-sans text-xs font-bold uppercase tracking-widest hover:bg-brand-forest-700 transition-colors">
-                      Quick Add
-                    </button>
-                  </div>
+                  <QuickAddButton product={product} />
                 </div>
 
                 <div>

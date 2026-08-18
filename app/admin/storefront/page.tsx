@@ -42,12 +42,27 @@ export default async function StorefrontEditorPage() {
   async function updateSection(formData: FormData) {
     'use server';
     const id = formData.get('id') as string;
-    const content = formData.get('content') as string;
     const isEnabled = formData.get('isEnabled') === 'on';
+
+    let rawContent = formData.get('content') as string;
+    let newContent: any = {};
+    try {
+      newContent = JSON.parse(rawContent);
+    } catch (e) {
+      console.error("Failed to parse raw content", e);
+    }
+
+    // Override with individual form inputs
+    for (const [key, value] of formData.entries()) {
+      if (key.startsWith('content_') && typeof value === 'string') {
+        const fieldName = key.replace('content_', '');
+        newContent[fieldName] = value;
+      }
+    }
 
     await db.homepageSection.update({
       where: { id },
-      data: { content, isEnabled }
+      data: { content: JSON.stringify(newContent), isEnabled }
     });
 
     revalidatePath('/');
@@ -63,7 +78,10 @@ export default async function StorefrontEditorPage() {
 
       <div className="space-y-8">
         {sections.map((section) => {
-          const content = JSON.parse(section.content);
+          let content = JSON.parse(section.content);
+          if (section.type === 'hero' && !content.image) {
+            content.image = "https://images.unsplash.com/photo-1596755389378-c31d21fd1273?q=80&w=2800&auto=format&fit=crop";
+          }
           
           return (
             <div key={section.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">

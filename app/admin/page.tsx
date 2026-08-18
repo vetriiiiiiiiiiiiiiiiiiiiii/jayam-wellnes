@@ -3,19 +3,23 @@ import Link from "next/link";
 import { format } from "date-fns";
 
 export default async function AdminDashboard() {
-  const [totalProducts, totalOrders, recentOrders, totalReviews] = await Promise.all([
+  const [totalProducts, totalOrders, recentOrders, totalReviews, allOrders] = await Promise.all([
     prisma.product.count(),
     prisma.order.count(),
     prisma.order.findMany({
       take: 5,
+      where: { status: 'PENDING' },
       orderBy: { createdAt: "desc" },
       include: { user: true },
     }),
     prisma.review.count(),
+    prisma.order.findMany({
+      select: { total: true }
+    })
   ]);
 
-  // Calculate some dummy metrics for visual fullness (since we don't have deep sales data yet)
-  const totalRevenue = recentOrders.reduce((sum, order) => sum + order.total, 0) || 125000;
+  const totalRevenue = allOrders.reduce((sum, order) => sum + order.total, 0) || 0;
+  const averageOrderValue = totalOrders > 0 ? (totalRevenue / totalOrders) : 0;
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
@@ -28,23 +32,21 @@ export default async function AdminDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
           <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">Total Revenue</p>
-          <h3 className="text-3xl font-serif text-gray-900 mt-2">₹{totalRevenue.toLocaleString()}</h3>
-          <p className="text-sm text-green-600 mt-2">↑ 12% from last month</p>
+          <h3 className="text-3xl font-serif text-gray-900 mt-2">₹{totalRevenue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</h3>
+        </div>
+        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+          <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">Average Order</p>
+          <h3 className="text-3xl font-serif text-gray-900 mt-2">₹{averageOrderValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</h3>
         </div>
         <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
           <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">Total Orders</p>
           <h3 className="text-3xl font-serif text-gray-900 mt-2">{totalOrders}</h3>
-          <p className="text-sm text-green-600 mt-2">↑ 5% from last month</p>
+          <Link href="/admin/orders" className="text-sm text-brand-green-600 hover:underline mt-2 inline-block">Manage orders →</Link>
         </div>
         <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
           <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">Products</p>
           <h3 className="text-3xl font-serif text-gray-900 mt-2">{totalProducts}</h3>
           <Link href="/admin/products" className="text-sm text-brand-green-600 hover:underline mt-2 inline-block">Manage catalog →</Link>
-        </div>
-        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
-          <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">Reviews</p>
-          <h3 className="text-3xl font-serif text-gray-900 mt-2">{totalReviews}</h3>
-          <Link href="/admin/reviews" className="text-sm text-brand-green-600 hover:underline mt-2 inline-block">Moderate reviews →</Link>
         </div>
       </div>
 

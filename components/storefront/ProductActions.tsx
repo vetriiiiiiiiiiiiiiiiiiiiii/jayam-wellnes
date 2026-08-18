@@ -2,17 +2,27 @@
 
 import { useState } from 'react';
 import MagneticButton from './MagneticButton';
+import { useCart } from './CartProvider';
 
-export default function ProductActions({ price }: { price: number }) {
+export default function ProductActions({ product }: { product: any }) {
   const [size, setSize] = useState('100g');
   const [isAdding, setIsAdding] = useState(false);
+  const { addToCart } = useCart();
 
   const handleAddToCart = () => {
     setIsAdding(true);
+    
+    addToCart({
+      id: product.id,
+      name: `${product.name} (${size})`,
+      price: product.price,
+      image: product.images?.[0]?.url || "https://images.unsplash.com/photo-1615397323171-897dbb25dfdd?q=80&w=2940&auto=format&fit=crop"
+    });
+
     setTimeout(() => {
       setIsAdding(false);
       // Here you would typically trigger the cart drawer open
-    }, 1500);
+    }, 500);
   };
 
   return (

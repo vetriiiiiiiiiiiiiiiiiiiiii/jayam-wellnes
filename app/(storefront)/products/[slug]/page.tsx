@@ -10,7 +10,18 @@ export default async function ProductPage(
   const params = await props.params;
   const product = await db.product.findUnique({
     where: { slug: params.slug },
-    include: { images: true, reviews: { orderBy: { createdAt: 'desc' } } }
+    include: { 
+      images: true, 
+      reviews: { orderBy: { createdAt: 'desc' } },
+      relatedTo: {
+        where: { type: 'BUNDLE_ITEM' },
+        include: {
+          relatedProduct: {
+            include: { images: true }
+          }
+        }
+      }
+    }
   });
 
   if (!product) {
@@ -33,13 +44,39 @@ export default async function ProductPage(
                 {product.name}
               </h1>
               
-              <div className="font-mono text-xl mb-12">₹{product.price}</div>
+              <div className="font-mono text-xl mb-12">
+                ₹{product.price}
+                {product.compareAtPrice && product.compareAtPrice > product.price && (
+                  <span className="text-sm text-gray-400 line-through ml-3">₹{product.compareAtPrice}</span>
+                )}
+              </div>
               
-              <div className="prose prose-lg prose-green mb-16 leading-relaxed text-gray-700">
+              <div className="prose prose-lg prose-green mb-10 leading-relaxed text-gray-700">
                 {product.description || "Potent by nature, crafted for your daily ritual. Discover the peak of wellness."}
               </div>
 
-              <ProductActions price={product.price} />
+              {/* Bundle Included Items */}
+              {product.productType === 'BUNDLE' && product.relatedTo && product.relatedTo.length > 0 && (
+                <div className="mb-12 border-y border-gray-200 py-8">
+                  <h3 className="text-sm uppercase tracking-widest font-medium text-brand-forest-700 mb-6">What's included</h3>
+                  <div className="space-y-4">
+                    {product.relatedTo.map(item => (
+                      <div key={item.id} className="flex items-center gap-4">
+                        {item.relatedProduct.images[0] && (
+                          <div className="w-16 h-16 bg-gray-100 rounded overflow-hidden relative">
+                            <img src={item.relatedProduct.images[0].url} alt={item.relatedProduct.name} className="object-cover w-full h-full" />
+                          </div>
+                        )}
+                        <div>
+                          <p className="font-medium text-lg">{item.relatedProduct.name}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <ProductActions product={product} />
               
               <ReviewSection productId={product.id} reviews={product.reviews || []} />
             </div>

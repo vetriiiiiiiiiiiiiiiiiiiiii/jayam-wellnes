@@ -4,6 +4,7 @@ import { deleteProduct } from "../actions";
 
 export default async function AdminProductsPage() {
   const products = await db.product.findMany({
+    where: { productType: { not: 'BUNDLE' } },
     orderBy: { createdAt: 'desc' }
   });
 
@@ -44,7 +45,10 @@ export default async function AdminProductsPage() {
                     {product.isPublished ? 'Published' : 'Draft'}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-right text-sm font-medium">
+                <td className="px-6 py-4 text-right text-sm font-medium flex justify-end gap-4 items-center">
+                  <Link href={`/admin/products/${product.id}/edit`} className="text-brand-forest-700 hover:text-brand-forest-900 transition-colors">
+                    Edit
+                  </Link>
                   <form action={deleteProduct}>
                     <input type="hidden" name="id" value={product.id} />
                     <button type="submit" className="text-red-600 hover:text-red-900 transition-colors">Delete</button>
