@@ -78,7 +78,7 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean, onClo
             <span className="text-sm font-medium uppercase tracking-widest">Subtotal</span>
             <span className="font-mono text-lg">₹{cartTotal.toFixed(2)}</span>
           </div>
-          <button className="w-full bg-black text-white py-5 text-sm uppercase tracking-widest font-medium hover:bg-brand-green-700 transition-colors">
+          <button onClick={() => { onClose(); window.location.href = '/checkout'; }} className="w-full bg-black text-white py-5 text-sm uppercase tracking-widest font-medium hover:bg-brand-green-700 transition-colors">
             Checkout
           </button>
         </div>

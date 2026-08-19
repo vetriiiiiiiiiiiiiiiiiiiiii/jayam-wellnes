@@ -363,6 +363,8 @@ export async function updateStock(productId: string, stock: number) {
   }
 }
 
+import { sendOrderShippedEmail, sendOrderDeliveredEmail } from '@/lib/mail';
+
 export async function updateOrderStatus(orderId: string, status: string) {
   try {
     const validStatuses = ['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
@@ -372,8 +374,17 @@ export async function updateOrderStatus(orderId: string, status: string) {
 
     const order = await prisma.order.update({
       where: { id: orderId },
-      data: { status }
+      data: { status },
+      include: { user: true }
     });
+
+    if (order.user?.email) {
+      if (status === 'SHIPPED') {
+        sendOrderShippedEmail(order.user.email, order);
+      } else if (status === 'DELIVERED') {
+        sendOrderDeliveredEmail(order.user.email, order);
+      }
+    }
 
     revalidatePath('/admin');
     revalidatePath('/admin/orders');
