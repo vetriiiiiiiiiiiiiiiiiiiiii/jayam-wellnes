@@ -1,7 +1,8 @@
+require('dotenv').config({ path: '../.env' });
 const { MongoClient } = require('mongodb');
 const bcrypt = require('bcryptjs');
 
-const url = 'mongodb://localhost:27017/miracletree';
+const url = process.env.MONGO_DB || 'mongodb://127.0.0.1:27017/miracletree';
 const client = new MongoClient(url);
 
 async function seed() {

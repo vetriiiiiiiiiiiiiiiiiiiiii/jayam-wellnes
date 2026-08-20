@@ -1,30 +1,29 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { useApp } from '../context/Appcontext';
+import { logout } from '../services/api';
 
 export default function AccountPage() {
-  const [user, setUser] = useState(null);
-  const [orders, setOrders] = useState([]);
+  const { user, orders, setUser, setOrders, setCart, isValidating } = useApp();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const stored = localStorage.getItem('user');
-    const token = localStorage.getItem('token');
-    if (!stored || !token) { navigate('/login'); return; }
-    setUser(JSON.parse(stored));
+    // Wait until validation finishes before checking auth
+    if (!isValidating && !user) {
+      navigate('/login');
+    }
+  }, [user, navigate, isValidating]);
 
-    axios.get(`${import.meta.env.VITE_API_URL}/api/orders/my`, {
-      headers: { Authorization: `Bearer ${token}` }
-    }).then(res => setOrders(res.data)).catch(() => {});
-  }, [navigate]);
-
-  const handleSignOut = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+  const handleSignOut = async () => {
+    console.log("Signing out user...");
+    await logout();
+    setUser(null);
+    setCart(null);
+    setOrders([]);
     navigate('/');
   };
 
-  if (!user) return null;
+  if (isValidating || !user) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
 
   return (
     <div className="min-h-screen bg-brand-pearl pt-32 pb-24">

@@ -27,40 +27,44 @@ import Register from './pages/Register';
 
 import AdminDashboard from './pages/admin/AdminDashboard';
 
+import { AppProvider } from './context/Appcontext';
+
 function App() {
   return (
-    <CartProvider>
-      <SmoothScroll>
-        <Router>
-          <CustomCursor />
-          <ScrollProgress />
-          <Navbar />
-          <main className="flex-grow flex flex-col">
-            <Routes>
-              {/* Admin */}
-              <Route path="/admin" element={<AdminDashboard />} />
+    <AppProvider>
+      <CartProvider>
+        <SmoothScroll>
+          <Router>
+            <CustomCursor />
+            <ScrollProgress />
+            <Navbar />
+            <main className="flex-grow flex flex-col">
+              <Routes>
+                {/* Admin */}
+                <Route path="/admin" element={<AdminDashboard />} />
 
-              {/* Storefront */}
-              <Route path="/" element={<Home />} />
-              <Route path="/shop" element={<Shop />} />
-              <Route path="/products/:slug" element={<Product />} />
-              <Route path="/collections" element={<Collections />} />
-              <Route path="/our-story" element={<OurStory />} />
-              <Route path="/journal" element={<Journal />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/checkout" element={<Checkout />} />
-              <Route path="/checkout/success" element={<CheckoutSuccess />} />
-              <Route path="/account" element={<Account />} />
+                {/* Storefront */}
+                <Route path="/" element={<Home />} />
+                <Route path="/shop" element={<Shop />} />
+                <Route path="/products/:slug" element={<Product />} />
+                <Route path="/collections" element={<Collections />} />
+                <Route path="/our-story" element={<OurStory />} />
+                <Route path="/journal" element={<Journal />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/checkout/success" element={<CheckoutSuccess />} />
+                <Route path="/account" element={<Account />} />
 
-              {/* Auth */}
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-            </Routes>
-          </main>
-          <Footer />
-        </Router>
-      </SmoothScroll>
-    </CartProvider>
+                {/* Auth */}
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+              </Routes>
+            </main>
+            <Footer />
+          </Router>
+        </SmoothScroll>
+      </CartProvider>
+    </AppProvider>
   );
 }
 

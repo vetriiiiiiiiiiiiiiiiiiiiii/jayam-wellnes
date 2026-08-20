@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import gsap from 'gsap';
 import MagneticButton from './MagneticButton';
 import CartDrawer from './CartDrawer';
 import { useCart } from './CartProvider';
+import { useApp } from '../../context/Appcontext';
+import { BACKEND_URL } from '../../services/api';
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -13,9 +15,13 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState('');
   const [cartOpen, setCartOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const isHome = location.pathname === '/';
   const {
     cartCount
   } = useCart();
+  const { user } = useApp();
+
   const menuRef = useRef(null);
   const searchRef = useRef(null);
   const menuLinksRef = useRef([]);
@@ -77,34 +83,54 @@ export default function Navbar() {
       if (!menuOpen) document.body.style.overflow = '';
     }
   }, [searchOpen, menuOpen]);
+  const isLightHeader = !isHome || isScrolled || menuOpen || searchOpen;
+
   return <>
-      <nav className={`fixed top-0 w-full z-[100] transition-colors duration-500 ${isScrolled || menuOpen || searchOpen ? 'bg-white/90 backdrop-blur-xl text-black border-b border-gray-100' : 'bg-transparent text-white'}`}>
-        <div className="max-w-[1400px] mx-auto px-6 flex justify-between items-center h-24">
-          <div className="flex-1 flex items-center gap-8">
-            <Link to="/" className="hover:opacity-80 transition-opacity bg-white/95 rounded-xl p-1.5 shadow-lg backdrop-blur-md" onClick={() => setMenuOpen(false)}>
-              <img src="/miracletree-logo.jpeg" alt="Miracle Tree" className="h-10 w-auto object-contain" />
+      <nav className={`fixed top-0 w-full z-[100] transition-all duration-500 ${isLightHeader ? 'bg-white/95 backdrop-blur-xl text-brand-dark border-b border-brand-green-100/60 shadow-xs' : 'bg-transparent text-white'}`}>
+        <div className="max-w-[1400px] mx-auto px-6 flex justify-between items-center h-20 md:h-24">
+          <div className="flex-1 flex items-center gap-6 md:gap-8">
+            <Link to="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity bg-white/90 rounded-xl px-2.5 py-1.5 shadow-md border border-brand-green-100/50 backdrop-blur-md" onClick={() => setMenuOpen(false)}>
+              <img src="/miracletree-logo.jpeg" alt="Miracle Tree" className="h-9 w-9 rounded-lg object-cover" />
+              <span className="font-serif font-bold text-lg md:text-xl tracking-tight text-brand-forest-700 hidden sm:inline-block">Miracle Tree</span>
             </Link>
             
             <MagneticButton>
-              <button onClick={() => setMenuOpen(!menuOpen)} className="text-xs uppercase tracking-[0.2em] font-medium hover:opacity-60 transition-opacity">
+              <button onClick={() => setMenuOpen(!menuOpen)} className="text-xs uppercase tracking-[0.2em] font-semibold hover:opacity-60 transition-opacity">
                 {menuOpen ? 'Close' : 'Menu'}
               </button>
             </MagneticButton>
             <MagneticButton>
-              <button onClick={() => setSearchOpen(true)} className="text-xs uppercase tracking-[0.2em] font-medium hidden md:block hover:opacity-60 transition-opacity">
+              <button onClick={() => setSearchOpen(true)} className="text-xs uppercase tracking-[0.2em] font-semibold hidden md:block hover:opacity-60 transition-opacity">
                 Search
               </button>
             </MagneticButton>
           </div>
           
-          <div className="flex-1 flex justify-end gap-8">
-            <MagneticButton>
-              <Link to="/account" className="text-xs uppercase tracking-[0.2em] font-medium hidden md:block hover:opacity-60 transition-opacity">
-                Account
+          <div className="flex-1 flex justify-end gap-6 md:gap-8 items-center">
+            {user ? (
+              <Link to="/account" className="hidden md:flex items-center gap-3 hover:opacity-80 transition-opacity">
+                {user.profilePicture ? (
+                  <img 
+                    src={user.profilePicture.startsWith('http') ? user.profilePicture : `${BACKEND_URL}${user.profilePicture.startsWith('/') ? '' : '/'}${user.profilePicture}`} 
+                    alt={user.fullname || user.name} 
+                    className="w-8 h-8 rounded-full border border-brand-green-100 object-cover shadow-sm" 
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-brand-forest-700 text-white flex items-center justify-center text-xs font-bold shadow-sm">
+                    {(user.fullname || user.name || 'U').charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <span className="text-xs uppercase tracking-[0.15em] font-semibold">{user.fullname?.split(' ')[0] || user.name?.split(' ')[0]}</span>
               </Link>
-            </MagneticButton>
+            ) : (
+              <MagneticButton>
+                <Link to="/account" className="text-xs uppercase tracking-[0.2em] font-semibold hidden md:block hover:opacity-60 transition-opacity">
+                  Account
+                </Link>
+              </MagneticButton>
+            )}
             <MagneticButton>
-              <button onClick={() => setCartOpen(true)} className="text-xs uppercase tracking-[0.2em] font-medium hover:opacity-60 transition-opacity">
+              <button onClick={() => setCartOpen(true)} className="text-xs uppercase tracking-[0.2em] font-semibold hover:opacity-60 transition-opacity">
                 Cart ({cartCount})
               </button>
             </MagneticButton>
