@@ -114,6 +114,7 @@ export default function Navbar() {
                     src={user.profilePicture.startsWith('http') ? user.profilePicture : `${BACKEND_URL}${user.profilePicture.startsWith('/') ? '' : '/'}${user.profilePicture}`} 
                     alt={user.fullname || user.name} 
                     className="w-8 h-8 rounded-full border border-brand-green-100 object-cover shadow-sm" 
+                    referrerPolicy="no-referrer"
                   />
                 ) : (
                   <div className="w-8 h-8 rounded-full bg-brand-forest-700 text-white flex items-center justify-center text-xs font-bold shadow-sm">

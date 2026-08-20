@@ -15,7 +15,16 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors({ origin: process.env.FRONTEND_URL || process.env.CLIENT_URL || 'http://localhost:5173', credentials: true }));
+app.use(cors({ 
+  origin: [
+    process.env.FRONTEND_URL, 
+    process.env.CLIENT_URL, 
+    'http://localhost:5173', 
+    'http://127.0.0.1:5173'
+  ].filter(Boolean), 
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -38,6 +47,7 @@ apiRouter.use('/auth', authRoutes);
 apiRouter.use('/products', productRoutes);
 apiRouter.use('/orders', orderRoutes);
 apiRouter.use('/admin', adminRoutes);
+apiRouter.use('/cart', require('./routes/cart.routes'));
 
 app.use('/api', apiRouter);
 

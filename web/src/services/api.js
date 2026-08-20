@@ -638,16 +638,32 @@ export async function createOrder(orderData) {
   try {
     // orderData should include: items, addressId, paymentMethod, totalAmount
     const response = await api.post("/orders", orderData);
-    toast.success("Order placed successfully!");
     return {
       success: true,
       orderId: response.data.orderId,
+      razorpayOrderId: response.data.razorpayOrderId,
+      amount: response.data.amount,
+      currency: response.data.currency,
       order: response.data.order,
     };
   } catch (error) {
     return {
       success: false,
       message: error.response?.data?.message || "Failed to place order",
+    };
+  }
+}
+
+// A2. Verify Payment
+export async function verifyPayment(paymentData) {
+  try {
+    const response = await api.post("/orders/verify", paymentData);
+    toast.success("Payment verified successfully!");
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      message: error.response?.data?.message || "Failed to verify payment",
     };
   }
 }

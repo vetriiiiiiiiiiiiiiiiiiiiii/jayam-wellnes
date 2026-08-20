@@ -4,8 +4,10 @@ const orderController = require('../controllers/orderController');
 
 const router = express.Router();
 
-router.get('/', protect({ admin: true }), orderController.getAllOrders);
-router.get('/my', protect(), orderController.getMyOrders);
+router.get('/my-orders', protect(), orderController.getMyOrders);
 router.post('/', orderController.createOrder);
+router.post('/verify', orderController.verifyPayment);
+router.get('/:id', protect(), orderController.getOrderById);
+router.put('/:id/cancel', protect(), orderController.cancelOrder);
 
 module.exports = router;

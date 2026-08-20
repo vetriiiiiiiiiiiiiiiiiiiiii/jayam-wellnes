@@ -30,6 +30,7 @@ const startWorkers = async () => {
     require("./orderWorker");
     require("./notificationWorker");
     require("./mailWorker");
+    require("./paymentWorker");
 
 
     console.log("✅ All workers initialized and listening for new jobs...");

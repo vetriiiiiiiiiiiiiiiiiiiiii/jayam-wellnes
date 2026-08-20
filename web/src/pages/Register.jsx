@@ -10,7 +10,13 @@ export default function RegisterPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { setUser } = useApp();
+  const { user, setUser, isValidating } = useApp();
+
+  React.useEffect(() => {
+    if (!isValidating && user) {
+      navigate('/account');
+    }
+  }, [user, isValidating, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

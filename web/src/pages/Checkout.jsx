@@ -1,13 +1,35 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useCart } from '../components/storefront/CartProvider';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import axios from 'axios';
+import { createOrder, verifyPayment } from '../services/api';
+
+import { useApp } from '../context/Appcontext';
+
+function loadScript(src) {
+  return new Promise((resolve) => {
+    const script = document.createElement('script');
+    script.src = src;
+    script.onload = () => {
+      resolve(true);
+    };
+    script.onerror = () => {
+      resolve(false);
+    };
+    document.body.appendChild(script);
+  });
+}
 
 export default function CheckoutPage() {
-  const { cart, cartTotal, cartCount } = useCart();
+  const { cart, cartTotal, cartCount, clearCart } = useCart();
+  const { refreshOrders } = useApp();
   const [loading, setLoading] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('RAZORPAY');
   const navigate = useNavigate();
+
+  useEffect(() => {
+    loadScript('https://checkout.razorpay.com/v1/checkout.js');
+  }, []);
 
   if (cartCount === 0) {
     return (
@@ -20,13 +42,20 @@ export default function CheckoutPage() {
     );
   }
 
+  const handleCheckoutSuccess = async () => {
+    console.log('[Checkout] Success! Clearing cart and refreshing orders...');
+    clearCart();
+    localStorage.removeItem('miracletree_cart');
+    await refreshOrders();
+    navigate('/checkout/success');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     const formData = new FormData(e.currentTarget);
     try {
-      const token = localStorage.getItem('token');
-      await axios.post(`${import.meta.env.VITE_API_URL}/api/orders`, {
+      const orderData = {
         email: formData.get('email'),
         name: formData.get('name'),
         address: {
@@ -38,11 +67,76 @@ export default function CheckoutPage() {
         },
         items: cart,
         total: cartTotal,
-      }, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+        paymentMethod: paymentMethod,
+      };
 
-      localStorage.removeItem('miracletree_cart');
-      navigate('/checkout/success');
+      console.log('[Checkout] Initiating order creation:', orderData);
+      const res = await createOrder(orderData);
+      console.log('[Checkout] Order creation response:', res);
+      
+      if (!res.success) {
+         console.error('[Checkout] Order creation failed:', res.message);
+         alert('Checkout failed: ' + res.message);
+         setLoading(false);
+         return;
+      }
+
+      if (paymentMethod === 'RAZORPAY' && res.razorpayOrderId) {
+        console.log('[Checkout] Initializing Razorpay modal with order ID:', res.razorpayOrderId);
+        const options = {
+          key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_placeholder', // Enter the Key ID generated from the Dashboard
+          amount: res.amount * 100,
+          currency: res.currency,
+          name: 'MiracleTree',
+          description: 'Purchase Checkout',
+          order_id: res.razorpayOrderId,
+          handler: async function (response) {
+            console.log('[Checkout] Razorpay payment success handler called. Response:', response);
+            const paymentData = {
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature,
+              orderId: res.orderId
+            };
+            console.log('[Checkout] Verifying payment with backend:', paymentData);
+            const verifyRes = await verifyPayment(paymentData);
+            console.log('[Checkout] Payment verification response:', verifyRes);
+            if (verifyRes.success) {
+              await handleCheckoutSuccess();
+            } else {
+              console.error('[Checkout] Payment verification failed on backend');
+              alert('Payment Verification Failed!');
+            }
+          },
+          prefill: {
+            name: formData.get('name'),
+            email: formData.get('email'),
+          },
+          theme: {
+            color: '#1c3d31', // brand-forest-700
+          },
+          modal: {
+            ondismiss: function() {
+              console.log('[Checkout] Razorpay modal dismissed by user');
+              setLoading(false);
+            }
+          }
+        };
+        const paymentObject = new window.Razorpay(options);
+        
+        paymentObject.on('payment.failed', function (response){
+          console.error('[Checkout] Razorpay payment.failed event triggered:', response.error);
+          alert(`Payment Failed: ${response.error.description}`);
+          setLoading(false);
+        });
+
+        paymentObject.open();
+      } else {
+         console.log('[Checkout] COD selected or Razorpay not configured. Proceeding to success.');
+         await handleCheckoutSuccess();
+      }
     } catch (err) {
+      console.error('[Checkout] Unexpected error during checkout:', err);
       alert('Checkout failed. Please try again.');
       setLoading(false);
     }
@@ -73,8 +167,22 @@ export default function CheckoutPage() {
               </div>
             </div>
 
+            <div className="space-y-4 pt-6">
+              <h2 className="text-sm font-medium uppercase tracking-widest text-brand-forest-700">Payment Options</h2>
+              <div className="flex flex-col space-y-3">
+                <label className="flex items-center space-x-3 p-4 bg-white border border-gray-200 rounded-xl cursor-pointer">
+                  <input type="radio" name="paymentMethod" value="RAZORPAY" checked={paymentMethod === 'RAZORPAY'} onChange={(e) => setPaymentMethod(e.target.value)} className="w-5 h-5 text-brand-forest-700" />
+                  <span className="font-medium text-gray-800">Pay Online (Razorpay)</span>
+                </label>
+                <label className="flex items-center space-x-3 p-4 bg-white border border-gray-200 rounded-xl cursor-pointer">
+                  <input type="radio" name="paymentMethod" value="COD" checked={paymentMethod === 'COD'} onChange={(e) => setPaymentMethod(e.target.value)} className="w-5 h-5 text-brand-forest-700" />
+                  <span className="font-medium text-gray-800">Cash on Delivery (COD)</span>
+                </label>
+              </div>
+            </div>
+
             <button disabled={loading} type="submit" className="w-full bg-brand-forest-700 text-white py-5 rounded-xl font-bold uppercase tracking-widest hover:bg-brand-forest-900 transition-colors disabled:opacity-50 mt-8">
-              {loading ? 'Processing...' : `Pay ₹${cartTotal.toFixed(2)}`}
+              {loading ? 'Processing...' : (paymentMethod === 'RAZORPAY' ? `Pay ₹${cartTotal.toFixed(2)}` : 'Confirm Order')}
             </button>
           </form>
         </div>
