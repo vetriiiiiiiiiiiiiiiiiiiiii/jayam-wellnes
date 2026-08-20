@@ -14,9 +14,9 @@ export default function ProductCard({
     addToCart
   } = useCart();
 
-  // Fallback images since Unsplash images were giving 404s
-  const defaultImage = "https://images.unsplash.com/photo-1615396899839-c99c14188f00?w=800";
-  const hoverImage = "https://images.unsplash.com/photo-1596755389378-c31d21fd1273?q=80&w=2800&auto=format&fit=crop";
+  // Use actual images from DB, fallback to Unsplash placeholders if none exist
+  const defaultImage = product.images?.[0]?.url || "https://images.unsplash.com/photo-1615396899839-c99c14188f00?w=800";
+  const hoverImage = product.images?.[1]?.url || product.images?.[0]?.url || "https://images.unsplash.com/photo-1596755389378-c31d21fd1273?q=80&w=2800&auto=format&fit=crop";
   return <div className="group relative flex flex-col w-full h-[60vh] md:h-[500px]" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
       <Link to={`/products/${product.slug}`} className="relative flex-1 overflow-hidden rounded-2xl bg-gray-100 block">
         {/* Primary Image */}

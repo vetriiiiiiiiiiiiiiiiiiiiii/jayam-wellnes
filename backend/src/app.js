@@ -51,4 +51,22 @@ apiRouter.use('/cart', require('./routes/cart.routes'));
 
 app.use('/api', apiRouter);
 
+// Proxy for minio images
+const minioClient = require('./config/minio');
+app.get('/product/:image', async (req, res) => {
+  if (process.env.USE_MINIO === 'true') {
+    try {
+      const bucketName = process.env.MINIO_BUCKET_NAME || 'icuman';
+      const dataStream = await minioClient.getObject(bucketName, `product/${req.params.image}`);
+      dataStream.pipe(res);
+    } catch (err) {
+      res.status(404).send('Image not found');
+    }
+  } else {
+    // If not minio, it would be served from /uploads which we should also expose?
+    // fallback logic if needed
+    res.status(404).send('Image not found');
+  }
+});
+
 module.exports = app;

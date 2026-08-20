@@ -26,6 +26,9 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 
 import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminOrders from './pages/admin/AdminOrders';
+import AdminProducts from './pages/admin/AdminProducts';
+import AdminUsers from './pages/admin/AdminUsers';
 
 import { AppProvider } from './context/Appcontext';
 
@@ -42,6 +45,9 @@ function App() {
               <Routes>
                 {/* Admin */}
                 <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin/orders" element={<AdminOrders />} />
+                <Route path="/admin/products" element={<AdminProducts />} />
+                <Route path="/admin/users" element={<AdminUsers />} />
 
                 {/* Storefront */}
                 <Route path="/" element={<Home />} />

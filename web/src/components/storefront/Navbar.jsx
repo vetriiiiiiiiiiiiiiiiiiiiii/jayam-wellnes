@@ -107,6 +107,13 @@ export default function Navbar() {
           </div>
           
           <div className="flex-1 flex justify-end gap-6 md:gap-8 items-center">
+            {user && (user.role === 'admin' || user.role === 'SUPER_ADMIN') && (
+              <MagneticButton>
+                <Link to="/admin" className="text-xs uppercase tracking-[0.2em] font-bold text-brand-forest-700 hidden md:block hover:opacity-60 transition-opacity">
+                  Admin Panel
+                </Link>
+              </MagneticButton>
+            )}
             {user ? (
               <Link to="/account" className="hidden md:flex items-center gap-3 hover:opacity-80 transition-opacity">
                 {user.profilePicture ? (

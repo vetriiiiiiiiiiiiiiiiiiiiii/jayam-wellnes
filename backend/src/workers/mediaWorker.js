@@ -99,12 +99,16 @@ const worker = new Worker(
           "Content-Type": "image/webp",
         });
         console.log(`[Worker][STEP 4] MinIO upload DONE`);
-        storedPath = `/${process.env.MINIO_BUCKET_NAME || 'icuman'}/${objectKey}`;
+        storedPath = `/${objectKey}`;
 
         // DB update (MinIO)
         const Model = mongoose.model(modelName);
         if (operation === "push") {
-          await Model.findByIdAndUpdate(fileId, { $push: { [fieldName]: storedPath } });
+          let pushData = storedPath;
+          if (modelName === "Product" && fieldName === "images") {
+            pushData = { url: storedPath, position: 0 };
+          }
+          await Model.findByIdAndUpdate(fileId, { $push: { [fieldName]: pushData } });
         } else {
           const doc = await Model.findById(fileId);
           if (doc && doc[fieldName]) {
@@ -121,19 +125,20 @@ const worker = new Worker(
           await Model.findByIdAndUpdate(fileId, update);
         }
 
-        fs.unlinkSync(tempOutput);
-
       } else {
         // Local fallback
         storedPath = `/uploads/${modelName.toLowerCase()}/${finalFilename}`;
         const finalDest = path.join(process.cwd(), "public", storedPath);
         fs.mkdirSync(path.dirname(finalDest), { recursive: true });
         fs.copyFileSync(tempOutput, finalDest);
-        fs.unlinkSync(tempOutput);
 
         const Model = mongoose.model(modelName);
         if (operation === "push") {
-          await Model.findByIdAndUpdate(fileId, { $push: { [fieldName]: storedPath } });
+          let pushData = storedPath;
+          if (modelName === "Product" && fieldName === "images") {
+            pushData = { url: storedPath, position: 0 };
+          }
+          await Model.findByIdAndUpdate(fileId, { $push: { [fieldName]: pushData } });
         } else {
           const update = { [fieldName]: storedPath };
           if (modelName === "Gallery") update.status = "completed";
@@ -143,8 +148,8 @@ const worker = new Worker(
 
       // ---------- STEP 6: Cleanup ----------
       console.log(`[Worker][STEP 6] Cleanup start`);
-      fs.unlinkSync(tempOutput);
-      fs.unlinkSync(absoluteInputPath);
+      if (fs.existsSync(tempOutput)) fs.unlinkSync(tempOutput);
+      if (fs.existsSync(absoluteInputPath)) fs.unlinkSync(absoluteInputPath);
 
       console.log(`[Worker] 🎉 JOB COMPLETED SUCCESSFULLY`);
       console.log(`[Worker] Final Path: ${storedPath}\n`);

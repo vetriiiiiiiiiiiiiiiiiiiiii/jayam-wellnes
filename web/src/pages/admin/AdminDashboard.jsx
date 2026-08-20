@@ -10,16 +10,13 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
-        const token = localStorage.getItem('token');
-        if (!token) return navigate('/login');
-        
         const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/dashboard`, {
-          headers: { Authorization: `Bearer ${token}` }
+          withCredentials: true
         });
         setData(res.data);
       } catch (err) {
         if (err.response?.status === 403 || err.response?.status === 401) {
-          navigate('/login');
+          navigate('/account'); // Not authorized as admin
         }
         console.error(err);
       } finally {
@@ -33,11 +30,22 @@ export default function AdminDashboard() {
   if (!data) return null;
 
   return (
-    <div className="p-8 max-w-7xl mx-auto pt-32 min-h-screen">
-      <div className="mb-8">
-        <h1 className="text-3xl font-serif text-gray-900">Dashboard Overview</h1>
-        <p className="text-gray-500 mt-1">Welcome back. Here's what's happening today.</p>
+    <div className="p-8 max-w-7xl mx-auto pt-32 min-h-screen flex gap-8">
+      <div className="w-64 flex-shrink-0 border-r border-gray-200 pr-8">
+         <h2 className="text-2xl font-serif text-brand-forest-700 mb-8">Admin</h2>
+         <nav className="space-y-4">
+            <Link to="/admin" className="block text-brand-dark font-bold transition-colors">Dashboard</Link>
+            <Link to="/admin/orders" className="block text-gray-500 hover:text-brand-dark transition-colors">Orders</Link>
+            <Link to="/admin/products" className="block text-gray-500 hover:text-brand-dark transition-colors">Products</Link>
+            <Link to="/admin/users" className="block text-gray-500 hover:text-brand-dark transition-colors">Users</Link>
+         </nav>
       </div>
+
+      <div className="flex-1">
+        <div className="mb-8">
+          <h1 className="text-3xl font-serif text-gray-900">Dashboard Overview</h1>
+          <p className="text-gray-500 mt-1">Welcome back. Here's what's happening today.</p>
+        </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
@@ -100,6 +108,7 @@ export default function AdminDashboard() {
           </div>
         )}
       </div>
+    </div>
     </div>
   );
 }
