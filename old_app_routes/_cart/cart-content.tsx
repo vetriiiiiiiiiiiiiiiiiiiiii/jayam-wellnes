@@ -1,7 +1,0 @@
-'use client';
-
-import Link from 'next/link';
-import { money } from '@/lib/catalog';
-import { useCommerce } from '@/components/commerce-provider';
-
-export default function CartContent() { const { items, subtotal, remove, changeQuantity } = useCommerce(); if (!items.length) return <section className="empty-cart"><p className="eyebrow">Your bag</p><h1>Nothing here<br/><em>just yet.</em></h1><p>Your daily ritual is waiting to be found.</p><Link className="button dark-button" href="/shop">Explore products <span>↗</span></Link></section>; return <section className="cart-page-content"><div><p className="eyebrow">Your bag</p><h1>The good<br/>stuff.</h1>{items.map((item) => <article className="full-cart-line" key={item.slug}><div style={{ backgroundImage: `url(${item.image})` }} /><div><p>{item.type}</p><h2>{item.name}</h2><b>{money(item.price)}</b></div><div className="full-cart-controls"><button onClick={() => changeQuantity(item.slug, item.quantity - 1)}>−</button><span>{item.quantity}</span><button onClick={() => changeQuantity(item.slug, item.quantity + 1)}>+</button></div><button className="full-cart-remove" onClick={() => remove(item.slug)}>Remove</button></article>)}</div><aside><p className="eyebrow">Order summary</p><div><span>Subtotal</span><b>{money(subtotal)}</b></div><p>Shipping is calculated at checkout.</p><Link className="purchase-button" href="/checkout">Checkout <span>→</span></Link></aside></section>; }

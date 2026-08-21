@@ -1,0 +1,77 @@
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
+// Layout components
+import Navbar from './components/storefront/Navbar';
+import Footer from './components/storefront/Footer';
+import CustomCursor from './components/storefront/CustomCursor';
+import SmoothScroll from './components/storefront/SmoothScroll';
+import ScrollProgress from './components/storefront/ScrollProgress';
+import { CartProvider } from './components/storefront/CartProvider';
+
+// Pages — Storefront
+import Home from './pages/Home';
+import Shop from './pages/Shop';
+import Product from './pages/Product';
+import Collections from './pages/Collections';
+import OurStory from './pages/OurStory';
+import Journal from './pages/Journal';
+import Contact from './pages/Contact';
+import Checkout from './pages/Checkout';
+import CheckoutSuccess from './pages/CheckoutSuccess';
+import Account from './pages/Account';
+
+// Pages — Auth
+import Login from './pages/Login';
+import Register from './pages/Register';
+
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminOrders from './pages/admin/AdminOrders';
+import AdminProducts from './pages/admin/AdminProducts';
+import AdminUsers from './pages/admin/AdminUsers';
+
+import { AppProvider } from './context/Appcontext';
+
+function App() {
+  return (
+    <AppProvider>
+      <CartProvider>
+        <SmoothScroll>
+          <Router>
+            <CustomCursor />
+            <ScrollProgress />
+            <Navbar />
+            <main className="flex-grow flex flex-col">
+              <Routes>
+                {/* Admin */}
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin/orders" element={<AdminOrders />} />
+                <Route path="/admin/products" element={<AdminProducts />} />
+                <Route path="/admin/users" element={<AdminUsers />} />
+
+                {/* Storefront */}
+                <Route path="/" element={<Home />} />
+                <Route path="/shop" element={<Shop />} />
+                <Route path="/products/:slug" element={<Product />} />
+                <Route path="/collections" element={<Collections />} />
+                <Route path="/our-story" element={<OurStory />} />
+                <Route path="/journal" element={<Journal />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/checkout/success" element={<CheckoutSuccess />} />
+                <Route path="/account" element={<Account />} />
+
+                {/* Auth */}
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+              </Routes>
+            </main>
+            <Footer />
+          </Router>
+        </SmoothScroll>
+      </CartProvider>
+    </AppProvider>
+  );
+}
+
+export default App;

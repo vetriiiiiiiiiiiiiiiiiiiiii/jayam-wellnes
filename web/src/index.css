@@ -1,0 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&display=swap');
+@import "tailwindcss";
+@import "./styles/all.css";
+
+@theme {
+  --color-brand-pearl: #f3f0e8;
+  --color-brand-dark: #172a22;
+  --color-brand-forest-700: #183128;
+  --color-brand-forest-500: #1e4034;
+  --color-brand-forest-900: #0b1e14;
+  --color-brand-green-500: #4a9166;
+  --color-brand-green-100: #d4e8dc;
+  --color-brand-gold: #c9a76a;
+  --color-brand-white: #ffffff;
+
+  --font-serif: 'Playfair Display', serif;
+  --font-sans: 'Manrope', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+}
