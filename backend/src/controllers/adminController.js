@@ -14,7 +14,7 @@ exports.getDashboardStats = async (req, res) => {
     ]);
 
     const totalRevenue = allOrders.reduce((sum, order) => sum + (order.total || 0), 0) || 0;
-    
+
     res.json({
       totalProducts,
       totalOrders,
@@ -50,20 +50,20 @@ exports.updateOrderStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { status, trackingNumber } = req.body;
-    
+
     const order = await Order.findById(id);
     if (!order) {
       return res.status(404).json({ message: 'Order not found' });
     }
-    
+
     if (status) order.status = status;
     if (trackingNumber) order.trackingNumber = trackingNumber;
-    
+
     await order.save();
-    
+
     const orderObj = order.toObject();
     orderObj.id = order._id.toString();
-    
+
     res.json({ success: true, message: 'Order updated successfully', order: orderObj });
   } catch (error) {
     res.status(500).json({ message: 'Failed to update order status' });
@@ -77,29 +77,29 @@ exports.refundOrder = async (req, res) => {
   try {
     const { id } = req.params;
     const order = await Order.findById(id);
-    
+
     if (!order) return res.status(404).json({ message: 'Order not found' });
-    
+
     if (order.status === 'CANCELLED') {
       return res.status(400).json({ message: 'Order is already cancelled' });
     }
-    
+
     // Process Razorpay refund if applicable
     if (order.paymentMethod === 'RAZORPAY' && order.razorpayOrderId) {
       if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
-         return res.status(500).json({ message: 'Razorpay keys missing on server' });
+        return res.status(500).json({ message: 'Razorpay keys missing on server' });
       }
-      
+
       const razorpay = new Razorpay({
         key_id: process.env.RAZORPAY_KEY_ID,
         key_secret: process.env.RAZORPAY_KEY_SECRET,
       });
-      
+
       // Need the payment ID to issue a refund. Usually stored in order or fetched from Razorpay
       // We will attempt to fetch payments for this order
       const payments = await razorpay.orders.fetchPayments(order.razorpayOrderId);
       const capturedPayment = payments.items.find(p => p.status === 'captured');
-      
+
       if (capturedPayment) {
         // Issue refund
         await razorpay.payments.refund(capturedPayment.id, {
@@ -110,10 +110,10 @@ exports.refundOrder = async (req, res) => {
         console.log(`[Admin] No captured payment found for Razorpay order: ${order.razorpayOrderId}. Proceeding to cancel anyway.`);
       }
     }
-    
+
     order.status = 'CANCELLED';
     await order.save();
-    
+
     res.json({ success: true, message: 'Order cancelled and refunded successfully' });
   } catch (error) {
     console.error('[Admin] Refund Error:', error);
@@ -148,7 +148,7 @@ exports.updateUserRole = async (req, res) => {
     const { role } = req.body;
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
-    
+
     user.role = role;
     await user.save();
     res.json({ success: true, message: 'User role updated' });
@@ -181,7 +181,13 @@ exports.getAllProducts = async (req, res) => {
 exports.createProduct = async (req, res) => {
   try {
     const { name, description, price, imageUrl, isPublished, stockQuantity, addToHomeScreen } = req.body;
-    const slug = name.toLowerCase().replace(/[\s_]+/g, '-').replace(/[^\w-]+/g, '');
+    let slug = name.toLowerCase().replace(/[\s_]+/g, '-').replace(/[^\w-]+/g, '');
+
+    // Ensure slug uniqueness
+    let existingProduct = await Product.findOne({ slug });
+    if (existingProduct) {
+      slug = `${slug}-${Math.random().toString(36).substring(2, 7)}`;
+    }
 
     const newProduct = new Product({
       name,
@@ -230,15 +236,15 @@ exports.updateProduct = async (req, res) => {
     if (updateData.addToHomeScreen !== undefined) {
       updateData.addToHomeScreen = updateData.addToHomeScreen === 'true' || updateData.addToHomeScreen === true;
     }
-    
+
     // Handle image update simplistically for now
     if (updateData.imageUrl) {
-       updateData.images = [{ url: updateData.imageUrl, position: 0 }];
+      updateData.images = [{ url: updateData.imageUrl, position: 0 }];
     }
 
     const product = await Product.findByIdAndUpdate(req.params.id, updateData, { new: true });
     if (!product) return res.status(404).json({ message: 'Product not found' });
-    
+
     // Add media queue jobs for each uploaded file
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
