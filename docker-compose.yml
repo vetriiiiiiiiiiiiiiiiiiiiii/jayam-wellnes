@@ -33,6 +33,23 @@ services:
       - redis
     restart: unless-stopped
 
+  worker:
+    build:
+      context: ./backend
+    container_name: miracletree_worker
+    command: node src/workers/index.js
+    env_file:
+      - ./backend/.env
+    environment:
+      - MONGO_DB=mongodb://db:27017/miracletree
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - db
+      - redis
+    restart: unless-stopped
+
   frontend:
     build:
       context: ./web
