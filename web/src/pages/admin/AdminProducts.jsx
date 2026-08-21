@@ -176,7 +176,7 @@ export default function AdminProducts() {
                     <td className="px-6 py-4">
                        {product.images?.length > 0 ? (
                          <div className="relative w-12 h-12">
-                           <img src={product.images[0].url} alt={product.name} className="w-12 h-12 object-cover rounded shadow-sm border border-gray-100" />
+                           <img src={product.images[0].url} alt={product.name} loading="lazy" className="w-12 h-12 object-cover rounded shadow-sm border border-gray-100" />
                            {product.images.length > 1 && (
                              <span className="absolute -top-2 -right-2 bg-brand-forest-700 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
                                +{product.images.length - 1}
@@ -184,7 +184,7 @@ export default function AdminProducts() {
                            )}
                          </div>
                        ) : (
-                         <img src="/placeholder.png" alt={product.name} className="w-12 h-12 object-cover rounded shadow-sm border border-gray-100" />
+                         <img src="/placeholder.png" alt={product.name} loading="lazy" className="w-12 h-12 object-cover rounded shadow-sm border border-gray-100" />
                        )}
                     </td>
                     <td className="px-6 py-4">
@@ -270,7 +270,7 @@ export default function AdminProducts() {
                     <div className="flex gap-3 mt-4 overflow-x-auto pb-2">
                       {imagePreviews.map((preview, index) => (
                         <div key={index} className="relative flex-shrink-0 group">
-                          <img src={preview} alt={`Preview ${index}`} className="w-20 h-20 object-cover rounded-lg border border-gray-200 shadow-sm" />
+                          <img src={preview} alt={`Preview ${index}`} loading="lazy" className="w-20 h-20 object-cover rounded-lg border border-gray-200 shadow-sm" />
                           <button 
                             type="button" 
                             onClick={() => removeImage(index)}
