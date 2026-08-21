@@ -2,9 +2,10 @@ import axios from "axios";
 import toast from "react-hot-toast";
 
 // 1. Configuration Constants
-const base = import.meta.env.VITE_API_URL || "http://localhost:5000";
-export const BACKEND_URL = base.replace(/\/api\/?$/, '');
-const API_URL = base.endsWith('/api') ? `${base}/` : (base.endsWith('/api/') ? base : `${base.replace(/\/$/, '')}/api/`);
+const rawBase = import.meta.env.VITE_API_URL || "";
+const base = rawBase.replace(/\/api\/?$/, '').replace(/\/$/, '');
+export const BACKEND_URL = base;
+const API_URL = base ? `${base}/api/` : '/api/';
 export const GOOGLE_AUTH_URL = `${API_URL}auth/google`;
 
 // 2. Create Axios Instance

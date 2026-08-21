@@ -36,6 +36,9 @@ services:
   frontend:
     build:
       context: ./web
+      args:
+        - VITE_API_URL=https://moringa.lumiodigital.store
+        - VITE_RAZORPAY_KEY_ID=rzp_test_Sk3yvj1QVXOhxu
     container_name: miracletree_frontend
     ports:
       - "3009:80"

@@ -3,6 +3,13 @@ FROM node:22-alpine as build
 
 WORKDIR /app
 
+# Accept build-time environment variables for Vite
+ARG VITE_API_URL
+ARG VITE_RAZORPAY_KEY_ID
+
+ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_RAZORPAY_KEY_ID=$VITE_RAZORPAY_KEY_ID
+
 COPY package*.json ./
 RUN npm install
 
