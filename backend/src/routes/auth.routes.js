@@ -39,7 +39,7 @@ router.get(
   "/google/callback",
   passport.authenticate("google", {
     session: false,
-    failureRedirect: `${process.env.CLIENT_URL}/login`,
+    failureRedirect: `${process.env.FRONTEND_URL || process.env.CLIENT_URL || 'http://localhost:5173'}/login`,
   }),
   (req, res) => {
     // req.user is populated by Passport strategy
@@ -50,7 +50,7 @@ router.get(
     console.log("[Auth Backend] Cookie set for user. Redirecting to frontend.");
 
     // 2. Redirect to Frontend (Dashboard/Home)
-    const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+    const clientUrl = process.env.FRONTEND_URL || process.env.CLIENT_URL || "http://localhost:5173";
     res.redirect(clientUrl);
   }
 );
