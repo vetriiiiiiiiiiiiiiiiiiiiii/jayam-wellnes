@@ -8,6 +8,10 @@ exports.getAllProducts = async (req, res) => {
       query.productType = req.query.type;
     }
 
+    if (req.query.homeScreen === 'true') {
+      query.addToHomeScreen = true;
+    }
+
     if (req.query.search) {
       query.$or = [
         { name: { $regex: req.query.search, $options: 'i' } },

@@ -14,7 +14,8 @@ export default function AdminProducts() {
     description: '',
     price: '',
     stockQuantity: '',
-    isPublished: true
+    isPublished: true,
+    addToHomeScreen: false
   });
   const [selectedImages, setSelectedImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
@@ -72,9 +73,21 @@ export default function AdminProducts() {
 
   const closeModal = () => {
     setIsModalOpen(false);
-    setFormData({ name: '', description: '', price: '', stockQuantity: '', isPublished: true });
+    setFormData({ name: '', description: '', price: '', stockQuantity: '', isPublished: true, addToHomeScreen: false });
     setSelectedImages([]);
     setImagePreviews([]);
+  };
+
+  const toggleHomeScreen = async (id, currentStatus) => {
+    try {
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/admin/products/${id}`, 
+        { addToHomeScreen: !currentStatus }, 
+        { withCredentials: true }
+      );
+      fetchProducts();
+    } catch (err) {
+      alert('Failed to update product');
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -86,6 +99,7 @@ export default function AdminProducts() {
       data.append('price', formData.price);
       data.append('stockQuantity', formData.stockQuantity);
       data.append('isPublished', formData.isPublished);
+      data.append('addToHomeScreen', formData.addToHomeScreen);
       
       selectedImages.forEach((file) => {
         data.append('images', file);
@@ -152,6 +166,7 @@ export default function AdminProducts() {
                   <th className="px-6 py-4 font-medium text-gray-500">Price</th>
                   <th className="px-6 py-4 font-medium text-gray-500">Stock</th>
                   <th className="px-6 py-4 font-medium text-gray-500">Status</th>
+                  <th className="px-6 py-4 font-medium text-gray-500">Home Screen</th>
                   <th className="px-6 py-4 font-medium text-gray-500">Action</th>
                 </tr>
               </thead>
@@ -184,6 +199,14 @@ export default function AdminProducts() {
                       ) : (
                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-50 text-gray-700 border border-gray-200">Draft</span>
                       )}
+                    </td>
+                    <td className="px-6 py-4">
+                      <button 
+                        onClick={() => toggleHomeScreen(product.id, product.addToHomeScreen)}
+                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${product.addToHomeScreen ? 'bg-brand-forest-700' : 'bg-gray-200'}`}
+                      >
+                        <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${product.addToHomeScreen ? 'translate-x-5' : 'translate-x-1'}`} />
+                      </button>
                     </td>
                     <td className="px-6 py-4">
                       <button onClick={() => handleDelete(product.id)} className="text-red-500 font-semibold text-xs uppercase tracking-wider hover:underline">
@@ -261,9 +284,15 @@ export default function AdminProducts() {
                   )}
                 </div>
 
-                <div className="flex items-center gap-2 pt-4">
-                   <input type="checkbox" name="isPublished" checked={formData.isPublished} onChange={handleChange} id="pub" className="w-4 h-4 text-brand-forest-700 bg-gray-100 border-gray-300 rounded focus:ring-brand-forest-700" />
-                   <label htmlFor="pub" className="text-sm font-medium text-gray-700">Publish immediately</label>
+                <div className="flex items-center gap-6 pt-4">
+                   <label className="flex items-center gap-2 cursor-pointer">
+                     <input type="checkbox" name="isPublished" checked={formData.isPublished} onChange={handleChange} className="w-4 h-4 text-brand-forest-700 bg-gray-100 border-gray-300 rounded focus:ring-brand-forest-700" />
+                     <span className="text-sm font-medium text-gray-700">Publish immediately</span>
+                   </label>
+                   <label className="flex items-center gap-2 cursor-pointer">
+                     <input type="checkbox" name="addToHomeScreen" checked={formData.addToHomeScreen} onChange={handleChange} className="w-4 h-4 text-brand-forest-700 bg-gray-100 border-gray-300 rounded focus:ring-brand-forest-700" />
+                     <span className="text-sm font-medium text-gray-700">Add to Home Screen</span>
+                   </label>
                 </div>
              </div>
 

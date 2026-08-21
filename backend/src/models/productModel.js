@@ -13,6 +13,7 @@ const productSchema = new mongoose.Schema({
     }
   ],
   isPublished: { type: Boolean, default: false },
+  addToHomeScreen: { type: Boolean, default: false },
   relatedToIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
 }, { timestamps: true });
 

@@ -12,7 +12,7 @@ function Home() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/products`);
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/products?homeScreen=true`);
         setProducts(response.data.slice(0, 4));
       } catch (error) {
         console.error('Error fetching products', error);

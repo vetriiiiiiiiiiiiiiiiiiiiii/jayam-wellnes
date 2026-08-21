@@ -180,7 +180,7 @@ exports.getAllProducts = async (req, res) => {
 
 exports.createProduct = async (req, res) => {
   try {
-    const { name, description, price, imageUrl, isPublished, stockQuantity } = req.body;
+    const { name, description, price, imageUrl, isPublished, stockQuantity, addToHomeScreen } = req.body;
     const slug = name.toLowerCase().replace(/[\s_]+/g, '-').replace(/[^\w-]+/g, '');
 
     const newProduct = new Product({
@@ -189,6 +189,7 @@ exports.createProduct = async (req, res) => {
       description,
       price: Number(price),
       isPublished: isPublished === 'true' || isPublished === true,
+      addToHomeScreen: addToHomeScreen === 'true' || addToHomeScreen === true,
       stockQuantity: Number(stockQuantity || 0),
       images: imageUrl ? [{ url: imageUrl, position: 0 }] : []
     });
@@ -225,6 +226,9 @@ exports.updateProduct = async (req, res) => {
     }
     if (updateData.isPublished !== undefined) {
       updateData.isPublished = updateData.isPublished === 'true' || updateData.isPublished === true;
+    }
+    if (updateData.addToHomeScreen !== undefined) {
+      updateData.addToHomeScreen = updateData.addToHomeScreen === 'true' || updateData.addToHomeScreen === true;
     }
     
     // Handle image update simplistically for now
