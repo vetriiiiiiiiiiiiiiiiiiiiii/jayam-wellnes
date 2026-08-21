@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  db:
+    image: mongo:6
+    container_name: miracletree_mongo
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+
+  redis:
+    image: redis:7
+    container_name: miracletree_redis
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+    container_name: miracletree_backend
+    env_file:
+      - ./backend/.env
+    environment:
+      - MONGO_DB=mongodb://db:27017/miracletree
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_URL=redis://redis:6379
+      - PORT=5000
+      - FRONTEND_URL=http://localhost:3009
+    depends_on:
+      - db
+      - redis
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./web
+    container_name: miracletree_frontend
+    ports:
+      - "3009:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  mongo_data:
+  redis_data:
