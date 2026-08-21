@@ -28,9 +28,17 @@ services:
       - REDIS_URL=redis://redis:6379
       - PORT=5000
       - FRONTEND_URL=https://moringa.lumiodigital.store
+      - USE_MINIO=true
+      - MINIO_ENDPOINT=host.docker.internal
+      - MINIO_PORT=9000
+      - MINIO_ACCESS_KEY=admin
+      - MINIO_SECRET_KEY=password123
+      - MINIO_BUCKET_NAME=icuman
     volumes:
       - temp_uploads:/app/uploads/temp
       - public_uploads:/app/public/uploads
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       - db
       - redis
@@ -48,9 +56,17 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_URL=redis://redis:6379
+      - USE_MINIO=true
+      - MINIO_ENDPOINT=host.docker.internal
+      - MINIO_PORT=9000
+      - MINIO_ACCESS_KEY=admin
+      - MINIO_SECRET_KEY=password123
+      - MINIO_BUCKET_NAME=icuman
     volumes:
       - temp_uploads:/app/uploads/temp
       - public_uploads:/app/public/uploads
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       - db
       - redis
