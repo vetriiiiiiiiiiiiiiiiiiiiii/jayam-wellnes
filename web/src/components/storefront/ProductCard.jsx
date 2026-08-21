@@ -20,10 +20,10 @@ export default function ProductCard({
   return <div className="group relative flex flex-col w-full h-[60vh] md:h-[500px]" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
       <Link to={`/products/${product.slug}`} className="relative flex-1 overflow-hidden rounded-2xl bg-gray-100 block">
         {/* Primary Image */}
-        <img src={defaultImage} alt={product.name} sizes="(max-width: 768px) 80vw, 400px" className={`absolute inset-0 w-full h-full object-cover transition-all duration-[1.5s] ease-[cubic-bezier(0.19,1,0.22,1)] ${isHovered ? 'scale-110 opacity-0' : 'scale-100 opacity-100'}`} />
+        <img src={defaultImage} alt={product.name} sizes="(max-width: 768px) 80vw, 400px" loading="lazy" className={`absolute inset-0 w-full h-full object-cover transition-all duration-[1.5s] ease-[cubic-bezier(0.19,1,0.22,1)] ${isHovered ? 'scale-110 opacity-0' : 'scale-100 opacity-100'}`} />
         
         {/* Alternate Image on Hover */}
-        <img src={hoverImage} alt={`${product.name} lifestyle`} sizes="(max-width: 768px) 80vw, 400px" className={`absolute inset-0 w-full h-full object-cover transition-all duration-[1.5s] ease-[cubic-bezier(0.19,1,0.22,1)] ${isHovered ? 'scale-100 opacity-100' : 'scale-110 opacity-0'}`} />
+        <img src={hoverImage} alt={`${product.name} lifestyle`} sizes="(max-width: 768px) 80vw, 400px" loading="lazy" className={`absolute inset-0 w-full h-full object-cover transition-all duration-[1.5s] ease-[cubic-bezier(0.19,1,0.22,1)] ${isHovered ? 'scale-100 opacity-100' : 'scale-110 opacity-0'}`} />
         
         {/* Dark gradient overlay for contrast */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />

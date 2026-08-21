@@ -63,10 +63,11 @@ app.get('/product/:image', async (req, res) => {
       res.status(404).send('Image not found');
     }
   } else {
-    // If not minio, it would be served from /uploads which we should also expose?
-    // fallback logic if needed
     res.status(404).send('Image not found');
   }
 });
+
+const path = require('path');
+app.use('/uploads', express.static(path.join(process.cwd(), 'public/uploads')));
 
 module.exports = app;
