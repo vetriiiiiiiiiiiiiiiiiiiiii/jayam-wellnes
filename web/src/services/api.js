@@ -967,5 +967,51 @@ export const reorderBanners = async (items) => {
     return { success: false, message: error.response?.data?.message };
   }
 };
+// ==============================================================
+// REVIEWS ENDPOINTS
+// ==============================================================
+
+// Storefront: Submit a product review
+export const createProductReview = async (productId, reviewData) => {
+  try {
+    const response = await api.post(`/products/${productId}/reviews`, reviewData);
+    toast.success("Review submitted successfully!");
+    return { success: true, data: response.data };
+  } catch (error) {
+    return { success: false, message: error.response?.data?.error || "Failed to submit review" };
+  }
+};
+
+// Admin: Get all reviews
+export const getAllAdminReviews = async () => {
+  try {
+    const response = await api.get("/admin/reviews");
+    return { success: true, data: response.data.data };
+  } catch (error) {
+    return { success: false, message: error.response?.data?.error || "Failed to load reviews" };
+  }
+};
+
+// Admin: Update a review (e.g. content, title, rating)
+export const updateAdminReview = async (id, reviewData) => {
+  try {
+    const response = await api.put(`/admin/reviews/${id}`, reviewData);
+    toast.success("Review updated successfully!");
+    return { success: true, data: response.data.data };
+  } catch (error) {
+    return { success: false, message: error.response?.data?.error || "Failed to update review" };
+  }
+};
+
+// Admin: Delete a review
+export const deleteAdminReview = async (id) => {
+  try {
+    const response = await api.delete(`/admin/reviews/${id}`);
+    toast.success("Review deleted successfully!");
+    return { success: true, message: response.data.message };
+  } catch (error) {
+    return { success: false, message: error.response?.data?.error || "Failed to delete review" };
+  }
+};
 
 export default api;

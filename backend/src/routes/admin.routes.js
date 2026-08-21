@@ -31,4 +31,10 @@ router.get('/users/inspect/:id', adminController.getUserDetails);
 router.put('/users/role/:id', adminController.updateUserRole);
 router.delete('/users/:id', adminController.deleteUser);
 
+// Review Management
+const adminReviewController = require('../controllers/adminReviewController');
+router.get('/reviews', adminReviewController.getAllReviews);
+router.put('/reviews/:id', adminReviewController.updateReview);
+router.delete('/reviews/:id', adminReviewController.deleteReview);
+
 module.exports = router;
