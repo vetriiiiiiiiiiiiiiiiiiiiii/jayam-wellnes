@@ -27,7 +27,7 @@ export default function TestimonialsCarousel() {
       </div>
       
       {/* Native CSS Horizontal Scroll with Snapping */}
-      <div className="w-full overflow-x-auto pb-12 snap-x snap-mandatory hide-scrollbar pl-6 md:pl-[max(1.5rem,calc((100vw-80rem)/2))]">
+      <div className="w-full overflow-x-auto pb-12 snap-x snap-mandatory hide-scrollbar pl-6 md:pl-[max(1.5rem,calc((100%-80rem)/2))]">
         <div className="flex gap-8 w-max pr-6">
           {testimonials.map(testimonial => <div key={testimonial.id} className="w-[85vw] md:w-[420px] bg-white p-10 rounded-3xl shadow-sm border border-brand-green-100 flex-shrink-0 snap-start">
               <div className="flex gap-1 mb-6 text-brand-green-500">
