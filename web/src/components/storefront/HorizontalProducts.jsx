@@ -4,7 +4,7 @@ import QuickAddButton from './QuickAddButton';
 export default function HorizontalProducts({
   products
 }) {
-  if (!products || products.length === 0) return null;
+  if (!Array.isArray(products) || products.length === 0) return null;
   return <section className="py-32 bg-brand-pearl border-t border-brand-forest-700/10">
       <div className="max-w-[1600px] mx-auto px-6 md:px-12">
         <div className="flex justify-between items-end mb-16">

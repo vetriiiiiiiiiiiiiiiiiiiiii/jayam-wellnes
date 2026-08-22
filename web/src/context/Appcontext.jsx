@@ -102,8 +102,8 @@ export const AppProvider = ({ children }) => {
         try {
           console.log("[AppContext] Checking auth status...");
           const result = await checkAuth();
-          if (result.isAuthenticated) {
-            console.log("[AppContext] User is authenticated:", result.user.email);
+          if (result && result.isAuthenticated) {
+            console.log("[AppContext] User is authenticated:", result.user?.email);
             setUser(result.user);
             const [cartRes, ordersRes] = await Promise.allSettled([
               getCart(),
