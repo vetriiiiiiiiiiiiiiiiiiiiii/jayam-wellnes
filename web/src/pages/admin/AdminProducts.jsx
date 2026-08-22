@@ -145,6 +145,7 @@ export default function AdminProducts() {
             <Link to="/admin/orders" className="block text-gray-500 hover:text-brand-dark transition-colors">Orders</Link>
             <Link to="/admin/products" className="block text-brand-dark font-bold transition-colors">Products</Link>
             <Link to="/admin/users" className="block text-gray-500 hover:text-brand-dark transition-colors">Users</Link>
+            <Link to="/admin/reviews" className="block text-gray-500 hover:text-brand-dark transition-colors">Reviews</Link>
          </nav>
       </div>
 

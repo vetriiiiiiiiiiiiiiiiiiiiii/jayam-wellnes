@@ -7,11 +7,12 @@ import MagneticButton from './MagneticButton';
 import CartDrawer from './CartDrawer';
 import { useCart } from './CartProvider';
 import { useApp } from '../../context/Appcontext';
-import { BACKEND_URL } from '../../services/api';
+import { BACKEND_URL, logout } from '../../services/api';
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [cartOpen, setCartOpen] = useState(false);
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ export default function Navbar() {
   const {
     cartCount
   } = useCart();
-  const { user } = useApp();
+  const { user, setUser, setOrders, setCart } = useApp();
 
   const menuRef = useRef(null);
   const searchRef = useRef(null);
@@ -115,21 +116,78 @@ export default function Navbar() {
               </MagneticButton>
             )}
             {user ? (
-              <Link to="/account" className="hidden md:flex items-center gap-3 hover:opacity-80 transition-opacity">
-                {user.profilePicture ? (
-                  <img 
-                    src={user.profilePicture.startsWith('http') ? user.profilePicture : `${BACKEND_URL}${user.profilePicture.startsWith('/') ? '' : '/'}${user.profilePicture}`} 
-                    alt={user.fullname || user.name} 
-                    className="w-8 h-8 rounded-full border border-brand-green-100 object-cover shadow-sm" 
-                    referrerPolicy="no-referrer"
-                  />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-brand-forest-700 text-white flex items-center justify-center text-xs font-bold shadow-sm">
-                    {(user.fullname || user.name || 'U').charAt(0).toUpperCase()}
+              <div className="relative hidden md:block group">
+                <button 
+                  onClick={() => setUserDropdownOpen(!userDropdownOpen)} 
+                  className="flex items-center gap-3 hover:opacity-80 transition-opacity outline-none"
+                >
+                  {user.profilePicture ? (
+                    <img 
+                      src={user.profilePicture.startsWith('http') ? user.profilePicture : `${BACKEND_URL}${user.profilePicture.startsWith('/') ? '' : '/'}${user.profilePicture}`} 
+                      alt={user.fullname || user.name} 
+                      className="w-8 h-8 rounded-full border border-brand-green-100 object-cover shadow-sm" 
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-brand-forest-700 text-white flex items-center justify-center text-xs font-bold shadow-sm">
+                      {(user.fullname || user.name || 'U').charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <span className="text-xs uppercase tracking-[0.15em] font-semibold flex items-center gap-1">
+                    {user.fullname?.split(' ')[0] || user.name?.split(' ')[0]}
+                    <svg className={`w-3 h-3 transition-transform duration-300 ${userDropdownOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </span>
+                </button>
+                
+                {/* Dropdown Menu */}
+                {userDropdownOpen && (
+                  <div className="absolute top-full mt-4 right-0 w-48 bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl border border-gray-100 py-3 flex flex-col z-[120] animate-in fade-in slide-in-from-top-4 duration-300">
+                    <div className="px-5 py-2 border-b border-gray-50 mb-2">
+                      <p className="text-xs text-gray-500 uppercase tracking-widest font-semibold">Signed in as</p>
+                      <p className="text-sm font-medium text-brand-dark truncate">{user.email}</p>
+                    </div>
+                    {(user.role === 'admin' || user.role === 'SUPER_ADMIN') && (
+                      <Link 
+                        to="/admin" 
+                        onClick={() => setUserDropdownOpen(false)}
+                        className="px-5 py-2 text-sm text-brand-forest-700 hover:bg-brand-pearl hover:text-brand-gold transition-colors font-medium flex items-center gap-2"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                        Admin Panel
+                      </Link>
+                    )}
+                    <Link 
+                      to="/account" 
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="px-5 py-2 text-sm text-gray-700 hover:bg-brand-pearl transition-colors"
+                    >
+                      My Account
+                    </Link>
+                    <Link 
+                      to="/account" 
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="px-5 py-2 text-sm text-gray-700 hover:bg-brand-pearl transition-colors"
+                    >
+                      Order History
+                    </Link>
+                    <button 
+                      onClick={async () => {
+                        await logout();
+                        setUser(null);
+                        setCart(null);
+                        setOrders([]);
+                        navigate('/');
+                        setUserDropdownOpen(false);
+                      }}
+                      className="px-5 py-2 text-sm text-red-500 hover:bg-red-50 text-left transition-colors mt-2 border-t border-gray-50 pt-3"
+                    >
+                      Sign out
+                    </button>
                   </div>
                 )}
-                <span className="text-xs uppercase tracking-[0.15em] font-semibold">{user.fullname?.split(' ')[0] || user.name?.split(' ')[0]}</span>
-              </Link>
+              </div>
             ) : (
               <MagneticButton>
                 <Link to="/account" className="text-xs uppercase tracking-[0.2em] font-semibold hidden md:block hover:opacity-60 transition-opacity">

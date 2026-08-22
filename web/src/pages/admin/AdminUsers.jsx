@@ -50,6 +50,7 @@ export default function AdminUsers() {
             <Link to="/admin/orders" className="block text-gray-500 hover:text-brand-dark transition-colors">Orders</Link>
             <Link to="/admin/products" className="block text-gray-500 hover:text-brand-dark transition-colors">Products</Link>
             <Link to="/admin/users" className="block text-brand-dark font-bold transition-colors">Users</Link>
+            <Link to="/admin/reviews" className="block text-gray-500 hover:text-brand-dark transition-colors">Reviews</Link>
          </nav>
       </div>
 
@@ -98,9 +99,9 @@ export default function AdminUsers() {
                            Make Admin
                          </button>
                       ) : (
-                         <button onClick={() => handleRoleUpdate(user.id, 'user')} className="text-red-500 font-semibold text-xs uppercase tracking-wider hover:underline">
-                           Remove Admin
-                         </button>
+                         <span className="text-gray-400 font-semibold text-xs uppercase tracking-wider">
+                           Admin
+                         </span>
                       )}
                     </td>
                   </tr>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { getAllAdminReviews, updateAdminReview, deleteAdminReview } from '../../services/api';
 import toast from 'react-hot-toast';
 
@@ -44,40 +45,57 @@ export default function AdminReviews() {
   };
 
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-6">Manage Reviews</h1>
+    <div className="p-8 max-w-7xl mx-auto pt-32 min-h-screen flex gap-8">
+      
+      {/* Sidebar for navigation */}
+      <div className="w-64 flex-shrink-0 border-r border-gray-200 pr-8">
+         <h2 className="text-2xl font-serif text-brand-forest-700 mb-8">Admin</h2>
+         <nav className="space-y-4">
+            <Link to="/admin" className="block text-gray-500 hover:text-brand-dark transition-colors">Dashboard</Link>
+            <Link to="/admin/orders" className="block text-gray-500 hover:text-brand-dark transition-colors">Orders</Link>
+            <Link to="/admin/products" className="block text-gray-500 hover:text-brand-dark transition-colors">Products</Link>
+            <Link to="/admin/users" className="block text-gray-500 hover:text-brand-dark transition-colors">Users</Link>
+            <Link to="/admin/reviews" className="block text-brand-dark font-bold transition-colors">Reviews</Link>
+         </nav>
+      </div>
 
-      {loading ? (
-        <p>Loading...</p>
-      ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Author</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rating</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {reviews.map((r) => (
-                <tr key={r.id}>
-                  <td className="px-6 py-4 whitespace-nowrap">{r.productId?.name || 'N/A'}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{r.author}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{r.rating} / 5</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{r.title}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button onClick={() => setEditingReview(r)} className="text-blue-600 hover:text-blue-900 mr-4">Edit</button>
-                    <button onClick={() => handleDelete(r.id)} className="text-red-600 hover:text-red-900">Delete</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <div className="flex-1">
+        <h1 className="text-3xl font-serif text-gray-900 mb-8">Manage Reviews</h1>
+
+        {loading ? (
+          <p>Loading...</p>
+        ) : (
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden mb-8">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left">
+                <thead className="bg-gray-50/50 border-b border-gray-100">
+                  <tr>
+                    <th className="px-6 py-4 font-medium text-gray-500">Product</th>
+                    <th className="px-6 py-4 font-medium text-gray-500">Author</th>
+                    <th className="px-6 py-4 font-medium text-gray-500">Rating</th>
+                    <th className="px-6 py-4 font-medium text-gray-500">Title</th>
+                    <th className="px-6 py-4 font-medium text-gray-500">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {reviews.map((r) => (
+                    <tr key={r.id} className="hover:bg-gray-50/50 transition-colors">
+                      <td className="px-6 py-4 text-gray-900 font-medium">{r.productId?.name || 'N/A'}</td>
+                      <td className="px-6 py-4 text-gray-500">{r.author}</td>
+                      <td className="px-6 py-4 text-gray-500">{r.rating} / 5</td>
+                      <td className="px-6 py-4 text-gray-500">{r.title}</td>
+                      <td className="px-6 py-4 font-medium">
+                        <button onClick={() => setEditingReview(r)} className="text-brand-green-600 font-semibold text-xs uppercase tracking-wider hover:underline mr-4">Edit</button>
+                        <button onClick={() => handleDelete(r.id)} className="text-red-500 font-semibold text-xs uppercase tracking-wider hover:underline">Delete</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Edit Modal */}
       {editingReview && (
