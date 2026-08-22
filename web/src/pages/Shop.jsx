@@ -30,6 +30,22 @@ export default function ShopPage() {
     fetchProducts();
   }, [searchParams]);
 
+  // Group products by productType
+  const groupedProducts = products.reduce((acc, product) => {
+    const type = product.productType || 'OTHER';
+    if (!acc[type]) acc[type] = [];
+    acc[type].push(product);
+    return acc;
+  }, {});
+
+  const categoryLabels = {
+    'SKINCARE': 'Skincare Essentials',
+    'HAIRCARE': 'Haircare Collection',
+    'SUPPLEMENT': 'Daily Supplements',
+    'BUNDLE': 'Curated Bundles',
+    'OTHER': 'Other Products'
+  };
+
   return (
     <main className="min-h-screen bg-brand-pearl pt-32 pb-24 px-6 md:px-12">
       <div className="max-w-[1400px] mx-auto">
@@ -64,9 +80,21 @@ export default function ShopPage() {
                 <p className="text-brand-dark/60 mt-2">Try adjusting your filters.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                {Array.isArray(products) && products.map((product, idx) => (
-                  <ProductCard key={product.id} product={product} index={idx} />
+              <div className="space-y-20">
+                {Object.entries(groupedProducts).map(([type, categoryProducts]) => (
+                  <div key={type} className="border-t border-gray-200 pt-12 first:border-0 first:pt-0">
+                    <div className="flex items-center justify-between mb-8">
+                      <h2 className="text-3xl font-serif text-brand-dark">
+                        {categoryLabels[type] || type}
+                      </h2>
+                      <span className="text-sm font-mono text-gray-500 uppercase tracking-widest">{categoryProducts.length} items</span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                      {categoryProducts.map((product, idx) => (
+                        <ProductCard key={product.id} product={product} index={idx} />
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </div>
             )}
