@@ -9,6 +9,7 @@ dist/
 dist-ssr/
 build/
 .next/
+out/
 
 # Logs
 *.log
@@ -36,3 +37,17 @@ web/.env.*
 *.njsproj
 *.sln
 *.sw?
+
+# Database
+*.db
+*.db-journal
+prisma/dev.db*
+
+# Other Next.js & TS
+next-env.d.ts
+tsconfig.tsbuildinfo
+e2e/.auth/
+shots/
+test-results/
+/public/uploads/*
+!/public/uploads/.gitkeep
