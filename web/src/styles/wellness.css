@@ -1,0 +1,845 @@
+/* ==========================================
+   WELLNESS THEME
+   Calm botanical palette, soft serif, rounded organic shapes.
+   Loaded after jayam.css; keeps the paper effect.
+   ========================================== */
+
+:root {
+  --ink: #2e4636;
+  --forest: #2a4232;
+  --cream: #f8f5ee;
+  --moss: #3a5a45;
+  --sage: #7d9070;
+  --sage-soft: #e3e9da;
+  --leaf-soft: #dfe8d0;
+  --sand-soft: #efe5d3;
+  --blush-soft: #f1e2da;
+  --sun: #d9a54a;
+  --sun-soft: #f5e7c6;
+  --muted: #5f6b5c;
+  --line: #ddd8cb;
+  --serif: 'Fraunces', Georgia, serif;
+  --radius-lg: 28px;
+  --radius-md: 18px;
+  --ease-soft: cubic-bezier(.22, .8, .32, 1);
+}
+
+html,
+body {
+  background: var(--cream);
+}
+
+body {
+  color: var(--ink);
+}
+
+/* Soft, rounded serif for every heading */
+h1,
+h2,
+h3,
+.font-serif,
+.jayam-art-title,
+.jayam-art-form {
+  font-family: var(--serif);
+  font-optical-sizing: auto;
+  font-variation-settings: 'SOFT' 100;
+}
+
+/* Existing headings were tracked very tightly for the previous typeface */
+.jayam-home-copy h1,
+.story-hero h1,
+.jayam-faq-hero h1,
+.jayam-contact-intro h1,
+.jayam-shop-intro h1,
+.jayam-checkout-heading h1,
+.jayam-checkout-empty h1 {
+  font-weight: 400;
+  letter-spacing: -0.03em;
+}
+
+.tracking-tighter {
+  letter-spacing: -0.02em;
+}
+
+::selection {
+  background: var(--leaf-soft);
+  color: var(--ink);
+}
+
+/* ---------- Buttons: soft pills ---------- */
+.wl-button,
+.jayam-primary-link {
+  display: inline-flex;
+  white-space: nowrap;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px solid var(--moss);
+  border-radius: 999px;
+  background: var(--moss);
+  padding: 15px 28px;
+  color: var(--cream);
+  font: 600 13px var(--sans);
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  text-transform: none;
+  transition: background-color 300ms var(--ease-soft), border-color 300ms var(--ease-soft), transform 300ms var(--ease-soft);
+}
+
+.wl-button:hover,
+.jayam-primary-link:hover {
+  border-color: #2e4a38;
+  background: #2e4a38;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.wl-button--ghost {
+  background: transparent;
+  color: var(--moss);
+}
+
+.wl-button--ghost:hover {
+  background: var(--sage-soft);
+  color: var(--ink);
+}
+
+.wl-text-link {
+  color: var(--moss);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: #b8c3ab;
+  text-underline-offset: 5px;
+}
+
+.wl-kicker,
+.jayam-eyebrow,
+.story-eyebrow {
+  margin: 0 0 18px;
+  color: var(--sage);
+  font: 600 12px var(--sans);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* ---------- Top bar and navigation ---------- */
+.jayam-topline {
+  background: var(--moss);
+  color: #f1efe6;
+}
+
+/* ---------- Product cards ---------- */
+.jayam-product-image {
+  border-radius: var(--radius-lg);
+}
+
+.jayam-product-kind {
+  border-radius: 999px;
+  padding: 6px 12px;
+  background: rgba(248, 245, 238, 0.9);
+  font: 600 11px var(--sans);
+  letter-spacing: 0.02em;
+}
+
+.jayam-product-info h2 {
+  font-weight: 400;
+}
+
+.jayam-quick-add {
+  margin-top: 6px;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid #c9cfbf;
+  border-radius: 999px;
+  padding: 11px 16px;
+  color: var(--moss);
+  font: 600 12px var(--sans);
+  letter-spacing: 0.02em;
+  text-transform: none;
+  transition: background-color 300ms var(--ease-soft), color 300ms var(--ease-soft);
+}
+
+.jayam-quick-add:hover {
+  background: var(--moss);
+  color: var(--cream);
+}
+
+/* ---------- Product label art: rounded, soft ---------- */
+.jayam-art {
+  background: var(--sage-soft);
+}
+
+.jayam-art--warm {
+  background: var(--sand-soft);
+}
+
+.jayam-art--hero {
+  border-radius: 36px;
+}
+
+.jayam-art-label {
+  border-radius: 16px;
+  outline-color: #d7d0bf;
+}
+
+.jayam-art-title {
+  font-weight: 400;
+}
+
+/* Product page: soft pills and rounded gallery */
+.jayam-trust-points li {
+  border-color: #cdd6c2;
+  background: rgba(227, 233, 218, 0.45);
+  color: var(--moss);
+}
+
+.jayam-product-page h1 {
+  font-weight: 400;
+}
+
+/* ---------- Footer ---------- */
+.jayam-footer {
+  background: var(--moss);
+}
+
+/* ---------- Page headers: a quiet botanical accent ---------- */
+.wl-page-head {
+  position: relative;
+  overflow: hidden;
+}
+
+.wl-page-sprig {
+  position: absolute;
+  top: 90px;
+  right: 8vw;
+  width: min(220px, 22vw);
+  color: #9cb08d;
+  opacity: 0.55;
+  transform: rotate(12deg);
+  pointer-events: none;
+}
+
+@media (max-width: 860px) {
+  .wl-page-sprig {
+    top: 110px;
+    right: -30px;
+    width: 140px;
+    opacity: 0.3;
+  }
+}
+
+/* ==========================================
+   HOME
+   ========================================== */
+.wl-home {
+  overflow: hidden;
+}
+
+.wl-home h2 em,
+.wl-hero h1 em {
+  color: var(--sage);
+  font-style: italic;
+  font-weight: 300;
+}
+
+/* ---------- Hero ---------- */
+.wl-hero {
+  display: grid;
+  max-width: 1320px;
+  grid-template-columns: 1.05fr 0.95fr;
+  align-items: center;
+  gap: 6vw;
+  margin: 0 auto;
+  padding: 150px 6vw 90px;
+}
+
+.wl-hero h1 {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(46px, 5.6vw, 84px);
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+}
+
+.wl-hero h1 em {
+  display: block;
+}
+
+.wl-hero-intro {
+  max-width: 470px;
+  margin: 26px 0 34px;
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 1.75;
+}
+
+.wl-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.wl-hero-note {
+  margin: 28px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.wl-hero-visual {
+  display: grid;
+  place-items: center;
+}
+
+.wl-arch {
+  position: relative;
+  width: min(100%, 470px);
+  aspect-ratio: 0.82;
+  overflow: hidden;
+  border-radius: 999px 999px 32px 32px;
+  background: linear-gradient(180deg, #f4ead2 0%, var(--sage-soft) 58%, #d6dfca 100%);
+}
+
+.wl-sun {
+  position: absolute;
+  top: 13%;
+  left: 50%;
+  width: 46%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, #fbe7b4 0%, #f3d38c 55%, rgba(243, 211, 140, 0) 72%);
+  transform: translateX(-50%);
+  animation: wl-breathe 9s ease-in-out infinite;
+}
+
+.wl-sprig {
+  position: absolute;
+  bottom: -4%;
+  width: 46%;
+  color: #6f8a5f;
+}
+
+.wl-sprig--left {
+  left: -6%;
+  transform: rotate(-14deg);
+  opacity: 0.85;
+}
+
+.wl-sprig--right {
+  right: -8%;
+  width: 52%;
+  transform: scaleX(-1) rotate(-10deg);
+  color: #557150;
+}
+
+.wl-hero-product {
+  position: absolute;
+  bottom: 9%;
+  left: 50%;
+  width: 46%;
+  aspect-ratio: 4 / 5;
+  transform: translateX(-50%);
+  transition: transform 500ms var(--ease-soft);
+}
+
+.wl-hero-product:hover {
+  transform: translateX(-50%) translateY(-6px);
+}
+
+.wl-hero-product .jayam-art {
+  padding: 0;
+  background: transparent;
+}
+
+.wl-hero-product .jayam-art-label {
+  height: 100%;
+  justify-content: center;
+  box-shadow: 0 24px 40px rgba(46, 70, 54, 0.16);
+}
+
+@keyframes wl-breathe {
+  0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.95; }
+  50% { transform: translateX(-50%) scale(1.06); opacity: 1; }
+}
+
+/* ---------- Promise strip ---------- */
+.wl-promise {
+  border-block: 1px solid var(--line);
+  background: rgba(227, 233, 218, 0.35);
+}
+
+.wl-promise ul {
+  display: grid;
+  max-width: 1320px;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0 auto;
+  padding: 26px 6vw;
+  list-style: none;
+}
+
+.wl-promise li {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--moss);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.wl-promise svg {
+  flex: none;
+  color: var(--sage);
+}
+
+/* ---------- Shared section layout ---------- */
+.wl-section {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 110px 6vw;
+}
+
+.wl-section-head {
+  max-width: 620px;
+  margin-bottom: 52px;
+}
+
+.wl-section-head--center {
+  margin-inline: auto;
+  text-align: center;
+}
+
+.wl-section-head h2,
+.wl-made-intro h2,
+.wl-closing h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(34px, 3.6vw, 54px);
+  font-weight: 400;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+}
+
+.wl-section-head > p:not(.wl-kicker) {
+  margin: 18px 0 0;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+/* ---------- Shop by need ---------- */
+.wl-needs-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.wl-need-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: var(--sage-soft);
+  color: var(--ink);
+  text-decoration: none;
+  transition: transform 500ms var(--ease-soft), box-shadow 500ms var(--ease-soft);
+}
+
+.wl-need-card:hover {
+  box-shadow: 0 22px 40px rgba(46, 70, 54, 0.12);
+  transform: translateY(-6px);
+}
+
+.wl-tone--leaf { background: var(--leaf-soft); }
+.wl-tone--blush { background: var(--blush-soft); }
+.wl-tone--sand { background: var(--sand-soft); }
+.wl-tone--sun { background: var(--sun-soft); }
+
+.wl-need-label {
+  margin: 20px 20px 0;
+  color: var(--moss);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.wl-need-art {
+  aspect-ratio: 1;
+}
+
+.wl-need-art .jayam-art {
+  padding: 12% 14%;
+  background: transparent;
+}
+
+.wl-need-art .jayam-art-label {
+  box-shadow: 0 14px 26px rgba(46, 70, 54, 0.1);
+}
+
+/* Need cards are compact: brand, name and form only */
+.wl-need-art .jayam-art-mark,
+.wl-need-art .jayam-art-rule,
+.wl-need-art .jayam-art-meta {
+  display: none;
+}
+
+.wl-need-art .jayam-art-label {
+  padding: 18px 10px;
+}
+
+.wl-need-art .jayam-art-title {
+  font-size: clamp(17px, 1.5vw, 21px);
+}
+
+.wl-need-art .jayam-art-form {
+  font-size: 15px;
+}
+
+.wl-need-card:hover .jayam-art-label {
+  transform: rotate(-1.5deg);
+}
+
+.wl-need-info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 0 20px 22px;
+}
+
+.wl-need-info h3 {
+  margin: 0 0 6px;
+  font-size: 21px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.wl-need-info p {
+  margin: 0 0 16px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.wl-need-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: auto;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.wl-need-meta span {
+  color: var(--moss);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ---------- Daily ritual ---------- */
+.wl-ritual {
+  position: relative;
+}
+
+.wl-ritual-steps {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wl-ritual-steps::before {
+  position: absolute;
+  top: 34px;
+  right: 16%;
+  left: 16%;
+  border-top: 1px dashed #c3cbb6;
+  content: '';
+}
+
+.wl-ritual-steps li {
+  position: relative;
+  text-align: center;
+}
+
+.wl-ritual-icon {
+  display: inline-grid;
+  width: 68px;
+  height: 68px;
+  place-items: center;
+  margin-bottom: 20px;
+  border: 1px solid #d3dbc6;
+  border-radius: 50%;
+  background: var(--cream);
+  color: var(--moss);
+}
+
+.wl-ritual-time {
+  margin: 0 0 6px;
+  color: var(--sage);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.wl-ritual-steps h3 {
+  margin: 0 0 10px;
+  font-size: 26px;
+  font-weight: 400;
+}
+
+.wl-ritual-steps p:last-child {
+  max-width: 290px;
+  margin: 0 auto;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.wl-ritual-note {
+  margin: 48px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+/* ---------- Made with care ---------- */
+.wl-made {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 7vw;
+  align-items: start;
+}
+
+.wl-made-intro {
+  position: sticky;
+  top: 140px;
+}
+
+.wl-made-intro > p:not(.wl-kicker) {
+  margin: 20px 0 22px;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.75;
+}
+
+.wl-made-sprig {
+  display: block;
+  width: 120px;
+  margin-top: 36px;
+  color: #8ba27c;
+  transform: rotate(18deg);
+}
+
+.wl-made-stages {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wl-made-stages li {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 18px;
+  padding: 30px 0;
+  border-top: 1px solid var(--line);
+}
+
+.wl-made-stages li:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+.wl-made-number {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--sage-soft);
+  color: var(--moss);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.wl-made-stages h3 {
+  margin: 4px 0 8px;
+  font-size: 24px;
+  font-weight: 400;
+}
+
+.wl-made-stages p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+/* ---------- Closing invitation ---------- */
+.wl-closing {
+  position: relative;
+  max-width: 1180px;
+  margin: 20px auto 110px;
+  overflow: hidden;
+  border-radius: 40px;
+  background: linear-gradient(160deg, #e7ecdd 0%, #f2ead8 100%);
+  padding: 96px 8vw;
+  text-align: center;
+}
+
+.wl-closing > p:not(.wl-kicker) {
+  max-width: 480px;
+  margin: 18px auto 30px;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.wl-closing .wl-hero-actions {
+  justify-content: center;
+}
+
+.wl-closing-sprig {
+  position: absolute;
+  bottom: -30px;
+  width: 170px;
+  color: #9db08e;
+  opacity: 0.7;
+}
+
+.wl-closing-sprig--left {
+  left: 2%;
+  transform: rotate(-24deg);
+}
+
+.wl-closing-sprig--right {
+  right: 2%;
+  transform: scaleX(-1) rotate(-24deg);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1100px) {
+  .wl-needs-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .wl-promise ul {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    row-gap: 18px;
+  }
+}
+
+@media (max-width: 860px) {
+  .wl-hero {
+    grid-template-columns: 1fr;
+    gap: 48px;
+    padding: 120px 20px 64px;
+  }
+
+  .wl-hero-intro {
+    font-size: 16px;
+  }
+
+  .wl-arch {
+    width: min(100%, 380px);
+  }
+
+  .wl-section {
+    padding: 76px 20px;
+  }
+
+  .wl-section-head {
+    margin-bottom: 36px;
+  }
+
+  .wl-needs-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .wl-ritual-steps {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .wl-ritual-steps::before {
+    display: none;
+  }
+
+  .wl-made {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+
+  .wl-made-intro {
+    position: static;
+  }
+
+  .wl-made-sprig {
+    display: none;
+  }
+
+  .wl-closing {
+    margin: 0 16px 80px;
+    border-radius: 28px;
+    padding: 72px 22px;
+  }
+
+  .wl-closing-sprig {
+    width: 110px;
+    opacity: 0.45;
+  }
+}
+
+@media (max-width: 520px) {
+  .wl-promise ul {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 22px 16px;
+  }
+
+  .wl-promise li {
+    justify-content: flex-start;
+    font-size: 12px;
+    text-align: left;
+  }
+
+  .wl-need-label {
+    margin: 14px 14px 0;
+    font-size: 10px;
+  }
+
+  .wl-need-info {
+    padding: 0 14px 16px;
+  }
+
+  .wl-need-info h3 {
+    font-size: 17px;
+  }
+
+  .wl-need-info p {
+    display: none;
+  }
+
+  .wl-need-meta span {
+    display: none;
+  }
+
+  .wl-hero-actions {
+    flex-direction: column;
+  }
+
+  .wl-hero-actions .wl-button {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wl-sun {
+    animation: none;
+  }
+}

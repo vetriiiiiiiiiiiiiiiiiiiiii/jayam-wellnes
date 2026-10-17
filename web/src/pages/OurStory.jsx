@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import MoringaSprig from '../components/home/MoringaSprig';
 
 const principles = [
   'Simple, clean products',
@@ -13,7 +14,8 @@ const principles = [
 export default function OurStoryPage() {
   return (
     <main className="story-page">
-      <header className="story-hero">
+      <header className="story-hero wl-page-head">
+        <MoringaSprig className="wl-page-sprig" pairs={10} />
         <p className="story-eyebrow">A little about us</p>
         <h1>Wellness,<br /><em>with care.</em></h1>
         <p className="story-intro">A simpler way to care for yourself, inspired by nature and made with the people we love in mind.</p>
