@@ -1,3 +1,4 @@
+import { Leaf } from 'lucide-react';
 import { CATEGORY_LABELS } from '../../lib/store';
 
 const FORMS = ['Capsules', 'Tablets'];
@@ -30,7 +31,7 @@ export default function ProductArt({ product, size = 'card' }) {
   return (
     <div className={`jayam-art jayam-art--${size} jayam-art--${tone}`} role="img" aria-label={product.name}>
       <div className="jayam-art-label">
-        <img className="jayam-art-mark" src="/jayam-logo.png" alt="" />
+        <Leaf className="jayam-art-mark" strokeWidth={1.4} aria-hidden="true" />
         <span className="jayam-art-brand">Jayam{isOrganic ? ' · Organic' : ''}</span>
         <strong className="jayam-art-title">{title}</strong>
         {form && <em className="jayam-art-form">{form}</em>}

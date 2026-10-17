@@ -54,7 +54,7 @@ export default function CartDrawer({
       {/* Drawer */}
       <div ref={drawerRef} className="fixed top-0 right-0 h-full w-full md:w-[450px] bg-brand-pearl z-[160] translate-x-full shadow-2xl flex flex-col">
         <div className="flex justify-between items-center p-8 border-b border-gray-200">
-          <h2 className="text-sm uppercase tracking-widest font-medium">Your bag ({cartItems.length})</h2>
+          <h2 className="font-serif text-2xl">Your bag <span className="text-base text-gray-500">({cartItems.length})</span></h2>
           <button onClick={onClose} className="text-sm uppercase tracking-widest hover:text-brand-green-500 transition-colors">
             Close
           </button>
@@ -84,7 +84,7 @@ export default function CartDrawer({
               <button type="button" onClick={() => {
             onClose();
             navigate('/shop');
-          }} className="mt-2 border border-brand-forest-700 px-6 py-3 text-xs uppercase tracking-widest hover:bg-brand-forest-700 hover:text-white transition-colors">
+          }} className="mt-2 rounded-full border border-brand-forest-700 px-6 py-3 text-sm font-semibold hover:bg-brand-forest-700 hover:text-white transition-colors">
                 Shop the collection
               </button>
             </div>}
@@ -110,7 +110,7 @@ export default function CartDrawer({
           <button disabled={cartItems.length === 0} onClick={() => {
           onClose();
           navigate('/checkout');
-        }} className="w-full bg-brand-forest-700 text-white py-5 text-xs uppercase tracking-widest font-medium hover:bg-brand-forest-900 transition-colors disabled:cursor-not-allowed disabled:opacity-40">
+        }} className="w-full rounded-full bg-brand-forest-700 text-white py-4 text-sm font-semibold hover:bg-brand-forest-900 transition-colors disabled:cursor-not-allowed disabled:opacity-40">
             Checkout
           </button>
         </div>
