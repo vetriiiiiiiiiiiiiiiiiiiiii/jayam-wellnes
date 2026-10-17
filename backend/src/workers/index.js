@@ -1,13 +1,13 @@
 require("dotenv").config();
-const connectMongo = require("../config/connectMongo");
+const connectDb = require("../config/connectDb");
 const { mediaQueue } = require("../services/queue"); // Import queue to check jobs
 
 const startWorkers = async () => {
   try {
     console.log("🔄 Connecting to Database for Workers...");
 
-    // 1. Connect to MongoDB FIRST
-    await connectMongo();
+    // 1. Connect to PostgreSQL FIRST
+    await connectDb();
     console.log("✅ Database connected");
 
     // 2. Check for Failed/Stalled Jobs and Retry them
@@ -30,7 +30,6 @@ const startWorkers = async () => {
     require("./orderWorker");
     require("./notificationWorker");
     require("./mailWorker");
-    require("./paymentWorker");
 
 
     console.log("✅ All workers initialized and listening for new jobs...");

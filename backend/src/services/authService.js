@@ -1,19 +1,21 @@
-const User = require("../models/userModel");
+const prisma = require("../config/prisma");
 
 async function findOrCreateGoogleUser(profile) {
   // 1. Check by Google ID
-  let user = await User.findOne({ googleId: profile.sub }); // Note: Google calls ID 'sub' in JWTs
+  let user = await prisma.user.findUnique({ where: { googleId: profile.sub } }); // Note: Google calls ID 'sub' in JWTs
   if (user) return user;
 
   // 2. Check by Email
   if (profile.email) {
-    user = await User.findOne({ email: profile.email });
+    user = await prisma.user.findUnique({ where: { email: profile.email } });
     if (user) {
-      user.googleId = profile.sub;
-      if (!user.profilePicture && profile.picture)
-        user.profilePicture = profile.picture;
-      await user.save();
-      return user;
+      return prisma.user.update({
+        where: { id: user.id },
+        data: {
+          googleId: profile.sub,
+          ...(!user.profilePicture && profile.picture && { profilePicture: profile.picture }),
+        },
+      });
     }
   }
 
@@ -22,14 +24,16 @@ async function findOrCreateGoogleUser(profile) {
   const defaultAdminEmail = (process.env.DEFAULT_SUPERADMIN_EMAIL || "").trim().toLowerCase();
   const isSuperAdmin = profile.email && (superAdminEmails.includes(profile.email.toLowerCase()) || profile.email.toLowerCase() === defaultAdminEmail);
 
-  return await User.create({
-    googleId: profile.sub,
-    email: profile.email,
-    fullname: profile.name,
-    username: profile.email.split("@")[0],
-    profilePicture: profile.picture,
-    password: "google-onetap-" + Date.now(),
-    role: isSuperAdmin ? "admin" : "user",
+  return await prisma.user.create({
+    data: {
+      googleId: profile.sub,
+      email: profile.email,
+      fullname: profile.name,
+      username: profile.email.split("@")[0],
+      profilePicture: profile.picture,
+      password: "google-onetap-" + Date.now(),
+      role: isSuperAdmin ? "admin" : "user",
+    },
   });
 }
 

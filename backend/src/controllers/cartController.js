@@ -1,12 +1,23 @@
-const Cart = require('../models/cartModel');
+const prisma = require('../config/prisma');
+const { productInclude, serializeCart } = require('../utils/serialize');
+
+const cartInclude = {
+  items: { include: { product: { include: productInclude } }, orderBy: { id: 'asc' } }
+};
+
+// Load the user's cart with products, creating an empty one if needed
+const loadCart = (userId) =>
+  prisma.cart.upsert({
+    where: { userId },
+    update: {},
+    create: { userId },
+    include: cartInclude
+  });
 
 exports.getCart = async (req, res) => {
   try {
-    let cart = await Cart.findOne({ userId: req.user.id }).populate('items.productId');
-    if (!cart) {
-      cart = await Cart.create({ userId: req.user.id, items: [] });
-    }
-    res.json({ success: true, cart });
+    const cart = await loadCart(req.user.id);
+    res.json({ success: true, cart: serializeCart(cart) });
   } catch (error) {
     console.error('Error fetching cart:', error);
     res.status(500).json({ message: 'Failed to load cart' });
@@ -15,29 +26,38 @@ exports.getCart = async (req, res) => {
 
 exports.addToCart = async (req, res) => {
   try {
-    const { productId, color, size, quantity = 1 } = req.body;
-    let cart = await Cart.findOne({ userId: req.user.id });
-
-    if (!cart) {
-      cart = new Cart({ userId: req.user.id, items: [] });
+    const { productId, color, size } = req.body;
+    const quantity = Number(req.body.quantity ?? 1);
+    if (!productId || !Number.isInteger(quantity) || quantity < 1) {
+      return res.status(400).json({ message: 'Invalid product or quantity' });
     }
 
-    const itemIndex = cart.items.findIndex(
-      item => item.productId.toString() === productId && item.color === color && item.size === size
-    );
+    const product = await prisma.product.findUnique({ where: { id: productId }, select: { id: true } });
+    if (!product) return res.status(404).json({ message: 'Product not found' });
 
-    if (itemIndex > -1) {
-      cart.items[itemIndex].quantity += quantity;
+    const cart = await prisma.cart.upsert({
+      where: { userId: req.user.id },
+      update: {},
+      create: { userId: req.user.id }
+    });
+
+    const existingItem = await prisma.cartItem.findFirst({
+      where: { cartId: cart.id, productId, color: color ?? null, size: size ?? null }
+    });
+
+    if (existingItem) {
+      await prisma.cartItem.update({
+        where: { id: existingItem.id },
+        data: { quantity: { increment: quantity } }
+      });
     } else {
-      cart.items.push({ productId, quantity, color, size });
+      await prisma.cartItem.create({
+        data: { cartId: cart.id, productId, quantity, color, size }
+      });
     }
 
-    await cart.save();
-    
-    // Populate before returning
-    await cart.populate('items.productId');
-    
-    res.json({ message: 'Added to cart successfully', cart });
+    const updatedCart = await loadCart(req.user.id);
+    res.json({ message: 'Added to cart successfully', cart: serializeCart(updatedCart) });
   } catch (error) {
     console.error('Error adding to cart:', error);
     res.status(500).json({ message: 'Failed to add item to cart' });
@@ -46,23 +66,28 @@ exports.addToCart = async (req, res) => {
 
 exports.updateCartItem = async (req, res) => {
   try {
-    const { itemId, quantity } = req.body;
-    const cart = await Cart.findOne({ userId: req.user.id });
+    const { itemId } = req.body;
+    const quantity = Number(req.body.quantity);
+    if (!Number.isInteger(quantity) || quantity < 1) {
+      return res.status(400).json({ message: 'Invalid quantity' });
+    }
 
+    const cart = await prisma.cart.findUnique({ where: { userId: req.user.id } });
     if (!cart) {
       return res.status(404).json({ message: 'Cart not found' });
     }
 
-    const itemIndex = cart.items.findIndex(item => item._id.toString() === itemId);
+    const { count } = await prisma.cartItem.updateMany({
+      where: { id: itemId, cartId: cart.id },
+      data: { quantity }
+    });
 
-    if (itemIndex > -1) {
-      cart.items[itemIndex].quantity = quantity;
-      await cart.save();
-      await cart.populate('items.productId');
-      return res.json({ cart });
-    } else {
+    if (count === 0) {
       return res.status(404).json({ message: 'Item not found in cart' });
     }
+
+    const updatedCart = await loadCart(req.user.id);
+    return res.json({ cart: serializeCart(updatedCart) });
   } catch (error) {
     console.error('Error updating cart item:', error);
     res.status(500).json({ message: 'Failed to update cart' });
@@ -72,17 +97,16 @@ exports.updateCartItem = async (req, res) => {
 exports.removeFromCart = async (req, res) => {
   try {
     const { itemId } = req.params;
-    const cart = await Cart.findOne({ userId: req.user.id });
+    const cart = await prisma.cart.findUnique({ where: { userId: req.user.id } });
 
     if (!cart) {
       return res.status(404).json({ message: 'Cart not found' });
     }
 
-    cart.items = cart.items.filter(item => item._id.toString() !== itemId);
-    await cart.save();
-    await cart.populate('items.productId');
+    await prisma.cartItem.deleteMany({ where: { id: itemId, cartId: cart.id } });
 
-    res.json({ message: 'Item removed', cart });
+    const updatedCart = await loadCart(req.user.id);
+    res.json({ message: 'Item removed', cart: serializeCart(updatedCart) });
   } catch (error) {
     console.error('Error removing from cart:', error);
     res.status(500).json({ message: 'Failed to remove item' });
@@ -91,7 +115,7 @@ exports.removeFromCart = async (req, res) => {
 
 exports.clearCart = async (req, res) => {
   try {
-    await Cart.findOneAndUpdate({ userId: req.user.id }, { items: [] });
+    await prisma.cartItem.deleteMany({ where: { cart: { userId: req.user.id } } });
     res.json({ success: true, message: 'Cart cleared' });
   } catch (error) {
     console.error('Error clearing cart:', error);

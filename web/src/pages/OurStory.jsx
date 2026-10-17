@@ -1,50 +1,39 @@
-import React from 'react';
+import { Link } from 'react-router-dom';
+
+const principles = [
+  'Simple, clean products',
+  'Carefully selected ingredients',
+  'Plant-based wellness',
+  'No unnecessary complexity',
+  'Quality and transparency',
+  'Products we would feel comfortable giving to our own families',
+  'Long-term everyday wellness, not quick fixes',
+];
 
 export default function OurStoryPage() {
   return (
-    <main className="min-h-screen bg-brand-pearl pt-32 pb-24 px-6 md:px-12">
-      <div className="max-w-4xl mx-auto">
-        <header className="mb-16 text-center mt-8">
-          <span className="text-brand-green-500 uppercase tracking-[0.3em] text-xs font-medium block mb-4">The Origin</span>
-          <h1 className="text-5xl md:text-7xl font-serif text-brand-dark mb-8 tracking-tighter">
-            Our Story
-          </h1>
-        </header>
+    <main className="story-page">
+      <header className="story-hero">
+        <p className="story-eyebrow">A little about us</p>
+        <h1>Wellness,<br /><em>with care.</em></h1>
+        <p className="story-intro">A simpler way to care for yourself, inspired by nature and made with the people we love in mind.</p>
+      </header>
 
-        <article className="prose prose-lg prose-green mx-auto text-brand-dark/80 font-light leading-relaxed">
-          <p className="text-2xl font-serif text-brand-dark mb-10 text-center leading-snug">
-            Miracletree Life Science was founded on a simple but powerful belief: that nature provides the most potent answers to human vitality.
-          </p>
-
-          <div className="my-16 h-[60vh] rounded-3xl bg-brand-forest-700 overflow-hidden relative">
-            <div
-              className="absolute inset-0 opacity-40 mix-blend-multiply bg-cover bg-center"
-              style={{ backgroundImage: "url('https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80')" }}
-            />
-          </div>
-
-          <h2 className="text-3xl font-serif text-brand-dark mt-16 mb-6">The Power of Moringa</h2>
-          <p>
-            Often referred to as the "Miracle Tree", Moringa Oleifera is one of the most nutrient-dense plants on the planet. Packed with antioxidants, vitamins, and essential amino acids, it has been used for centuries in traditional medicine.
-          </p>
-          <p>
-            We harness this ancient wisdom and combine it with modern scientific rigorous testing to bring you formulations that are not only pure but extraordinarily effective.
-          </p>
-
-          <h2 className="text-3xl font-serif text-brand-dark mt-16 mb-6">Ethical from Seed to Skin</h2>
-          <p>
-            Sustainability isn't just a buzzword for us; it's our foundational operating principle. We partner directly with farmers to ensure fair trade practices, and our harvesting methods ensure the long-term health of the soil and the local ecosystem.
-          </p>
-
-          <div className="mt-20 p-12 bg-white rounded-3xl text-center border border-brand-green-100">
-            <h3 className="text-2xl font-serif text-brand-dark mb-4">Join Our Journey</h3>
-            <p className="mb-8">Experience the purest expression of botanical science.</p>
-            <a href="/shop" className="inline-block px-8 py-4 bg-brand-dark text-white rounded-full font-medium tracking-wide hover:scale-105 transition-transform">
-              Explore Products
-            </a>
-          </div>
-        </article>
-      </div>
+      <article className="story-copy">
+        <p>Jayam began with a simple belief: the things we choose for our health should be chosen with care.</p>
+        <p>For generations, families have trusted nature, traditional ingredients, and simple everyday habits as part of their well-being. That wisdom continues to inspire us.</p>
+        <p>Today, wellness can feel complicated, with endless choices and long lists of unfamiliar ingredients. Jayam was created to offer something simpler — thoughtful products, carefully chosen, and worthy of your trust.</p>
+        <p>Our bodies are precious, and what we choose to put into them matters. We believe in keeping wellness simple, staying close to nature, respecting the body, avoiding unnecessary complexity, and supporting lasting everyday wellness — not quick fixes.</p>
+        <p>Our journey began with Moringa, but Jayam is about more than one ingredient. We continue to explore purposeful wellness products that we would be proud to place in the hands of our own families.</p>
+        <h2 className="story-subhead">What Jayam stands for</h2>
+        <ul className="story-principles">
+          {principles.map((principle) => <li key={principle}>{principle}</li>)}
+        </ul>
+        <p>Because wellness is personal, and trust matters.</p>
+        <img className="story-logo" src="/jayam-logo.png" alt="Jayam — Bringing the best to your hands" />
+        <p className="story-signoff">Jayam — Bringing the best to your hands.</p>
+        <Link to="/shop" className="story-link">Explore our products <span aria-hidden="true">↗</span></Link>
+      </article>
     </main>
   );
 }

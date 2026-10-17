@@ -10,7 +10,7 @@ export function CartProvider({
 
   // Load from local storage on mount
   useEffect(() => {
-    const saved = localStorage.getItem('miracletree_cart');
+    const saved = localStorage.getItem('jayam_cart') || localStorage.getItem('miracletree_cart');
     if (saved) {
       try {
         setCart(JSON.parse(saved));
@@ -24,7 +24,8 @@ export function CartProvider({
   // Save to local storage on change
   useEffect(() => {
     if (isLoaded) {
-      localStorage.setItem('miracletree_cart', JSON.stringify(cart));
+      localStorage.setItem('jayam_cart', JSON.stringify(cart));
+      localStorage.removeItem('miracletree_cart');
     }
   }, [cart, isLoaded]);
   const addToCart = item => {

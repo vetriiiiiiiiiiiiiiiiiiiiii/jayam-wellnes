@@ -1,6 +1,6 @@
 const { Worker } = require("bullmq");
 const { connection, notificationQueue } = require("../services/queue");
-const Order = require("../models/orderModel");
+const prisma = require("../config/prisma");
 
 const orderWorker = new Worker(
   "order-processing-queue",
@@ -9,24 +9,13 @@ const orderWorker = new Worker(
     console.log(`\n⚙️ [OrderWorker] Processing Order: ${orderId}...`);
 
     try {
-      const order = await Order.findOneAndUpdate(
-        { orderId: orderId, status: "Pending" },
-        {
-          status: "Processing",
-          processedByWorker: true,
-          $push: {
-            steps: {
-              status: "Processing",
-              date: new Date(),
-              description: "Order picked up by warehouse.",
-              processedBy: "System Worker",
-            },
-          },
-        },
-        { new: true }
-      );
+      // orderId here is the human-readable order number
+      const { count } = await prisma.order.updateMany({
+        where: { orderNumber: orderId, status: "PENDING" },
+        data: { status: "PROCESSING" },
+      });
 
-      if (order) {
+      if (count > 0) {
         console.log(`[OrderWorker] ✅ Order ${orderId} moved to PROCESSING.`);
 
         await notificationQueue.add("push-user", {

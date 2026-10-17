@@ -34,27 +34,27 @@ export default function FilterSidebar() {
       const params = new URLSearchParams(qs);
       params.delete('maxPrice');
       navigate('?' + params.toString(), { replace: true });
-    } else if (val === '500') {
+    } else if (val === '25') {
       let qs = createQueryString('minPrice', '');
       const params = new URLSearchParams(qs);
-      params.set('maxPrice', '500');
+      params.set('maxPrice', '25');
       navigate('?' + params.toString(), { replace: true });
-    } else if (val === '500-1000') {
-      let qs = createQueryString('minPrice', '500');
+    } else if (val === '25-32') {
+      let qs = createQueryString('minPrice', '25');
       const params = new URLSearchParams(qs);
-      params.set('maxPrice', '1000');
+      params.set('maxPrice', '32');
       navigate('?' + params.toString(), { replace: true });
-    } else if (val === '1000') {
-      let qs = createQueryString('minPrice', '1000');
+    } else if (val === '32') {
+      let qs = createQueryString('minPrice', '32');
       const params = new URLSearchParams(qs);
       params.delete('maxPrice');
       navigate('?' + params.toString(), { replace: true });
     }
   };
 
-  const currentPriceValue = currentMinPrice === '' && currentMaxPrice === '500' ? '500' :
-                            currentMinPrice === '500' && currentMaxPrice === '1000' ? '500-1000' :
-                            currentMinPrice === '1000' && currentMaxPrice === '' ? '1000' : '';
+  const currentPriceValue = currentMinPrice === '' && currentMaxPrice === '25' ? '25' :
+                            currentMinPrice === '25' && currentMaxPrice === '32' ? '25-32' :
+                            currentMinPrice === '32' && currentMaxPrice === '' ? '32' : '';
 
   return (
     <div className="space-y-8 pr-4">
@@ -81,9 +81,9 @@ export default function FilterSidebar() {
           className="w-full p-3 bg-white border border-gray-200 rounded-xl text-sm text-brand-dark/80 focus:ring-brand-green-500 focus:border-brand-green-500 outline-none shadow-sm transition-shadow hover:shadow"
         >
           <option value="">All Prices</option>
-          <option value="500">Under ₹500</option>
-          <option value="500-1000">₹500 - ₹1000</option>
-          <option value="1000">Over ₹1000</option>
+          <option value="25">Under $25</option>
+          <option value="25-32">$25 – $32</option>
+          <option value="32">$32 &amp; above</option>
         </select>
       </div>
       

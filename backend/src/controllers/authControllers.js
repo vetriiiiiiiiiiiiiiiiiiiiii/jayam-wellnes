@@ -1,7 +1,7 @@
-const User = require("../models/userModel"); // Check your spelling: userModal vs userModel
+const prisma = require("../config/prisma");
 const bcrypt = require("bcryptjs");
 const generateTokenAndSetCookie = require("../utils/generateToken");
-const userModal = require("../models/userModel");
+const { serializeUser } = require("../utils/serialize");
 
 // ==============================================
 // 1. SIGNUP
@@ -38,7 +38,7 @@ exports.Signup = async (req, res) => {
     }
 
     // 5. Check duplicate email
-    const existingUser = await User.findOne({ email });
+    const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
@@ -51,21 +51,27 @@ exports.Signup = async (req, res) => {
     const defaultAdminEmail = (process.env.DEFAULT_SUPERADMIN_EMAIL || "").trim().toLowerCase();
     const isSuperAdmin = superAdminEmails.includes(email.toLowerCase()) || email.toLowerCase() === defaultAdminEmail;
 
-    const newUser = await User.create({
-      fullname: finalFullname,
-      username: finalUsername,
-      email,
-      password: hashedPassword,
-      phone,
-      role: isSuperAdmin ? "admin" : "user",
+    if (phone && !/^[6-9]\d{9}$/.test(phone)) {
+      return res.status(400).json({ message: `${phone} is not a valid 10-digit Indian mobile number!` });
+    }
+
+    const newUser = await prisma.user.create({
+      data: {
+        fullname: finalFullname,
+        username: finalUsername,
+        email,
+        password: hashedPassword,
+        phone,
+        role: isSuperAdmin ? "admin" : "user",
+      },
     });
 
-    generateTokenAndSetCookie(res, newUser._id);
+    generateTokenAndSetCookie(res, newUser.id);
 
     res.status(201).json({
       message: "Signup successful",
       user: {
-        id: newUser._id,
+        id: newUser.id,
         email: newUser.email,
         fullname: newUser.fullname,
         username: newUser.username,
@@ -88,20 +94,20 @@ exports.Login = async (req, res) => {
       return res.status(400).json({ message: "Missing fields" });
     }
 
-    const user = await User.findOne({ email });
+    const user = await prisma.user.findUnique({ where: { email } });
     if (!user) return res.status(404).json({ message: "User not found" });
 
     // Verify Password
-    const match = await bcrypt.compare(password, user.password);
+    const match = user.password ? await bcrypt.compare(password, user.password) : false;
     if (!match) return res.status(401).json({ message: "Invalid credentials" });
 
     // Generate Token & Set Cookie
-    generateTokenAndSetCookie(res, user._id);
+    generateTokenAndSetCookie(res, user.id);
 
     res.status(200).json({
       message: "Login successful",
       user: {
-        id: user._id,
+        id: user.id,
         email: user.email,
         fullname: user.fullname,
         username: user.username,
@@ -129,13 +135,15 @@ exports.Logout = (req, res) => {
 // 4. ME (Check Auth Status)
 // ==============================================
 exports.Me = async (req, res) => {
-  const user = await userModal
-    .findById(req.user._id)
-    .select("-password -__v -updatedAt");
+  const user = await prisma.user.findUnique({
+    where: { id: req.user.id },
+    include: { addresses: true },
+  });
+  const { updatedAt, ...safeUser } = serializeUser(user);
 
   res.status(200).json({
     success: true,
-    user,
+    user: safeUser,
   });
 };
 
@@ -153,7 +161,7 @@ exports.resetPassword = async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email });
+    const user = await prisma.user.findUnique({ where: { email } });
 
     if (!user) {
       return res.status(404).json({
@@ -172,7 +180,7 @@ exports.resetPassword = async (req, res) => {
       success: true,
       message: "Password reset instructions sent to email",
       user: {
-        id: user._id,
+        id: user.id,
         fullname: user.fullname,
         username: user.username,
         email: user.email,
@@ -210,12 +218,12 @@ exports.GoogleOneTap = async (req, res) => {
     const user = await findOrCreateGoogleUser(payload);
 
     // C. Set the Cookie (CRITICAL: Matches your existing auth logic)
-    generateTokenAndSetCookie(res, user._id);
+    generateTokenAndSetCookie(res, user.id);
 
     // D. Respond with User Data (Frontend updates state immediately)
     res.status(200).json({
       success: true,
-      user,
+      user: serializeUser(user),
       message: "Google One Tap Login Successful",
     });
   } catch (error) {

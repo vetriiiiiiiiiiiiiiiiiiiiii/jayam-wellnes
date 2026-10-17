@@ -10,9 +10,10 @@ import { checkAuth, getCart, getMyOrders } from "../services/api";
 
 const AppContext = createContext();
 
-export const AppProvider = ({ children }) => {
+export const AppProvider = ({ children, authEnabled = true }) => {
   // --- USER DATA ---
   const [user, setUser] = useState(() => {
+    if (!authEnabled) return null;
     const stored = localStorage.getItem("app_user");
     return stored ? JSON.parse(stored) : null;
   });
@@ -24,7 +25,7 @@ export const AppProvider = ({ children }) => {
     const stored = localStorage.getItem("app_orders");
     return stored ? JSON.parse(stored) : [];
   });
-  const [isValidating, setIsValidating] = useState(true);
+  const [isValidating, setIsValidating] = useState(authEnabled);
 
   // --- MODAL STATE ---
   const [modalState, setModalState] = useState({
@@ -95,6 +96,7 @@ export const AppProvider = ({ children }) => {
 
   // Auth Check
   useEffect(() => {
+    if (!authEnabled) return;
     let isMounted = true;
     const verifyUser = async () => {
       let isChecked = false;
@@ -131,7 +133,7 @@ export const AppProvider = ({ children }) => {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [authEnabled]);
 
   const value = useMemo(
     () => ({

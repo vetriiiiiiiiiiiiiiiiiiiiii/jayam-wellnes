@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
-const User = require("../models/userModel");
+const prisma = require("../config/prisma");
+const { serializeUser } = require("../utils/serialize");
 const generateTokenAndSetCookie = require("../utils/generateToken");
 
 // 1. Change function signature to accept options (admin and staff)
@@ -18,11 +19,12 @@ const protect =
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
       // 4. Find user
-      req.user = await User.findById(decoded.id).select("-password");
+      const user = await prisma.user.findUnique({ where: { id: String(decoded.id) } });
 
-      if (!req.user) {
+      if (!user) {
         return res.status(401).json({ message: "User not found" });
       }
+      req.user = serializeUser(user);
 
       // ============================================================
       // 4.5 AUTO-UPGRADE TO ADMIN IF IN SUPERADMIN_EMAILS
@@ -34,8 +36,8 @@ const protect =
         (superAdminEmails.includes(req.user.email.toLowerCase()) || req.user.email.toLowerCase() === defaultAdminEmail) &&
         req.user.role !== "admin" && req.user.role !== "SUPER_ADMIN"
       ) {
+        await prisma.user.update({ where: { id: req.user.id }, data: { role: "admin" } });
         req.user.role = "admin";
-        await req.user.save();
       }
 
       // ============================================================
@@ -63,7 +65,7 @@ const protect =
       const timeRemaining = decoded.exp - nowInSeconds;
 
       if (timeRemaining < sevenDaysInSeconds) {
-        generateTokenAndSetCookie(res, req.user._id);
+        generateTokenAndSetCookie(res, req.user.id);
       }
 
       next();

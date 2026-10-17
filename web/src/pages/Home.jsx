@@ -3,7 +3,6 @@ import axios from 'axios';
 import HeroSection from '../components/storefront/HeroSection';
 import HorizontalProducts from '../components/storefront/HorizontalProducts';
 import ValuesSection from '../components/storefront/ValuesSection';
-import TestimonialsCarousel from '../components/storefront/TestimonialsCarousel';
 import TrustSection from '../components/storefront/TrustSection';
 
 function Home() {
@@ -26,7 +25,6 @@ function Home() {
       <HeroSection />
       <HorizontalProducts products={products} />
       <ValuesSection />
-      <TestimonialsCarousel />
       <TrustSection />
     </div>
   );

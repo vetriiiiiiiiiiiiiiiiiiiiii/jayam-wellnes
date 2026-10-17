@@ -1,0 +1,305 @@
+// Prisma schema for the Jayam Wellness / Miracle Tree store (PostgreSQL)
+// Docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ==========================================
+// ENUMS
+// ==========================================
+enum Role {
+  user
+  admin
+  staff
+}
+
+enum Gender {
+  Male
+  Female
+  Other
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum Carrier {
+  USPS
+  UPS
+}
+
+enum EnquiryCategory {
+  PRODUCT_QUESTION
+  ORDER_SUPPORT
+  SHIPPING
+  RETURNS
+  WHOLESALE
+  OTHER
+}
+
+enum EnquiryStatus {
+  NEW
+  RESPONDED
+  CLOSED
+}
+
+// ==========================================
+// USERS
+// ==========================================
+model User {
+  id             String    @id @default(cuid())
+  googleId       String?   @unique
+  username       String?
+  fullname       String?
+  age            Int?
+  gender         Gender?
+  email          String    @unique
+  password       String?
+  phone          String?
+  profilePicture String?
+  role           Role      @default(user)
+  addresses      Address[]
+  cart           Cart?
+  orders         Order[]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Address {
+  id       String  @id @default(cuid())
+  userId   String
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  primary  Boolean @default(false)
+  door     String?
+  street   String?
+  area     String?
+  landmark String?
+  city     String
+  district String?
+  state    String
+  country  String  @default("India")
+  zip      String
+  lat      Float?
+  lng      Float?
+
+  @@index([userId])
+}
+
+// ==========================================
+// PRODUCTS
+// ==========================================
+model Product {
+  id                String           @id @default(cuid())
+  name              String
+  slug              String           @unique
+  shortDescription  String?
+  description       String?
+  ingredients       String?
+  usageInstructions String?
+  price             Float
+  compareAtPrice    Float?
+  productType       String? // e.g. BUNDLE, SKINCARE, SUPPLEMENT
+  category          String? // display category, e.g. "Herbal Supplements"
+  tagline           String?
+  highlights        Json? // [{ title, body }] key benefit bullets
+  warnings          String?
+  disclaimer        String?
+  stockQuantity     Int              @default(0)
+  isPublished       Boolean          @default(false)
+  addToHomeScreen   Boolean          @default(false)
+  images            ProductImage[]
+  specs             ProductSpec[]
+  variants          ProductVariant[]
+  reviews           Review[]
+  cartItems         CartItem[]
+  orderItems        OrderItem[]
+  // Bundles: a bundle product lists the products it contains
+  bundleItems       Product[]        @relation("BundleItems")
+  bundledIn         Product[]        @relation("BundleItems")
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  @@index([isPublished, createdAt])
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  position  Int     @default(0)
+
+  @@index([productId])
+}
+
+model ProductSpec {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name      String
+  value     String
+  position  Int     @default(0)
+
+  @@index([productId])
+}
+
+model ProductVariant {
+  id             String  @id @default(cuid())
+  productId      String
+  product        Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name           String?
+  size           String?
+  sku            String?
+  price          Float?
+  compareAtPrice Float?
+  stock          Int     @default(0)
+  position       Int     @default(0)
+
+  @@unique([productId, sku])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  author    String
+  rating    Int
+  title     String?
+  content   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId, createdAt])
+}
+
+// ==========================================
+// CART
+// ==========================================
+model Cart {
+  id        String     @id @default(cuid())
+  userId    String     @unique
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     CartItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model CartItem {
+  id        String  @id @default(cuid())
+  cartId    String
+  cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity  Int     @default(1)
+  color     String?
+  size      String?
+
+  @@index([cartId])
+}
+
+// ==========================================
+// ORDERS
+// ==========================================
+model Order {
+  id                    String        @id @default(cuid())
+  orderNumber           String        @unique
+  userId                String? // null for guest checkout
+  user                  User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  email                 String
+  name                  String
+  address               Json
+  phone                 String?
+  items                 OrderItem[]
+  subtotal              Float         @default(0)
+  shippingFee           Float         @default(0)
+  total                 Float
+  currency              String        @default("USD")
+  paymentMethod         String        @default("STRIPE")
+  // Stripe PaymentIntent that pays for this order (set when checkout starts)
+  stripePaymentIntentId String?       @unique
+  // Unguessable token for the receipt link in emails and on the tracking page
+  accessToken           String        @unique @default(dbgenerated("replace((gen_random_uuid())::text, '-'::text, ''::text)"))
+  carrier               Carrier?
+  trackingNumber        String?
+  paymentStatus         PaymentStatus @default(PENDING)
+  status                OrderStatus   @default(PENDING)
+  paidAt                DateTime?
+  shippedAt             DateTime?
+  deliveredAt           DateTime?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  @@index([userId, createdAt])
+}
+
+model OrderItem {
+  id          String   @id @default(cuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String?
+  product     Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  name        String
+  variantName String?
+  variantSku  String?
+  image       String?
+  quantity    Int
+  price       Float
+
+  @@index([orderId])
+}
+
+// ==========================================
+// CUSTOMER ENQUIRIES (Contact form)
+// ==========================================
+model Enquiry {
+  id          String          @id @default(cuid())
+  name        String
+  email       String
+  phone       String?
+  subject     String
+  category    EnquiryCategory @default(OTHER)
+  orderNumber String?
+  message     String
+  status      EnquiryStatus   @default(NEW)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([status, createdAt])
+}
+
+// ==========================================
+// MEDIA
+// ==========================================
+model Banner {
+  id        String   @id @default(cuid())
+  title     String?
+  imageUrl  String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Gallery {
+  id        String   @id @default(cuid())
+  title     String?
+  imageUrl  String?
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

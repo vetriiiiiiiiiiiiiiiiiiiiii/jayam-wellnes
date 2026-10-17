@@ -1,24 +1,22 @@
-const Review = require('../models/reviewModel');
+const prisma = require('../config/prisma');
+const { serializeReview } = require('../utils/serialize');
 
 // Fetch all reviews for admin dashboard
 exports.getAllReviews = async (req, res) => {
   try {
-    const reviews = await Review.find()
-      .populate('productId', 'name images') // Populate product info to display what they reviewed
-      .sort({ createdAt: -1 });
-    
-    // Map _id to id for frontend
+    const reviews = await prisma.review.findMany({
+      // Include product info to display what they reviewed
+      include: {
+        product: {
+          select: { id: true, name: true, images: { orderBy: { position: 'asc' } } }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
     res.json({
       success: true,
-      data: reviews.map(r => {
-        const obj = r.toObject();
-        obj.id = obj._id.toString();
-        // If product populated, map its id too
-        if (obj.productId && obj.productId._id) {
-          obj.productId.id = obj.productId._id.toString();
-        }
-        return obj;
-      })
+      data: reviews.map(serializeReview)
     });
   } catch (error) {
     console.error('Error fetching reviews:', error);
@@ -32,20 +30,29 @@ exports.updateReview = async (req, res) => {
     const { id } = req.params;
     const { title, content, rating, author } = req.body;
 
-    const updatedReview = await Review.findByIdAndUpdate(
-      id,
-      { title, content, rating, author },
-      { new: true, runValidators: true }
-    );
+    if (rating !== undefined) {
+      const numericRating = Number(rating);
+      if (!Number.isInteger(numericRating) || numericRating < 1 || numericRating > 5) {
+        return res.status(400).json({ error: 'Rating must be between 1 and 5' });
+      }
+    }
 
-    if (!updatedReview) {
+    const existing = await prisma.review.findUnique({ where: { id } });
+    if (!existing) {
       return res.status(404).json({ error: 'Review not found' });
     }
 
-    const obj = updatedReview.toObject();
-    obj.id = obj._id.toString();
+    const updatedReview = await prisma.review.update({
+      where: { id },
+      data: {
+        title,
+        content,
+        rating: rating !== undefined ? Number(rating) : undefined,
+        author
+      }
+    });
 
-    res.json({ success: true, data: obj, message: 'Review updated successfully' });
+    res.json({ success: true, data: serializeReview(updatedReview), message: 'Review updated successfully' });
   } catch (error) {
     console.error('Error updating review:', error);
     res.status(500).json({ error: 'Failed to update review' });
@@ -56,9 +63,9 @@ exports.updateReview = async (req, res) => {
 exports.deleteReview = async (req, res) => {
   try {
     const { id } = req.params;
-    const deletedReview = await Review.findByIdAndDelete(id);
-    
-    if (!deletedReview) {
+    const { count } = await prisma.review.deleteMany({ where: { id } });
+
+    if (count === 0) {
       return res.status(404).json({ error: 'Review not found' });
     }
 

@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/Appcontext';
 import { logout } from '../services/api';
+import { formatPrice } from '../lib/store';
 
 export default function AccountPage() {
   const { user, orders, setUser, setOrders, setCart, isValidating } = useApp();
@@ -46,7 +47,7 @@ export default function AccountPage() {
                       <span className="text-xs text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</span>
                     </div>
                     <div className="flex items-center gap-4">
-                      <span className="font-mono font-medium">₹{order.total?.toFixed(2)}</span>
+                      <span className="font-mono font-medium">{formatPrice(order.total)}</span>
                       <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                         order.status === 'DELIVERED' ? 'bg-green-100 text-green-800' :
                         order.status === 'SHIPPED' ? 'bg-blue-100 text-blue-800' :
@@ -58,7 +59,7 @@ export default function AccountPage() {
                     {order.items?.map(item => (
                       <div key={item.id} className="flex justify-between items-center text-sm">
                         <span className="text-gray-600">{item.quantity}x {item.productName}</span>
-                        <span className="font-mono text-gray-500">₹{item.unitPrice?.toFixed(2)}</span>
+                        <span className="font-mono text-gray-500">{formatPrice(item.unitPrice)}</span>
                       </div>
                     ))}
                   </div>

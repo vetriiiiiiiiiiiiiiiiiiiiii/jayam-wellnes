@@ -10,7 +10,8 @@ export default defineConfig({
   ],
   server: {
     proxy: {
-      '/product': 'http://localhost:5000'
+      // MinIO image proxy only — the trailing slash keeps /products/* page routes in the SPA
+      '/product/': 'http://localhost:5005'
     }
   }
 })

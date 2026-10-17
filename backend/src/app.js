@@ -25,6 +25,8 @@ app.use(cors({
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
 }));
+// Stripe webhooks are signed over the raw body, so this route comes before express.json()
+app.post('/api/payments/stripe/webhook', express.raw({ type: 'application/json' }), require('./controllers/paymentController').stripeWebhook);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -48,6 +50,7 @@ apiRouter.use('/products', productRoutes);
 apiRouter.use('/orders', orderRoutes);
 apiRouter.use('/admin', adminRoutes);
 apiRouter.use('/cart', require('./routes/cart.routes'));
+apiRouter.use('/enquiries', require('./routes/enquiry.routes'));
 
 app.use('/api', apiRouter);
 

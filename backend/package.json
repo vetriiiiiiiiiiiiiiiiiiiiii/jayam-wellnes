@@ -4,38 +4,46 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "concurrently \"nodemon src/server.js\" \"nodemon src/workers/index.js\"",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "postinstall": "prisma generate",
+    "db:start": "prisma dev --name jayam --detach",
+    "db:stop": "prisma dev stop jayam",
+    "db:migrate": "prisma migrate dev && prisma generate",
+    "db:deploy": "prisma migrate deploy",
+    "db:seed": "node scripts/seed.js",
+    "db:studio": "prisma studio"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@prisma/adapter-pg": "^7.10.0",
+    "@prisma/client": "^7.10.0",
     "bcryptjs": "^3.0.3",
     "bullmq": "^6.1.2",
     "concurrently": "^9.2.4",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "google-auth-library": "^10.9.1",
     "ioredis": "^6.0.0",
     "jsonwebtoken": "^9.0.3",
     "minio": "^8.0.7",
-    "mongodb": "^7.5.0",
-    "mongoose": "^9.9.3",
     "morgan": "^1.11.0",
     "multer": "^2.2.0",
     "nodemailer": "^9.0.5",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
-    "razorpay": "^2.9.8",
+    "pg": "^8.23.1",
+    "prisma": "^7.10.0",
     "sharp": "^0.35.3",
+    "stripe": "^23.0.0",
     "winston": "^3.19.0"
   },
   "devDependencies": {
-    "dotenv": "^17.4.2",
     "nodemon": "^3.1.14"
   }
 }

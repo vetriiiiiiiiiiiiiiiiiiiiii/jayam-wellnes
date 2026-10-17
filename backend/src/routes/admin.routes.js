@@ -37,4 +37,9 @@ router.get('/reviews', adminReviewController.getAllReviews);
 router.put('/reviews/:id', adminReviewController.updateReview);
 router.delete('/reviews/:id', adminReviewController.deleteReview);
 
+// Customer Enquiries (contact form)
+const enquiryController = require('../controllers/enquiryController');
+router.get('/enquiries', enquiryController.getAllEnquiries);
+router.put('/enquiries/:id', enquiryController.updateEnquiryStatus);
+
 module.exports = router;

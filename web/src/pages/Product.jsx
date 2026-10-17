@@ -4,6 +4,16 @@ import axios from 'axios';
 import ProductGallery from '../components/storefront/ProductGallery';
 import ProductActions from '../components/storefront/ProductActions';
 import ReviewSection from '../components/storefront/ReviewSection';
+import { CATEGORY_LABELS, FREE_SHIPPING_THRESHOLD, formatPrice } from '../lib/store';
+
+// Required alongside structure/function statements on U.S. dietary supplements
+// Quick-glance trust points, taken from the product information Jayam supplied
+const TRUST_POINTS = {
+  SUPPLEMENT: ['Vegan', 'Non-GMO', 'No fillers or binders', 'GMP-certified', 'Third-party tested'],
+  SKINCARE: ['100% natural oils', 'Cruelty-free', 'No artificial fragrance', 'All skin types'],
+};
+
+const FDA_STATEMENT = '*These statements have not been evaluated by the Food and Drug Administration. This product is not intended to diagnose, treat, cure, or prevent any disease.';
 
 export default function ProductPage() {
   const { slug } = useParams();
@@ -41,35 +51,51 @@ export default function ProductPage() {
   if (!product) return null;
 
   return (
-    <div className="bg-brand-pearl min-h-screen text-brand-dark font-sans">
+    <div className="jayam-product-page min-h-screen text-brand-dark font-sans">
       {/* HERO SECTION */}
       <div className="max-w-[1600px] mx-auto px-6 pt-32 pb-24">
         <div className="flex flex-col lg:flex-row gap-16 lg:gap-32">
           {/* Left: Image Gallery */}
           <div className="lg:w-3/5">
-            <ProductGallery images={product.images} />
+            <ProductGallery images={product.images} product={product} />
           </div>
 
           {/* Right: Details */}
           <div className="lg:w-2/5 relative">
             <div className="sticky top-40 flex flex-col pt-12 pb-32">
-              <h1 className="text-5xl md:text-7xl font-serif tracking-tighter leading-none mb-6">
+              <p className="mb-4 text-xs uppercase tracking-[0.2em] text-brand-forest-700/70">
+                {product.category || CATEGORY_LABELS[product.productType] || 'Wellness'}
+              </p>
+              <h1 className="text-4xl md:text-6xl font-serif tracking-tighter leading-none mb-4">
                 {product.name}
               </h1>
+              {product.tagline && (
+                <p className="font-serif italic text-2xl text-brand-forest-700 mb-6">{product.tagline}</p>
+              )}
 
               <div className="font-mono text-xl mb-6">
-                ₹{selectedVariant ? selectedVariant.price : product.price}
+                {formatPrice(selectedVariant ? selectedVariant.price : product.price)}
                 {((selectedVariant && selectedVariant.compareAtPrice > selectedVariant.price) || (!selectedVariant && product.compareAtPrice > product.price)) && (
                   <span className="text-sm text-gray-400 line-through ml-3">
-                    ₹{selectedVariant ? selectedVariant.compareAtPrice : product.compareAtPrice}
+                    {formatPrice(selectedVariant ? selectedVariant.compareAtPrice : product.compareAtPrice)}
                   </span>
                 )}
               </div>
 
               {product.shortDescription && (
-                <div className="text-lg text-gray-600 mb-8 leading-relaxed font-medium">
+                <div className="text-base text-gray-600 mb-8 leading-relaxed font-normal">
                   {product.shortDescription}
                 </div>
+              )}
+              {TRUST_POINTS[product.productType] && (
+                <ul className="jayam-trust-points" aria-label="Product qualities">
+                  {TRUST_POINTS[product.productType].map((point) => <li key={point}>{point}</li>)}
+                </ul>
+              )}
+              {product.variants?.length > 0 && (
+                <p className="mb-5 text-xs uppercase tracking-widest text-gray-500">
+                  {selectedVariant?.stock > 0 ? `${selectedVariant.stock} available` : 'Currently unavailable'}
+                </p>
               )}
 
               {product.productType === 'BUNDLE' && product.relatedTo && product.relatedTo.length > 0 && (
@@ -95,6 +121,9 @@ export default function ProductPage() {
                 selectedVariant={selectedVariant}
                 onVariantSelect={setSelectedVariant}
               />
+              <p className="mt-6 text-xs uppercase tracking-widest text-gray-500">
+                Free U.S. shipping on orders ${FREE_SHIPPING_THRESHOLD}+ · Ships in 2–7 business days
+              </p>
               
             </div>
           </div>
@@ -102,40 +131,46 @@ export default function ProductPage() {
       </div>
 
       {/* BENEFITS / FULL-DESCRIPTION SECTION */}
-      {product.description && (
-        <section className="bg-white py-24 px-6">
-          <div className="max-w-[800px] mx-auto text-center">
-            <h2 className="text-3xl md:text-5xl font-serif text-brand-dark mb-8 tracking-tighter">Why You'll Love It</h2>
-            <div className="prose prose-lg prose-green mx-auto leading-relaxed text-gray-700 font-light text-xl">
-              {product.description}
-            </div>
+      {(product.description || product.highlights?.length > 0) && (
+        <section className="py-24 px-6 border-t border-gray-200">
+          <div className="max-w-[900px] mx-auto">
+            <h2 className="text-3xl md:text-5xl font-serif text-brand-dark mb-10 tracking-tighter text-center">Product details</h2>
+            {product.description && (
+              <div className="space-y-6 leading-relaxed text-gray-700 font-light text-lg md:text-xl">
+                {product.description.split(/\n\s*\n/).map((paragraph, index) => <p key={index}>{paragraph}</p>)}
+              </div>
+            )}
+            {product.highlights?.length > 0 && (
+              <ul className="mt-16 grid gap-x-12 gap-y-10 md:grid-cols-2">
+                {product.highlights.map(({ title, body }) => (
+                  <li key={title} className="border-t border-gray-200 pt-5">
+                    <h3 className="mb-2 text-sm uppercase tracking-[0.15em] font-semibold text-brand-forest-700">{title}</h3>
+                    <p className="text-gray-700 leading-relaxed">{body}</p>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </section>
       )}
 
       {/* INGREDIENTS SECTION */}
       {product.ingredients && (
-        <section className="bg-brand-green-900 text-white py-24 px-6 relative overflow-hidden">
-          <div className="max-w-[1200px] mx-auto relative z-10">
-            <div className="grid md:grid-cols-2 gap-16 items-center">
-              <div>
-                <h2 className="text-sm uppercase tracking-[0.2em] mb-4 text-brand-green-300">The Formula</h2>
-                <h3 className="text-4xl md:text-6xl font-serif mb-8 leading-tight text-white">Pure ingredients, <br/><span className="italic text-brand-green-200">nothing hidden.</span></h3>
-              </div>
-              <div>
-                <p className="text-xl leading-relaxed text-brand-green-50 font-light">
-                  {product.ingredients}
-                </p>
-              </div>
+        <section className="py-24 px-6 border-t border-gray-200">
+          <div className="max-w-[1200px] mx-auto grid md:grid-cols-2 gap-12 md:gap-16">
+            <div>
+              <h2 className="text-sm uppercase tracking-[0.2em] mb-4 text-brand-forest-700 font-semibold">The formula</h2>
+              <h3 className="text-3xl md:text-5xl font-serif leading-tight">Pure ingredients, <span className="italic text-brand-green-500">nothing hidden.</span></h3>
             </div>
+            <p className="text-lg md:text-xl leading-relaxed text-gray-700 font-light md:pt-10">
+              {product.ingredients}
+            </p>
           </div>
-          {/* Subtle background decoration */}
-          <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-brand-green-800 rounded-full blur-[120px] opacity-50 -translate-y-1/2 translate-x-1/3"></div>
         </section>
       )}
 
       {/* HOW TO USE & SPECS SECTION */}
-      <section className="bg-brand-pearl py-24 px-6">
+      <section className="py-24 px-6 border-t border-gray-200">
         <div className="max-w-[1200px] mx-auto">
           <div className="grid md:grid-cols-2 gap-20">
             {product.usageInstructions && (
@@ -162,8 +197,27 @@ export default function ProductPage() {
         </div>
       </section>
 
+      {/* SAFETY & DISCLAIMERS */}
+      {(product.warnings || product.disclaimer) && (
+        <section className="py-16 px-6 border-t border-gray-200">
+          <div className="max-w-[900px] mx-auto grid gap-10 md:grid-cols-2 text-sm leading-relaxed text-gray-600">
+            {product.warnings && (
+              <div>
+                <h2 className="mb-3 text-xs uppercase tracking-[0.2em] font-semibold text-brand-forest-700">Warnings &amp; precautions</h2>
+                <p>{product.warnings}</p>
+              </div>
+            )}
+            <div>
+              <h2 className="mb-3 text-xs uppercase tracking-[0.2em] font-semibold text-brand-forest-700">Please note</h2>
+              {product.productType === 'SUPPLEMENT' && <p className="mb-3">{FDA_STATEMENT}</p>}
+              {product.disclaimer && <p>{product.disclaimer}</p>}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* REVIEWS SECTION */}
-      <section className="bg-white py-24 px-6 border-t border-gray-100">
+      <section className="py-24 px-6 border-t border-gray-200">
         <div className="max-w-[1200px] mx-auto">
           <h2 className="text-4xl md:text-5xl font-serif text-center mb-16 tracking-tighter">Customer Reviews</h2>
           <ReviewSection productId={product.id} reviews={product.reviews || []} />

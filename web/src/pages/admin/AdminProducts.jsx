@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import { formatPrice } from '../../lib/store';
 
 export default function AdminProducts() {
   const [products, setProducts] = useState([]);
@@ -146,6 +147,7 @@ export default function AdminProducts() {
             <Link to="/admin/products" className="block text-brand-dark font-bold transition-colors">Products</Link>
             <Link to="/admin/users" className="block text-gray-500 hover:text-brand-dark transition-colors">Users</Link>
             <Link to="/admin/reviews" className="block text-gray-500 hover:text-brand-dark transition-colors">Reviews</Link>
+            <Link to="/admin/enquiries" className="block text-gray-500 hover:text-brand-dark transition-colors">Enquiries</Link>
          </nav>
       </div>
 
@@ -192,7 +194,7 @@ export default function AdminProducts() {
                        <p className="text-gray-900 font-medium">{product.name}</p>
                        <p className="text-xs text-gray-400">{product.slug}</p>
                     </td>
-                    <td className="px-6 py-4 text-gray-900 font-medium">₹{product.price}</td>
+                    <td className="px-6 py-4 text-gray-900 font-medium">{formatPrice(product.price)}</td>
                     <td className="px-6 py-4 text-gray-600">{product.stockQuantity || 0}</td>
                     <td className="px-6 py-4">
                       {product.isPublished ? (
@@ -243,8 +245,8 @@ export default function AdminProducts() {
                 </div>
                 <div className="flex gap-4">
                    <div className="flex-1">
-                      <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Price (₹)</label>
-                      <input required type="number" name="price" value={formData.price} onChange={handleChange} className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-forest-700" />
+                      <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Price ($)</label>
+                      <input required type="number" step="0.01" min="0" name="price" value={formData.price} onChange={handleChange} className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-forest-700" />
                    </div>
                    <div className="flex-1">
                       <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Stock</label>

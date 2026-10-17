@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { formatPrice } from '../../lib/store';
 
 export default function AdminDashboard() {
   const [data, setData] = useState(null);
@@ -39,6 +40,7 @@ export default function AdminDashboard() {
             <Link to="/admin/products" className="block text-gray-500 hover:text-brand-dark transition-colors">Products</Link>
             <Link to="/admin/users" className="block text-gray-500 hover:text-brand-dark transition-colors">Users</Link>
             <Link to="/admin/reviews" className="block text-gray-500 hover:text-brand-dark transition-colors">Reviews</Link>
+            <Link to="/admin/enquiries" className="block text-gray-500 hover:text-brand-dark transition-colors">Enquiries</Link>
          </nav>
       </div>
 
@@ -51,11 +53,11 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
           <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">Total Revenue</p>
-          <h3 className="text-3xl font-serif text-gray-900 mt-2">₹{data.totalRevenue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</h3>
+          <h3 className="text-3xl font-serif text-gray-900 mt-2">{formatPrice(data.totalRevenue)}</h3>
         </div>
         <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
           <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">Average Order</p>
-          <h3 className="text-3xl font-serif text-gray-900 mt-2">₹{(data.totalOrders > 0 ? data.totalRevenue / data.totalOrders : 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</h3>
+          <h3 className="text-3xl font-serif text-gray-900 mt-2">{formatPrice((data.totalOrders > 0 ? data.totalRevenue / data.totalOrders : 0))}</h3>
         </div>
         <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
           <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">Total Orders</p>
@@ -94,7 +96,7 @@ export default function AdminDashboard() {
                     <td className="px-6 py-4 font-mono text-gray-600">#{order.orderNumber}</td>
                     <td className="px-6 py-4 text-gray-900 font-medium">{order.name || "Guest"}</td>
                     <td className="px-6 py-4 text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</td>
-                    <td className="px-6 py-4 text-gray-900">₹{order.total.toFixed(2)}</td>
+                    <td className="px-6 py-4 text-gray-900">{formatPrice(order.total)}</td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
                         order.status === "PENDING" ? "bg-yellow-50 text-yellow-700 border border-yellow-200" :

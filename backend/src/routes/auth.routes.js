@@ -46,7 +46,7 @@ router.get(
     console.log("[Auth Backend] Google authentication successful for user:", req.user.email);
 
     // 1. Use Utility to Set Cookie
-    generateTokenAndSetCookie(res, req.user._id);
+    generateTokenAndSetCookie(res, req.user.id);
     console.log("[Auth Backend] Cookie set for user. Redirecting to frontend.");
 
     // 2. Redirect to Frontend (Dashboard/Home)

@@ -1,7 +1,12 @@
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
-const User = require("../models/userModel");
+const prisma = require("../config/prisma");
 
 module.exports = (passport) => {
+  if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+    console.warn("⚠️  GOOGLE_CLIENT_ID/GOOGLE_CLIENT_SECRET not set — Google login disabled");
+    return;
+  }
+
   passport.use(
     new GoogleStrategy(
       {
@@ -20,7 +25,7 @@ module.exports = (passport) => {
               : null;
 
           // 1. Check existing user by Google ID
-          let user = await User.findOne({ googleId: profile.id });
+          let user = await prisma.user.findUnique({ where: { googleId: profile.id } });
           if (user) {
             console.log("User found by Google ID:", user.email);
             return done(null, user);
@@ -28,19 +33,18 @@ module.exports = (passport) => {
 
           // 2. Check existing user by Email (Account Linking)
           if (profile.emails && profile.emails.length > 0) {
-            user = await User.findOne({ email: profile.emails[0].value });
+            user = await prisma.user.findUnique({ where: { email: profile.emails[0].value } });
             if (user) {
               console.log("User found by Email. Linking account...");
 
-              // Link Google ID
-              user.googleId = profile.id;
-
-              // OPTIONAL: If user has no profile picture yet, use the Google one
-              if (!user.profilePicture && googlePhoto) {
-                user.profilePicture = googlePhoto;
-              }
-
-              await user.save();
+              // Link Google ID (and use the Google photo if the user has none yet)
+              user = await prisma.user.update({
+                where: { id: user.id },
+                data: {
+                  googleId: profile.id,
+                  ...(!user.profilePicture && googlePhoto && { profilePicture: googlePhoto }),
+                },
+              });
               return done(null, user);
             }
           }
@@ -72,8 +76,8 @@ module.exports = (passport) => {
             newUserObj.profilePicture
           );
 
-          const newUser = await User.create(newUserObj);
-          console.log("USER CREATED SUCCESSFULLY:", newUser._id);
+          const newUser = await prisma.user.create({ data: newUserObj });
+          console.log("USER CREATED SUCCESSFULLY:", newUser.id);
 
           return done(null, newUser);
         } catch (err) {

@@ -60,13 +60,6 @@ api.interceptors.response.use(
     // C. Handle specific status codes
     if (status === 401) {
       toast.error(backendMessage);
-
-      setTimeout(() => {
-        // Prevent redirect loop if already on login page
-        if (window.location.pathname !== "/login") {
-          window.location.href = "/login";
-        }
-      }, 1000);
     } else if (status === 403) {
       toast.error(backendMessage);
     } else if (status === 404) {
@@ -637,12 +630,13 @@ export async function deleteAddress(id) {
 // A. Create Order
 export async function createOrder(orderData) {
   try {
-    // orderData should include: items, addressId, paymentMethod, totalAmount
+    // orderData should include: email, name, phone, address, items
     const response = await api.post("/orders", orderData);
     return {
       success: true,
       orderId: response.data.orderId,
-      razorpayOrderId: response.data.razorpayOrderId,
+      orderNumber: response.data.orderNumber,
+      clientSecret: response.data.clientSecret,
       amount: response.data.amount,
       currency: response.data.currency,
       order: response.data.order,
@@ -655,16 +649,28 @@ export async function createOrder(orderData) {
   }
 }
 
-// A2. Verify Payment
-export async function verifyPayment(paymentData) {
+// A2. Confirm a Stripe payment after checkout returns (the webhook also does this)
+export async function confirmOrderPayment(orderNumber, paymentIntentId) {
   try {
-    const response = await api.post("/orders/verify", paymentData);
-    toast.success("Payment verified successfully!");
-    return { success: true };
+    const response = await api.post("/orders/confirm-payment", { orderNumber, paymentIntentId });
+    return { success: true, paymentStatus: response.data.paymentStatus, order: response.data.order };
   } catch (error) {
     return {
       success: false,
-      message: error.response?.data?.message || "Failed to verify payment",
+      message: error.response?.data?.message || "We could not check your payment",
+    };
+  }
+}
+
+// A3. Public order tracking by order number + email
+export async function trackOrder(orderNumber, email) {
+  try {
+    const response = await api.post("/orders/track", { orderNumber, email });
+    return { success: true, order: response.data.order };
+  } catch (error) {
+    return {
+      success: false,
+      message: error.response?.data?.message || "We could not find that order",
     };
   }
 }
@@ -722,17 +728,18 @@ export async function cancelOrder(id, reason) {
 // --- ADMIN ORDER OPERATIONS ---
 
 // E. Admin Update Order Status
-export async function adminUpdateOrderStatus(
-  id,
-  status,
-  trackingNumber = null
-) {
+export async function adminUpdateOrderStatus(id, status, shipment = null) {
   try {
-    const payload = { status };
-    if (trackingNumber) payload.trackingNumber = trackingNumber;
+    const payload = {};
+    if (status) payload.status = status;
+    if (shipment) Object.assign(payload, shipment); // { carrier, trackingNumber }
 
     const response = await api.put(`/admin/order/${id}`, payload);
-    toast.success("Order status updated");
+    if (response.data.emailQueued === false) {
+      toast.error("Order updated, but the customer email could not be queued");
+    } else {
+      toast.success(response.data.emailQueued ? "Order updated — customer notified" : "Order status updated");
+    }
     return {
       success: true,
       order: response.data.order,
@@ -1015,3 +1022,23 @@ export const deleteAdminReview = async (id) => {
 };
 
 export default api;
+
+// Admin: Customer enquiries from the contact form
+export const getAdminEnquiries = async (status) => {
+  try {
+    const response = await api.get("/admin/enquiries", { params: status ? { status } : {} });
+    return { success: true, data: response.data.data };
+  } catch (error) {
+    return { success: false, message: error.response?.data?.message || "Failed to load enquiries" };
+  }
+};
+
+export const updateAdminEnquiryStatus = async (id, status) => {
+  try {
+    await api.put(`/admin/enquiries/${id}`, { status });
+    return { success: true };
+  } catch (error) {
+    toast.error(error.response?.data?.message || "Failed to update enquiry");
+    return { success: false };
+  }
+};

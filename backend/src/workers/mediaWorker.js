@@ -1,5 +1,5 @@
 const { Worker } = require("bullmq");
-const mongoose = require("mongoose");
+const prisma = require("../config/prisma");
 const { connection } = require("../services/queue");
 const sharp = require("sharp");
 const path = require("path");
@@ -8,13 +8,32 @@ const minio = require("../config/minio");
 
 sharp.cache(false);
 
-// Models
-require("../models/galleryModel");
-require("../models/userModel");
-require("../models/productModel");
-require("../models/bannerModel");
-
 const BUCKET = process.env.MINIO_BUCKET_NAME;
+
+// Prisma delegate for each model name used in job data
+const delegates = {
+  Product: prisma.product,
+  User: prisma.user,
+  Gallery: prisma.gallery,
+  Banner: prisma.banner,
+};
+
+// Add an uploaded file to a list field (only Product.images is a list)
+const pushMedia = async (modelName, fieldName, fileId, storedPath) => {
+  if (modelName === "Product" && fieldName === "images") {
+    const position = await prisma.productImage.count({ where: { productId: fileId } });
+    await prisma.productImage.create({ data: { productId: fileId, url: storedPath, position } });
+    return;
+  }
+  throw new Error(`Unsupported push target ${modelName}.${fieldName}`);
+};
+
+// Replace a single-file field (e.g. User.profilePicture, Gallery.imageUrl)
+const setMedia = async (modelName, fieldName, fileId, storedPath) => {
+  const data = { [fieldName]: storedPath };
+  if (modelName === "Gallery") data.status = "completed";
+  await delegates[modelName].update({ where: { id: fileId }, data });
+};
 
 const worker = new Worker(
   "media-processing",
@@ -102,15 +121,10 @@ const worker = new Worker(
         storedPath = `/${objectKey}`;
 
         // DB update (MinIO)
-        const Model = mongoose.model(modelName);
         if (operation === "push") {
-          let pushData = storedPath;
-          if (modelName === "Product" && fieldName === "images") {
-            pushData = { url: storedPath, position: 0 };
-          }
-          await Model.findByIdAndUpdate(fileId, { $push: { [fieldName]: pushData } });
+          await pushMedia(modelName, fieldName, fileId, storedPath);
         } else {
-          const doc = await Model.findById(fileId);
+          const doc = await delegates[modelName].findUnique({ where: { id: fileId } });
           if (doc && doc[fieldName]) {
             const oldPath = doc[fieldName];
             // Assuming storedPath is /bucket/objectKey
@@ -120,9 +134,7 @@ const worker = new Worker(
               try { await minio.removeObject(BUCKET, oldKey); } catch (e) {}
             }
           }
-          const update = { [fieldName]: storedPath };
-          if (modelName === "Gallery") update.status = "completed";
-          await Model.findByIdAndUpdate(fileId, update);
+          await setMedia(modelName, fieldName, fileId, storedPath);
         }
 
       } else {
@@ -132,17 +144,10 @@ const worker = new Worker(
         fs.mkdirSync(path.dirname(finalDest), { recursive: true });
         fs.copyFileSync(tempOutput, finalDest);
 
-        const Model = mongoose.model(modelName);
         if (operation === "push") {
-          let pushData = storedPath;
-          if (modelName === "Product" && fieldName === "images") {
-            pushData = { url: storedPath, position: 0 };
-          }
-          await Model.findByIdAndUpdate(fileId, { $push: { [fieldName]: pushData } });
+          await pushMedia(modelName, fieldName, fileId, storedPath);
         } else {
-          const update = { [fieldName]: storedPath };
-          if (modelName === "Gallery") update.status = "completed";
-          await Model.findByIdAndUpdate(fileId, update);
+          await setMedia(modelName, fieldName, fileId, storedPath);
         }
       }
 

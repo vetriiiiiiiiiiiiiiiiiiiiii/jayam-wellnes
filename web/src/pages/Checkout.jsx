@@ -1,221 +1,258 @@
-import React, { useEffect } from 'react';
+import { useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { useCart } from '../components/storefront/CartProvider';
-import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-import { createOrder, verifyPayment } from '../services/api';
+import { createOrder } from '../services/api';
+import { FREE_SHIPPING_THRESHOLD, US_STATES, formatPrice, shippingFor } from '../lib/store';
 
-import { useApp } from '../context/Appcontext';
+const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+const stripePromise = publishableKey ? loadStripe(publishableKey) : null;
 
-function loadScript(src) {
-  return new Promise((resolve) => {
-    const script = document.createElement('script');
-    script.src = src;
-    script.onload = () => {
-      resolve(true);
-    };
-    script.onerror = () => {
-      resolve(false);
-    };
-    document.body.appendChild(script);
-  });
+const stripeAppearance = {
+  theme: 'flat',
+  variables: {
+    colorPrimary: '#20372b',
+    colorText: '#20372b',
+    colorBackground: '#f2efe6',
+    colorDanger: '#7b3026',
+    fontFamily: 'Manrope, system-ui, sans-serif',
+    borderRadius: '0px',
+  },
+  rules: {
+    '.Input': { border: '1px solid #c8c4b8' },
+    '.Tab': { border: '1px solid #d2cec2' },
+  },
+};
+
+// Card, Apple Pay, Google Pay (and any other methods enabled in the Stripe Dashboard)
+function PaymentStep({ order, total, details, onEdit }) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const navigate = useNavigate();
+  const [paying, setPaying] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const handlePay = async (event) => {
+    event.preventDefault();
+    if (!stripe || !elements) return;
+    setPaying(true);
+    setErrorMessage('');
+
+    const successPath = `/checkout/success?order=${encodeURIComponent(order.orderNumber)}`;
+    const { error, paymentIntent } = await stripe.confirmPayment({
+      elements,
+      confirmParams: {
+        // Redirect-based methods (e.g. PayPal) come back here
+        return_url: `${window.location.origin}${successPath}`,
+        payment_method_data: {
+          billing_details: { name: details.name, email: details.email, phone: details.phone || undefined },
+        },
+      },
+      redirect: 'if_required',
+    });
+
+    if (error) {
+      setErrorMessage(error.message || 'Your payment could not be completed. Please try again.');
+      setPaying(false);
+      return;
+    }
+    navigate(`${successPath}&payment_intent=${encodeURIComponent(paymentIntent.id)}`);
+  };
+
+  const address = details.address;
+  return (
+    <form onSubmit={handlePay} className="jayam-checkout-form">
+      <section>
+        <h2>Shipping to</h2>
+        <div className="jayam-checkout-review">
+          <p>
+            {details.name} · {details.email}<br />
+            {address.street}{address.street2 ? `, ${address.street2}` : ''}<br />
+            {address.city}, {address.state} {address.zipCode}
+          </p>
+          <button type="button" onClick={onEdit} disabled={paying}>Edit</button>
+        </div>
+      </section>
+      <section>
+        <h2>Payment</h2>
+        <p className="jayam-checkout-note">All payments are processed securely by Stripe in U.S. dollars.</p>
+        <PaymentElement
+          options={{
+            layout: 'tabs',
+            fields: { billingDetails: { name: 'never', email: 'never', phone: 'never' } },
+          }}
+        />
+      </section>
+      {errorMessage && <p className="jayam-checkout-error" role="alert">{errorMessage}</p>}
+      <button className="jayam-place-order" type="submit" disabled={!stripe || paying}>
+        {paying ? 'Processing…' : `Pay ${formatPrice(total)}`}
+      </button>
+      <p className="jayam-checkout-note">Order {order.orderNumber}</p>
+    </form>
+  );
 }
 
 export default function CheckoutPage() {
-  const { cart, cartTotal, cartCount, clearCart } = useCart();
-  const { refreshOrders } = useApp();
+  const { cart, cartTotal, cartCount } = useCart();
   const [loading, setLoading] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('RAZORPAY');
-  const navigate = useNavigate();
+  const [errorMessage, setErrorMessage] = useState('');
+  const [details, setDetails] = useState(null);
+  const [startedOrder, setOrder] = useState(null);
+  const shipping = shippingFor(cartTotal);
+  const orderTotal = Math.round((cartTotal + shipping) * 100) / 100;
 
-  useEffect(() => {
-    loadScript('https://checkout.razorpay.com/v1/checkout.js');
-  }, []);
+  // If the bag changes after payment has started, the amount is stale: start over
+  const cartSignature = useMemo(() => cart.map((item) => `${item.id}x${item.quantity}`).join('|'), [cart]);
+  const [paymentCartSignature, setPaymentCartSignature] = useState(null);
+  const order = startedOrder && paymentCartSignature === cartSignature ? startedOrder : null;
+
+  const handleDetails = async (event) => {
+    event.preventDefault();
+    setErrorMessage('');
+
+    const form = new FormData(event.currentTarget);
+    const nextDetails = {
+      email: form.get('email'),
+      name: form.get('name'),
+      phone: form.get('phone'),
+      address: {
+        street: form.get('street'),
+        street2: form.get('street2'),
+        city: form.get('city'),
+        state: form.get('state'),
+        zipCode: form.get('zipCode'),
+        country: 'United States',
+      },
+    };
+    setDetails(nextDetails);
+
+    if (!stripePromise) {
+      setErrorMessage('Online payment is not set up yet. Please check back soon or contact us to order.');
+      return;
+    }
+
+    setLoading(true);
+    const result = await createOrder({
+      ...nextDetails,
+      items: cart.map((item) => ({
+        productId: item.productId || item.id.split(':')[0],
+        variantSku: item.variantSku,
+        quantity: item.quantity,
+      })),
+    });
+    setLoading(false);
+
+    if (!result.success || !result.clientSecret) {
+      setErrorMessage(result.message || 'We could not start your payment. Please try again.');
+      return;
+    }
+    setPaymentCartSignature(cartSignature);
+    setOrder({ orderNumber: result.orderNumber, clientSecret: result.clientSecret, total: result.amount });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   if (cartCount === 0) {
     return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center bg-brand-pearl pt-24">
-        <h1 className="text-3xl font-serif text-brand-forest-700 mb-4">Your cart is empty</h1>
-        <button onClick={() => navigate('/shop')} className="px-8 py-3 bg-brand-forest-700 text-white rounded-full text-sm uppercase tracking-widest">
-          Continue Shopping
-        </button>
-      </div>
+      <main className="jayam-checkout-empty">
+        <p className="jayam-eyebrow">Your bag is waiting</p>
+        <h1>Your bag is<br /><em>empty.</em></h1>
+        <p>Take a look at our thoughtfully chosen wellness essentials.</p>
+        <Link to="/shop" className="jayam-primary-link">Continue shopping <span aria-hidden="true">↗</span></Link>
+      </main>
     );
   }
 
-  const handleCheckoutSuccess = async () => {
-    console.log('[Checkout] Success! Clearing cart and refreshing orders...');
-    clearCart();
-    localStorage.removeItem('miracletree_cart');
-    await refreshOrders();
-    navigate('/checkout/success');
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    const formData = new FormData(e.currentTarget);
-    try {
-      const orderData = {
-        email: formData.get('email'),
-        name: formData.get('name'),
-        address: {
-          street: formData.get('street'),
-          city: formData.get('city'),
-          state: formData.get('state'),
-          zipCode: formData.get('zipCode'),
-          country: formData.get('country'),
-        },
-        items: cart,
-        total: cartTotal,
-        paymentMethod: paymentMethod,
-      };
-
-      console.log('[Checkout] Initiating order creation:', orderData);
-      const res = await createOrder(orderData);
-      console.log('[Checkout] Order creation response:', res);
-      
-      if (!res.success) {
-         console.error('[Checkout] Order creation failed:', res.message);
-         alert('Checkout failed: ' + res.message);
-         setLoading(false);
-         return;
-      }
-
-      if (paymentMethod === 'RAZORPAY' && res.razorpayOrderId) {
-        console.log('[Checkout] Initializing Razorpay modal with order ID:', res.razorpayOrderId);
-        const options = {
-          key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_placeholder', // Enter the Key ID generated from the Dashboard
-          amount: res.amount * 100,
-          currency: res.currency,
-          name: 'MiracleTree',
-          description: 'Purchase Checkout',
-          order_id: res.razorpayOrderId,
-          handler: async function (response) {
-            console.log('[Checkout] Razorpay payment success handler called. Response:', response);
-            const paymentData = {
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_signature: response.razorpay_signature,
-              orderId: res.orderId
-            };
-            console.log('[Checkout] Verifying payment with backend:', paymentData);
-            const verifyRes = await verifyPayment(paymentData);
-            console.log('[Checkout] Payment verification response:', verifyRes);
-            if (verifyRes.success) {
-              await handleCheckoutSuccess();
-            } else {
-              console.error('[Checkout] Payment verification failed on backend');
-              alert('Payment Verification Failed!');
-            }
-          },
-          prefill: {
-            name: formData.get('name'),
-            email: formData.get('email'),
-          },
-          theme: {
-            color: '#1c3d31', // brand-forest-700
-          },
-          modal: {
-            ondismiss: function() {
-              console.log('[Checkout] Razorpay modal dismissed by user');
-              setLoading(false);
-            }
-          }
-        };
-        const paymentObject = new window.Razorpay(options);
-        
-        paymentObject.on('payment.failed', function (response){
-          console.error('[Checkout] Razorpay payment.failed event triggered:', response.error);
-          alert(`Payment Failed: ${response.error.description}`);
-          setLoading(false);
-        });
-
-        paymentObject.open();
-      } else {
-         console.log('[Checkout] COD selected or Razorpay not configured. Proceeding to success.');
-         await handleCheckoutSuccess();
-      }
-    } catch (err) {
-      console.error('[Checkout] Unexpected error during checkout:', err);
-      alert('Checkout failed. Please try again.');
-      setLoading(false);
-    }
-  };
+  const value = (name) => details?.[name] ?? '';
+  const addressValue = (name) => details?.address?.[name] ?? '';
 
   return (
-    <div className="min-h-screen bg-brand-pearl pt-32 pb-24">
-      <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16">
-        <div>
-          <h1 className="text-4xl font-serif text-brand-forest-700 mb-8">Checkout</h1>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-4">
-              <h2 className="text-sm font-medium uppercase tracking-widest text-brand-forest-700">Contact Information</h2>
-              <input type="email" name="email" placeholder="Email Address *" required className="w-full p-4 bg-white border border-gray-200 rounded-xl focus:border-brand-green-500 outline-none" />
-              <input type="text" name="name" placeholder="Full Name *" required className="w-full p-4 bg-white border border-gray-200 rounded-xl focus:border-brand-green-500 outline-none" />
-            </div>
-
-            <div className="space-y-4 pt-6">
-              <h2 className="text-sm font-medium uppercase tracking-widest text-brand-forest-700">Shipping Address</h2>
-              <input type="text" name="street" placeholder="Street Address *" required className="w-full p-4 bg-white border border-gray-200 rounded-xl focus:border-brand-green-500 outline-none" />
-              <div className="grid grid-cols-2 gap-4">
-                <input type="text" name="city" placeholder="City *" required className="w-full p-4 bg-white border border-gray-200 rounded-xl focus:border-brand-green-500 outline-none" />
-                <input type="text" name="state" placeholder="State *" required className="w-full p-4 bg-white border border-gray-200 rounded-xl focus:border-brand-green-500 outline-none" />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <input type="text" name="zipCode" placeholder="ZIP / Postal Code *" required className="w-full p-4 bg-white border border-gray-200 rounded-xl focus:border-brand-green-500 outline-none" />
-                <input type="text" name="country" placeholder="Country *" required className="w-full p-4 bg-white border border-gray-200 rounded-xl focus:border-brand-green-500 outline-none" />
-              </div>
-            </div>
-
-            <div className="space-y-4 pt-6">
-              <h2 className="text-sm font-medium uppercase tracking-widest text-brand-forest-700">Payment Options</h2>
-              <div className="flex flex-col space-y-3">
-                <label className="flex items-center space-x-3 p-4 bg-white border border-gray-200 rounded-xl cursor-pointer">
-                  <input type="radio" name="paymentMethod" value="RAZORPAY" checked={paymentMethod === 'RAZORPAY'} onChange={(e) => setPaymentMethod(e.target.value)} className="w-5 h-5 text-brand-forest-700" />
-                  <span className="font-medium text-gray-800">Pay Online (Razorpay)</span>
+    <main className="jayam-checkout">
+      <header className="jayam-checkout-heading">
+        <p className="jayam-eyebrow">{order ? 'Step 2 of 2' : 'Step 1 of 2'}</p>
+        <h1>Checkout</h1>
+      </header>
+      <div className="jayam-checkout-layout">
+        {order ? (
+          <Elements stripe={stripePromise} options={{ clientSecret: order.clientSecret, appearance: stripeAppearance }} key={order.clientSecret}>
+            <PaymentStep order={order} total={order.total} details={details} onEdit={() => setOrder(null)} />
+          </Elements>
+        ) : (
+          <form onSubmit={handleDetails} className="jayam-checkout-form">
+            <section>
+              <h2>Contact information</h2>
+              <label>Email address
+                <input type="email" name="email" autoComplete="email" required defaultValue={value('email')} />
+              </label>
+              <label>Full name
+                <input type="text" name="name" autoComplete="name" required defaultValue={value('name')} />
+              </label>
+              <label>Phone <small>(optional, for delivery updates)</small>
+                <input type="tel" name="phone" autoComplete="tel" defaultValue={value('phone')} />
+              </label>
+            </section>
+            <section>
+              <h2>Shipping address</h2>
+              <p className="jayam-checkout-note">We ship within the United States, including U.S. territories.</p>
+              <label>Street address
+                <input type="text" name="street" autoComplete="address-line1" required defaultValue={addressValue('street')} />
+              </label>
+              <label>Apartment, suite, etc. <small>(optional)</small>
+                <input type="text" name="street2" autoComplete="address-line2" defaultValue={addressValue('street2')} />
+              </label>
+              <div className="jayam-checkout-fields">
+                <label>City
+                  <input type="text" name="city" autoComplete="address-level2" required defaultValue={addressValue('city')} />
                 </label>
-                <label className="flex items-center space-x-3 p-4 bg-white border border-gray-200 rounded-xl cursor-pointer">
-                  <input type="radio" name="paymentMethod" value="COD" checked={paymentMethod === 'COD'} onChange={(e) => setPaymentMethod(e.target.value)} className="w-5 h-5 text-brand-forest-700" />
-                  <span className="font-medium text-gray-800">Cash on Delivery (COD)</span>
+                <label>State / territory
+                  <select name="state" autoComplete="address-level1" required defaultValue={addressValue('state')}>
+                    <option value="" disabled>Select</option>
+                    {US_STATES.map(([code, label]) => <option key={code} value={code}>{label}</option>)}
+                  </select>
                 </label>
               </div>
-            </div>
-
-            <button disabled={loading} type="submit" className="w-full bg-brand-forest-700 text-white py-5 rounded-xl font-bold uppercase tracking-widest hover:bg-brand-forest-900 transition-colors disabled:opacity-50 mt-8">
-              {loading ? 'Processing...' : (paymentMethod === 'RAZORPAY' ? `Pay ₹${cartTotal.toFixed(2)}` : 'Confirm Order')}
+              <div className="jayam-checkout-fields">
+                <label>ZIP code
+                  <input type="text" name="zipCode" autoComplete="postal-code" inputMode="numeric" pattern="\d{5}(-\d{4})?" title="5-digit ZIP code" required defaultValue={addressValue('zipCode')} />
+                </label>
+                <label>Country
+                  <input type="text" value="United States" readOnly aria-readonly="true" />
+                </label>
+              </div>
+            </section>
+            <p className="jayam-checkout-note">
+              Next, pay securely with card, Apple Pay or Google Pay. We’ll email your order confirmation and receipt, and tracking details when it ships.
+            </p>
+            {errorMessage && <p className="jayam-checkout-error" role="alert">{errorMessage}</p>}
+            <button className="jayam-place-order" type="submit" disabled={loading}>
+              {loading ? 'Please wait…' : 'Continue to payment'}
             </button>
+            <Link to="/shop" className="jayam-back-to-shop">← Continue shopping</Link>
           </form>
-        </div>
+        )}
 
-        <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm h-fit">
-          <h2 className="text-sm font-medium uppercase tracking-widest text-brand-forest-700 mb-6">Order Summary</h2>
-          <div className="space-y-6 mb-8">
-            {cart.map(item => (
-              <div key={item.id} className="flex justify-between items-center">
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden relative">
-                    <img src={item.image} alt={item.name} className="object-cover w-full h-full" />
-                    <span className="absolute -top-2 -right-2 bg-brand-forest-700 text-white w-5 h-5 flex items-center justify-center rounded-full text-[10px]">{item.quantity}</span>
-                  </div>
-                  <span className="font-serif text-brand-forest-700">{item.name}</span>
-                </div>
-                <span className="font-mono text-sm text-gray-600">₹{(item.price * item.quantity).toFixed(2)}</span>
+        <aside className="jayam-checkout-summary">
+          <h2>Your order</h2>
+          <div className="jayam-order-lines">
+            {cart.map((item) => (
+              <div className="jayam-order-line" key={item.id}>
+                {item.image ? <img src={item.image} alt="" /> : <span className="jayam-order-image-placeholder">J</span>}
+                <div><strong>{item.name}</strong><span>Qty {item.quantity}</span></div>
+                <b>{formatPrice(item.price * item.quantity)}</b>
               </div>
             ))}
           </div>
-          <div className="border-t border-gray-100 pt-6 space-y-4">
-            <div className="flex justify-between text-sm text-gray-500">
-              <span>Subtotal</span><span className="font-mono">₹{cartTotal.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-sm text-gray-500">
-              <span>Shipping</span><span className="font-mono">Free</span>
-            </div>
-            <div className="flex justify-between font-serif text-xl text-brand-forest-700 pt-4 border-t border-gray-100">
-              <span>Total</span><span>₹{cartTotal.toFixed(2)}</span>
-            </div>
-          </div>
-        </div>
+          <div className="jayam-order-total"><span>Subtotal</span><b>{formatPrice(cartTotal)}</b></div>
+          <div className="jayam-order-total"><span>Shipping</span><b>{shipping === 0 ? 'Free' : formatPrice(shipping)}</b></div>
+          <div className="jayam-order-total"><span>Total</span><b>{formatPrice(orderTotal)}</b></div>
+          <p>
+            {shipping === 0
+              ? 'Your order qualifies for free U.S. shipping.'
+              : `Add ${formatPrice(FREE_SHIPPING_THRESHOLD - cartTotal)} more for free shipping.`}
+            {' '}Delivery usually takes 2–7 business days via USPS or UPS; Alaska, Hawaii and U.S. territories may take longer.
+          </p>
+        </aside>
       </div>
-    </div>
+    </main>
   );
 }

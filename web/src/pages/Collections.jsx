@@ -1,49 +1,67 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { formatPrice } from '../lib/store';
 
 export default function CollectionsPage() {
   const [collections, setCollections] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const fetch = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/products`);
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/products`, { params: { type: 'BUNDLE' } });
         setCollections(res.data);
-      } catch (e) { console.error(e); }
+      } catch (e) {
+        console.error('Error fetching collections', e);
+        setError('We couldn’t load collections just now. Please try again.');
+      }
       finally { setLoading(false); }
     };
     fetch();
   }, []);
 
   return (
-    <div className="pt-24 min-h-screen bg-brand-pearl">
-      <div className="max-w-[1400px] mx-auto px-6 py-20">
-        <header className="mb-20 text-center max-w-3xl mx-auto">
-          <h1 className="text-5xl md:text-7xl font-serif text-brand-forest-700 mb-6">Our Collections</h1>
-          <p className="text-lg text-brand-forest-700/70 font-light">
-            Curated bundles designed to provide complete routines for your health and wellness journey.
-          </p>
+    <main className="jayam-shop-page">
+      <div className="jayam-shop-intro">
+        <p className="jayam-eyebrow">Thoughtfully brought together</p>
+        <h1>Curated<br /><em>collections.</em></h1>
+        <p>Purposeful pairings for simple, considered wellness rituals.</p>
+      </div>
+      <div className="jayam-collections-content">
+        <header className="mb-10 flex items-center justify-between">
+          <p className="text-sm text-brand-dark/65">{loading ? 'Finding your collection…' : `${collections.length} collections`}</p>
+          <Link to="/shop" className="text-xs uppercase tracking-widest underline underline-offset-4">Shop everything</Link>
         </header>
 
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            {[...Array(4)].map((_, i) => <div key={i} className="animate-pulse bg-white rounded-xl aspect-[4/3]" />)}
+          <div className="jayam-product-grid">
+            {[...Array(2)].map((_, i) => <div key={i} className="jayam-product-skeleton" />)}
+          </div>
+        ) : error ? (
+          <div className="jayam-shop-empty" role="alert">
+            <p className="jayam-eyebrow">A moment, please</p>
+            <h2>Our collections aren’t loading.</h2>
+            <p>{error}</p>
+            <button type="button" onClick={() => window.location.reload()}>Try again</button>
           </div>
         ) : collections.length === 0 ? (
-          <div className="text-center py-20 text-brand-forest-700/50">
-            <p>No collections available at the moment.</p>
+          <div className="jayam-shop-empty">
+            <p className="jayam-eyebrow">Coming together</p>
+            <h2>Our collections are taking shape.</h2>
+            <p>Browse our individual wellness essentials in the meantime.</p>
+            <Link to="/shop">Explore the shop <span aria-hidden="true">↗</span></Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+          <div className="jayam-collection-grid">
             {collections.map(collection => (
               <Link to={`/products/${collection.slug}`} key={collection.id} className="group block">
-                <div className="relative aspect-[4/3] bg-brand-forest-700/10 mb-6 overflow-hidden rounded-sm">
+                <div className="jayam-collection-image">
                   {collection.images?.[0] ? (
                     <img src={collection.images[0].url} alt={collection.images[0].altText || collection.name} className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-700 ease-out" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-brand-forest-700/30">No Image</div>
+                    <div className="jayam-product-placeholder" aria-hidden="true">J</div>
                   )}
                 </div>
                 <div className="flex justify-between items-start">
@@ -54,9 +72,9 @@ export default function CollectionsPage() {
                     )}
                   </div>
                   <div className="text-right">
-                    <span className="text-xl font-light text-brand-forest-700">₹{collection.price?.toFixed(2)}</span>
+                    <span className="text-xl font-light text-brand-forest-700">{formatPrice(collection.price)}</span>
                     {collection.compareAtPrice && collection.compareAtPrice > collection.price && (
-                      <div className="text-sm text-brand-forest-700/50 line-through">₹{collection.compareAtPrice?.toFixed(2)}</div>
+                      <div className="text-sm text-brand-forest-700/50 line-through">{formatPrice(collection.compareAtPrice)}</div>
                     )}
                   </div>
                 </div>
@@ -65,6 +83,6 @@ export default function CollectionsPage() {
           </div>
         )}
       </div>
-    </div>
+    </main>
   );
 }

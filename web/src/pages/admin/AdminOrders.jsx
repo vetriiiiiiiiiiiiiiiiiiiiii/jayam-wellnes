@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { adminUpdateOrderStatus } from '../../services/api';
+import { formatPrice } from '../../lib/store';
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [savingShipment, setSavingShipment] = useState(false);
   const navigate = useNavigate();
 
   const fetchOrders = async () => {
@@ -36,11 +38,29 @@ export default function AdminOrders() {
       if (res.success) {
         fetchOrders();
         if (selectedOrder?.id === orderId) {
-          setSelectedOrder({ ...selectedOrder, status: newStatus });
+          setSelectedOrder(res.order);
         }
+      } else {
+        alert(res.message || 'Failed to update status');
       }
     } catch (error) {
       alert('Failed to update status');
+    }
+  };
+
+  const handleShipment = async (event) => {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const shipment = { carrier: form.get('carrier'), trackingNumber: String(form.get('trackingNumber') || '').trim() };
+    if (!shipment.carrier || !shipment.trackingNumber) return;
+    setSavingShipment(true);
+    const res = await adminUpdateOrderStatus(selectedOrder.id, null, shipment);
+    setSavingShipment(false);
+    if (res.success) {
+      setSelectedOrder(res.order);
+      fetchOrders();
+    } else {
+      alert(res.message || 'Failed to save tracking details');
     }
   };
 
@@ -74,6 +94,7 @@ export default function AdminOrders() {
             <Link to="/admin/products" className="block text-gray-500 hover:text-brand-dark transition-colors">Products</Link>
             <Link to="/admin/users" className="block text-gray-500 hover:text-brand-dark transition-colors">Users</Link>
             <Link to="/admin/reviews" className="block text-gray-500 hover:text-brand-dark transition-colors">Reviews</Link>
+            <Link to="/admin/enquiries" className="block text-gray-500 hover:text-brand-dark transition-colors">Enquiries</Link>
          </nav>
       </div>
 
@@ -102,7 +123,7 @@ export default function AdminOrders() {
                       {order.name}<br/>
                       <span className="text-xs text-gray-500 font-normal">{order.email}</span>
                     </td>
-                    <td className="px-6 py-4 text-gray-900 font-medium">₹{order.total?.toFixed(2)}</td>
+                    <td className="px-6 py-4 text-gray-900 font-medium">{formatPrice(order.total)}</td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
                         order.status === "PENDING" ? "bg-yellow-50 text-yellow-700 border border-yellow-200" :
@@ -157,25 +178,52 @@ export default function AdminOrders() {
               <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 flex flex-col gap-2">
                  <div className="flex justify-between items-center text-sm">
                     <span className="text-gray-500 font-medium">Payment Method:</span>
-                    <span className="text-gray-900 font-mono">{selectedOrder.paymentMethod || 'RAZORPAY'}</span>
+                    <span className="text-gray-900 font-mono">{selectedOrder.paymentMethod || 'STRIPE'}</span>
                  </div>
                  <div className="flex justify-between items-center text-sm">
                     <span className="text-gray-500 font-medium">Payment Status:</span>
                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
                       selectedOrder.paymentStatus === 'PAID' ? 'bg-green-100 text-green-700' :
-                      selectedOrder.paymentStatus === 'FAILED' ? 'bg-red-100 text-red-700' :
+                      selectedOrder.paymentStatus === 'FAILED' || selectedOrder.paymentStatus === 'REFUNDED' ? 'bg-red-100 text-red-700' :
                       'bg-yellow-100 text-yellow-700'
                     }`}>
                       {selectedOrder.paymentStatus || 'PENDING'}
                     </span>
                  </div>
-                 {selectedOrder.razorpayOrderId && (
+                 {selectedOrder.stripePaymentIntentId && (
                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-gray-500 font-medium">Transaction ID:</span>
-                      <span className="text-gray-900 font-mono text-xs">{selectedOrder.razorpayOrderId}</span>
+                      <span className="text-gray-500 font-medium">Stripe Payment:</span>
+                      <span className="text-gray-900 font-mono text-xs">{selectedOrder.stripePaymentIntentId}</span>
                    </div>
                  )}
               </div>
+            </div>
+
+            <div className="mb-8">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 mb-2">Shipment</h3>
+              {selectedOrder.paymentStatus !== 'PAID' ? (
+                <p className="text-sm text-gray-500">Tracking can be added once the order is paid.</p>
+              ) : (
+                <form key={`${selectedOrder.id}-${selectedOrder.trackingNumber || ''}`} onSubmit={handleShipment} className="bg-gray-50 p-4 rounded-xl border border-gray-100 flex flex-wrap gap-3 items-end">
+                  <label className="text-xs text-gray-500 flex flex-col gap-1">
+                    Carrier
+                    <select name="carrier" defaultValue={selectedOrder.carrier || 'USPS'} className="border border-gray-200 rounded px-2 py-2 text-sm text-gray-900 bg-white">
+                      <option value="USPS">USPS</option>
+                      <option value="UPS">UPS</option>
+                    </select>
+                  </label>
+                  <label className="text-xs text-gray-500 flex flex-col gap-1 flex-1 min-w-[200px]">
+                    Tracking number
+                    <input name="trackingNumber" defaultValue={selectedOrder.trackingNumber || ''} required className="border border-gray-200 rounded px-2 py-2 text-sm text-gray-900 font-mono bg-white" />
+                  </label>
+                  <button type="submit" disabled={savingShipment} className="px-4 py-2 bg-brand-dark text-white rounded text-xs font-bold uppercase tracking-wider disabled:opacity-50">
+                    {savingShipment ? 'Saving…' : selectedOrder.trackingNumber ? 'Update & notify' : 'Mark shipped & email customer'}
+                  </button>
+                  {selectedOrder.trackingNumber && (
+                    <p className="w-full text-xs text-gray-500">Shipped {selectedOrder.shippedAt ? new Date(selectedOrder.shippedAt).toLocaleDateString() : ''} with {selectedOrder.carrier} · {selectedOrder.trackingNumber}</p>
+                  )}
+                </form>
+              )}
             </div>
 
             <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 mb-4">Items</h3>
@@ -191,11 +239,11 @@ export default function AdminOrders() {
                        <div className="w-12 h-12 rounded bg-gray-200" />
                      )}
                      <div>
-                       <p className="font-medium text-gray-900">{item.productName || (item.productId && item.productId.name)}</p>
+                       <p className="font-medium text-gray-900">{item.name || item.productName}{item.variantName ? ` · ${item.variantName}` : ''}</p>
                        <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
                      </div>
                   </div>
-                  <p className="font-mono text-gray-900">₹{((item.price || (item.productId && item.productId.price) || 0) * item.quantity).toFixed(2)}</p>
+                  <p className="font-mono text-gray-900">{formatPrice(((item.price || (item.productId && item.productId.price) || 0) * item.quantity))}</p>
                 </div>
               ))}
             </div>
@@ -227,7 +275,7 @@ export default function AdminOrders() {
                     </button>
                  )}
                  <p className="text-xl font-serif font-bold text-brand-forest-700 ml-0 lg:ml-4 whitespace-nowrap">
-                   Total: ₹{selectedOrder.total?.toFixed(2)}
+                   Total: {formatPrice(selectedOrder.total)}
                  </p>
               </div>
             </div>
