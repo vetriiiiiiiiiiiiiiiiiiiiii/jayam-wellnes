@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from './CartProvider';
-import { CATEGORY_LABELS, formatPrice } from '../../lib/store';
+import { formatPrice } from '../../lib/store';
 import ProductArt from './ProductArt';
 
 export default function ProductCard({ product }) {
@@ -36,7 +36,6 @@ export default function ProductCard({ product }) {
         ) : (
           <ProductArt product={product} />
         )}
-        <span className="jayam-product-kind">{product.category || CATEGORY_LABELS[product.productType] || 'Wellness'}</span>
       </Link>
       <div className="jayam-product-info">
         <div>

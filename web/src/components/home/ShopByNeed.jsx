@@ -39,11 +39,7 @@ export default function ShopByNeed({ products }) {
               </div>
               <div className="wl-need-info">
                 <h3>{product.name.replace(/^Organic\s+/i, '').split(' — ')[0]}</h3>
-                {product.tagline && <p>{product.tagline}</p>}
-                <span className="wl-need-meta">
-                  {formatPrice(product.price)}
-                  <span aria-hidden="true">Explore →</span>
-                </span>
+                <span className="wl-need-meta">{formatPrice(product.price)}</span>
               </div>
             </Link>
           );

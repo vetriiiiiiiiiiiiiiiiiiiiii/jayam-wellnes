@@ -4,7 +4,6 @@ import axios from 'axios';
 import ProductCard from '../components/storefront/ProductCard';
 import FilterSidebar from '../components/storefront/FilterSidebar';
 import { CATEGORY_LABELS } from '../lib/store';
-import MoringaSprig from '../components/home/MoringaSprig';
 
 export default function ShopPage() {
   const [products, setProducts] = useState([]);
@@ -43,8 +42,7 @@ export default function ShopPage() {
 
   return (
     <main className="jayam-shop-page">
-      <header className="jayam-shop-intro wl-page-head">
-        <MoringaSprig className="wl-page-sprig" pairs={9} />
+      <header className="jayam-shop-intro">
         <p className="jayam-eyebrow">Thoughtful wellness, made simple</p>
         <h1>Shop the<br /><em>collection.</em></h1>
         <p>Simple, clean, plant-based wellness — carefully selected ingredients, nothing unnecessary. Free U.S. shipping on orders $49 and above.</p>

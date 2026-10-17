@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import MoringaSprig from './MoringaSprig';
 
 const stages = [
   { title: 'Organic botanicals', body: 'Moringa leaves, flowers and seeds, and Amla — carefully selected and sourced from India.' },
@@ -16,7 +15,6 @@ export default function MadeWithCare() {
         <h2>Nothing hidden. <em>Nothing unnecessary.</em></h2>
         <p>No fillers, binders, artificial colors or preservatives — just carefully chosen botanicals and a process we’re proud to share.</p>
         <Link to="/faq" className="wl-text-link">Questions about ingredients? Read the FAQ →</Link>
-        <MoringaSprig className="wl-made-sprig" pairs={7} />
       </div>
       <ol className="wl-made-stages">
         {stages.map(({ title, body }, index) => (

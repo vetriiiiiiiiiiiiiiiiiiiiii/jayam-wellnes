@@ -560,17 +560,6 @@ a {
   transform: scale(1.035);
 }
 
-.jayam-product-kind {
-  position: absolute;
-  top: 14px;
-  left: 14px;
-  background: #f2efe6e8;
-  padding: 7px 9px;
-  color: #5d6b57;
-  font: 11px var(--mono);
-  letter-spacing: 0.1em;
-}
-
 .jayam-product-placeholder,
 .jayam-product-no-image {
   display: grid;

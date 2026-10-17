@@ -130,14 +130,6 @@ h3,
   border-radius: var(--radius-lg);
 }
 
-.jayam-product-kind {
-  border-radius: 999px;
-  padding: 6px 12px;
-  background: rgba(248, 245, 238, 0.9);
-  font: 600 11px var(--sans);
-  letter-spacing: 0.02em;
-}
-
 .jayam-product-info h2 {
   font-weight: 400;
 }
@@ -223,32 +215,6 @@ h3,
 /* ---------- Footer ---------- */
 .jayam-footer {
   background: var(--moss);
-}
-
-/* ---------- Page headers: a quiet botanical accent ---------- */
-.wl-page-head {
-  position: relative;
-  overflow: hidden;
-}
-
-.wl-page-sprig {
-  position: absolute;
-  top: 90px;
-  right: 8vw;
-  width: min(220px, 22vw);
-  color: #9cb08d;
-  opacity: 0.55;
-  transform: rotate(12deg);
-  pointer-events: none;
-}
-
-@media (max-width: 860px) {
-  .wl-page-sprig {
-    top: 110px;
-    right: -30px;
-    width: 140px;
-    opacity: 0.3;
-  }
 }
 
 /* ==========================================
@@ -369,50 +335,6 @@ h3,
   animation: wl-sway 7s ease-in-out infinite alternate;
 }
 
-/* Ritual chips on the arch edge */
-.wl-ritual-chip {
-  position: absolute;
-  z-index: 2;
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  margin: 0;
-  border: 1px solid rgba(205, 214, 194, 0.9);
-  border-radius: 999px;
-  background: rgba(252, 250, 244, 0.92);
-  padding: 10px 16px;
-  box-shadow: 0 14px 30px -12px rgba(46, 70, 54, 0.3);
-  color: var(--ink);
-  font-size: 13px;
-  white-space: nowrap;
-  backdrop-filter: blur(6px);
-  animation: wl-float 6s ease-in-out infinite alternate;
-}
-
-.wl-ritual-chip svg {
-  color: var(--sun);
-}
-
-.wl-ritual-chip--evening svg {
-  color: var(--sage);
-}
-
-.wl-ritual-chip strong {
-  font-weight: 700;
-}
-
-/* Morning and evening stack on the right like a small schedule */
-.wl-ritual-chip--morning {
-  top: 50%;
-  right: -6%;
-}
-
-.wl-ritual-chip--evening {
-  top: 61%;
-  right: -2%;
-  animation-delay: -3s;
-}
-
 /* Featured product breaks out of the frame */
 .wl-hero-product {
   position: absolute;
@@ -446,13 +368,6 @@ h3,
   filter: drop-shadow(0 18px 24px rgba(46, 70, 54, 0.22));
 }
 
-.wl-hero-product-cta {
-  color: var(--moss);
-  font-size: 12px;
-  font-weight: 700;
-  text-align: center;
-}
-
 @keyframes wl-sunrise {
   from { transform: translateY(120px); opacity: 0.2; }
   to { transform: translateY(0); opacity: 1; }
@@ -466,11 +381,6 @@ h3,
 @keyframes wl-drift {
   from { transform: translateX(-10px); }
   to { transform: translateX(14px); }
-}
-
-@keyframes wl-float {
-  from { transform: translateY(0); }
-  to { transform: translateY(-8px); }
 }
 
 @media (max-width: 860px) {
@@ -488,26 +398,9 @@ h3,
     width: min(86%, 340px);
   }
 
-  .wl-ritual-chip {
-    padding: 8px 12px;
-    font-size: 12px;
-  }
-
-  .wl-ritual-chip--morning {
-    right: 0;
-  }
-
-  .wl-ritual-chip--evening {
-    right: 0;
-  }
-
   .wl-hero-product {
     left: 0;
     width: 38%;
-  }
-
-  .wl-hero-product-cta {
-    display: none;
   }
 }
 
@@ -517,9 +410,8 @@ h3,
   }
 
   .wl-scene-sun,
-  .wl-scene-clouds,
-  .wl-hero-branch,
-  .wl-ritual-chip {
+.wl-scene-clouds,
+.wl-hero-branch {
     animation: none;
   }
 }
@@ -763,14 +655,6 @@ h3,
   line-height: 1.75;
 }
 
-.wl-made-sprig {
-  display: block;
-  width: 120px;
-  margin-top: 36px;
-  color: #8ba27c;
-  transform: rotate(18deg);
-}
-
 .wl-made-stages {
   margin: 0;
   padding: 0;
@@ -838,24 +722,6 @@ h3,
   justify-content: center;
 }
 
-.wl-closing-sprig {
-  position: absolute;
-  bottom: -30px;
-  width: 170px;
-  color: #9db08e;
-  opacity: 0.7;
-}
-
-.wl-closing-sprig--left {
-  left: 2%;
-  transform: rotate(-24deg);
-}
-
-.wl-closing-sprig--right {
-  right: 2%;
-  transform: scaleX(-1) rotate(-24deg);
-}
-
 /* ---------- Responsive ---------- */
 @media (max-width: 1100px) {
   .wl-needs-grid {
@@ -914,19 +780,10 @@ h3,
     position: static;
   }
 
-  .wl-made-sprig {
-    display: none;
-  }
-
   .wl-closing {
     margin: 0 16px 80px;
     border-radius: 28px;
     padding: 72px 22px;
-  }
-
-  .wl-closing-sprig {
-    width: 110px;
-    opacity: 0.45;
   }
 }
 
@@ -1318,7 +1175,6 @@ body::after {
   }
 }
 
-
 /* ==========================================
    OUR STORY — SCROLL JOURNEY
    A pinned full-screen scene; StoryJourney.jsx drives it from scroll position.
@@ -1590,5 +1446,165 @@ body::after {
   .sj-branch-wrap,
   .sj-panel {
     transition: none;
+  }
+}
+
+/* ==========================================
+   CALM PASS
+   Light-touch minimalism: flatter surfaces, softer lines, more room.
+   ========================================== */
+.wl-hero::before {
+  display: none;
+}
+
+.wl-section {
+  padding-block: 130px;
+}
+
+/* Promise strip: a quiet line of text */
+.wl-promise {
+  border-block-color: #e7e3d8;
+  background: transparent;
+}
+
+.wl-promise ul {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  padding-block: 30px;
+}
+
+.wl-promise li {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+/* Shop by need: lighter tints, no tilt */
+.wl-need-card {
+  background: rgba(227, 233, 218, 0.55);
+}
+
+.wl-tone--leaf { background: rgba(223, 232, 208, 0.55); }
+.wl-tone--blush { background: rgba(241, 226, 218, 0.6); }
+.wl-tone--sand { background: rgba(239, 229, 211, 0.6); }
+.wl-tone--sun { background: rgba(245, 231, 198, 0.55); }
+
+.wl-need-card:hover {
+  box-shadow: none;
+  transform: translateY(-4px);
+}
+
+.wl-need-card .jayam-art {
+  background: transparent;
+}
+
+.wl-need-label {
+  color: var(--sage);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Ritual: no connecting line */
+.wl-ritual-steps::before {
+  display: none;
+}
+
+.wl-ritual-icon {
+  border-color: #e3e0d5;
+}
+
+/* Made with care: plain numbers */
+.wl-made-number {
+  background: transparent;
+  color: var(--sage);
+  font: 400 18px var(--serif);
+}
+
+/* Closing: a flat, quiet panel */
+.wl-closing {
+  background: rgba(227, 233, 218, 0.45);
+}
+
+/* Product cards: lighter backdrops */
+.jayam-product-image .jayam-art--sage { background: #eef1e8; }
+.jayam-product-image .jayam-art--leaf { background: #ecf1e3; }
+.jayam-product-image .jayam-art--blush { background: #f6ede8; }
+.jayam-product-image .jayam-art--sand { background: #f4eee3; }
+.jayam-product-image .jayam-art--sun { background: #f7f0de; }
+
+/* ---------- Our Story: quiet lists instead of cards ---------- */
+.st-plant {
+  background: transparent;
+}
+
+.st-plant-grid {
+  gap: 0 40px;
+}
+
+.st-plant-card {
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  padding: 28px 0 0;
+}
+
+.st-plant-icon {
+  width: auto;
+  height: auto;
+  margin-bottom: 16px;
+  background: transparent;
+  color: var(--sage);
+  place-items: start;
+}
+
+.st-plant-card ul {
+  border-top: 0;
+  padding-top: 4px;
+}
+
+.st-values-grid {
+  max-width: 760px;
+  flex-direction: column;
+  gap: 0;
+  margin: 0 auto;
+}
+
+.st-values-grid li {
+  flex: none;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  padding: 20px 4px;
+  font-size: 21px;
+}
+
+.st-values-grid li:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+.st-signoff-emblem {
+  width: auto;
+  height: auto;
+  background: none;
+}
+
+.st-signoff-emblem img {
+  width: 120px;
+}
+
+@media (max-width: 860px) {
+  .wl-section {
+    padding-block: 84px;
+  }
+
+  .wl-promise ul {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .st-plant-grid {
+    gap: 0;
+  }
+
+  .st-values-grid li {
+    font-size: 18px;
   }
 }
