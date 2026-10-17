@@ -37,9 +37,7 @@ body {
 h1,
 h2,
 h3,
-.font-serif,
-.jayam-art-title,
-.jayam-art-form {
+.font-serif {
   font-family: var(--serif);
   font-optical-sizing: auto;
   font-variation-settings: 'SOFT' 100;
@@ -47,7 +45,6 @@ h3,
 
 /* Existing headings were tracked very tightly for the previous typeface */
 .jayam-home-copy h1,
-.story-hero h1,
 .jayam-faq-hero h1,
 .jayam-contact-intro h1,
 .jayam-shop-intro h1,
@@ -114,8 +111,7 @@ h3,
 }
 
 .wl-kicker,
-.jayam-eyebrow,
-.story-eyebrow {
+.jayam-eyebrow {
   margin: 0 0 18px;
   color: var(--sage);
   font: 600 12px var(--sans);
@@ -166,25 +162,51 @@ h3,
 }
 
 /* ---------- Product label art: rounded, soft ---------- */
+/* ---------- Illustrated packaging ---------- */
 .jayam-art {
+  position: relative;
+  overflow: hidden;
+  padding: 8% 10% 4%;
   background: var(--sage-soft);
 }
 
-.jayam-art--warm {
-  background: var(--sand-soft);
+.jayam-art--sage { background: linear-gradient(170deg, #eef2e6 0%, var(--sage-soft) 100%); }
+.jayam-art--leaf { background: linear-gradient(170deg, #eaf0de 0%, var(--leaf-soft) 100%); }
+.jayam-art--blush { background: linear-gradient(170deg, #f7ece6 0%, var(--blush-soft) 100%); }
+.jayam-art--sand { background: linear-gradient(170deg, #f5eee1 0%, var(--sand-soft) 100%); }
+.jayam-art--sun { background: linear-gradient(170deg, #faf1dc 0%, var(--sun-soft) 100%); }
+
+/* Soft pool of light behind the pack */
+.jayam-art-halo {
+  position: absolute;
+  top: 18%;
+  left: 50%;
+  width: 72%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0) 68%);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.jayam-pack {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  overflow: visible;
+  transition: transform 600ms var(--ease-soft);
+}
+
+.jayam-product-card:hover .jayam-pack,
+.wl-need-card:hover .jayam-pack,
+.wl-hero-product:hover .jayam-pack {
+  transform: translateY(-8px) rotate(-1.5deg);
 }
 
 .jayam-art--hero {
   border-radius: 36px;
-}
-
-.jayam-art-label {
-  border-radius: 16px;
-  outline-color: #d7d0bf;
-}
-
-.jayam-art-title {
-  font-weight: 400;
+  padding: 10% 14% 6%;
 }
 
 /* Product page: soft pills and rounded gallery */
@@ -413,26 +435,15 @@ h3,
   aspect-ratio: 4 / 5;
   padding: 0;
   background: transparent;
+  overflow: visible;
 }
 
-.wl-hero-product .jayam-art-label {
-  height: 100%;
-  justify-content: center;
-  padding: 16px 10px;
-  box-shadow: 0 28px 44px -16px rgba(46, 70, 54, 0.4);
-}
-
-.wl-hero-product .jayam-art-title {
-  font-size: 20px;
-}
-
-.wl-hero-product .jayam-art-form {
-  font-size: 15px;
-}
-
-.wl-hero-product .jayam-art-meta,
-.wl-hero-product .jayam-art-rule {
+.wl-hero-product .jayam-art-halo {
   display: none;
+}
+
+.wl-hero-product .jayam-pack {
+  filter: drop-shadow(0 18px 24px rgba(46, 70, 54, 0.22));
 }
 
 .wl-hero-product-cta {
@@ -493,14 +504,6 @@ h3,
   .wl-hero-product {
     left: 0;
     width: 38%;
-  }
-
-  .wl-hero-product .jayam-art-title {
-    font-size: 16px;
-  }
-
-  .wl-hero-product .jayam-art-form {
-    font-size: 13px;
   }
 
   .wl-hero-product-cta {
@@ -630,35 +633,8 @@ h3,
 }
 
 .wl-need-art .jayam-art {
-  padding: 12% 14%;
+  padding: 6% 10% 0;
   background: transparent;
-}
-
-.wl-need-art .jayam-art-label {
-  box-shadow: 0 14px 26px rgba(46, 70, 54, 0.1);
-}
-
-/* Need cards are compact: brand, name and form only */
-.wl-need-art .jayam-art-mark,
-.wl-need-art .jayam-art-rule,
-.wl-need-art .jayam-art-meta {
-  display: none;
-}
-
-.wl-need-art .jayam-art-label {
-  padding: 18px 10px;
-}
-
-.wl-need-art .jayam-art-title {
-  font-size: clamp(17px, 1.5vw, 21px);
-}
-
-.wl-need-art .jayam-art-form {
-  font-size: 15px;
-}
-
-.wl-need-card:hover .jayam-art-label {
-  transform: rotate(-1.5deg);
 }
 
 .wl-need-info {
@@ -996,7 +972,6 @@ h3,
   }
 }
 
-
 /* ==========================================
    COHESION PASS
    One visual language: paper as a background, soft pills for every control.
@@ -1017,19 +992,6 @@ body::after {
   mix-blend-mode: multiply;
   pointer-events: none;
   transition: opacity 80ms linear;
-}
-
-/* Label icon: a small sage leaf instead of the multicolour logo */
-.jayam-art-mark,
-.jayam-product-image .jayam-art-mark {
-  width: 22px;
-  height: 22px;
-  color: var(--sage);
-}
-
-.jayam-art--hero .jayam-art-mark {
-  width: 30px;
-  height: 30px;
 }
 
 /* ---------- Navigation ---------- */
@@ -1160,5 +1122,473 @@ body::after {
 
   .jayam-nav-bag {
     padding: 5px 6px 5px 12px !important;
+  }
+}
+
+/* ---------- Scroll reveal (see lib/useScrollReveal.js) ---------- */
+[data-reveal] {
+  transition: opacity 900ms var(--ease-soft), transform 900ms var(--ease-soft), box-shadow 500ms var(--ease-soft);
+}
+
+.reveal-pending {
+  opacity: 0;
+  transform: translateY(28px);
+}
+
+.wl-ritual-steps li:nth-child(2) { transition-delay: 120ms; }
+.wl-ritual-steps li:nth-child(3) { transition-delay: 240ms; }
+.wl-made-stages li:nth-child(2) { transition-delay: 80ms; }
+.wl-made-stages li:nth-child(3) { transition-delay: 160ms; }
+.wl-made-stages li:nth-child(4) { transition-delay: 240ms; }
+
+/* ==========================================
+   OUR STORY
+   ========================================== */
+/* clip (not hidden) so the pinned story scene can stay sticky */
+.st-page {
+  overflow-x: clip;
+}
+
+.st-page h2 em,
+.st-page h1 em,
+.st-signoff-line em {
+  color: var(--sage);
+  font-style: italic;
+  font-weight: 300;
+}
+
+/* ---------- One remarkable plant ---------- */
+.st-plant {
+  margin: 0 auto;
+  padding: 120px 6vw;
+  background: linear-gradient(180deg, rgba(227, 233, 218, 0) 0%, rgba(227, 233, 218, 0.6) 22%, rgba(227, 233, 218, 0.6) 78%, rgba(227, 233, 218, 0) 100%);
+}
+
+.st-plant-grid {
+  display: grid;
+  max-width: 1180px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin: 0 auto;
+}
+
+.st-plant-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(205, 214, 194, 0.8);
+  border-radius: var(--radius-lg);
+  background: rgba(252, 250, 244, 0.85);
+  padding: 30px 26px;
+}
+
+.st-plant-icon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  margin-bottom: 22px;
+  border-radius: 50%;
+  background: var(--sage-soft);
+  color: var(--moss);
+}
+
+.st-plant-card h3 {
+  margin: 0 0 8px;
+  font-size: 26px;
+  font-weight: 400;
+}
+
+.st-plant-card p {
+  margin: 0 0 20px;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.st-plant-card ul {
+  display: grid;
+  gap: 8px;
+  margin: auto 0 0;
+  padding: 16px 0 0;
+  border-top: 1px solid var(--line);
+  list-style: none;
+}
+
+.st-plant-card a {
+  color: var(--moss);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.st-plant-card a:hover {
+  color: var(--sage);
+}
+
+/* ---------- Values ---------- */
+.st-values {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 120px 6vw 80px;
+}
+
+.st-values-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.st-values-grid li {
+  flex: 0 1 238px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-radius: 20px;
+  background: rgba(239, 229, 211, 0.45);
+  padding: 22px 24px;
+  color: var(--ink);
+  font: 400 19px/1.35 var(--serif);
+}
+
+.st-values-grid svg {
+  flex: none;
+  color: var(--sage);
+}
+
+/* ---------- Sign-off ---------- */
+.st-signoff {
+  display: grid;
+  justify-items: center;
+  padding: 60px 6vw 140px;
+  text-align: center;
+}
+
+.st-signoff-emblem {
+  display: grid;
+  width: 190px;
+  height: 190px;
+  place-items: center;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fdf8ec 0 60%, rgba(247, 222, 160, 0.4) 61% 72%, rgba(247, 222, 160, 0) 73%);
+}
+
+.st-signoff-emblem img {
+  width: 140px;
+}
+
+.st-signoff-line {
+  max-width: 640px;
+  margin: 28px 0 32px;
+  color: var(--ink);
+  font: 400 clamp(28px, 3vw, 42px)/1.2 var(--serif);
+  letter-spacing: -0.02em;
+}
+
+.st-signoff .wl-hero-actions {
+  justify-content: center;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 960px) {
+  .st-plant-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+
+  .st-plant {
+    padding: 80px 20px;
+  }
+
+  .st-plant-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .st-values {
+    padding: 80px 20px 50px;
+  }
+
+  .st-signoff {
+    padding: 40px 20px 100px;
+  }
+}
+
+
+/* ==========================================
+   OUR STORY — SCROLL JOURNEY
+   A pinned full-screen scene; StoryJourney.jsx drives it from scroll position.
+   ========================================== */
+.sj {
+  position: relative;
+}
+
+.sj-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+}
+
+.sj-landscape {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Moringa tree growing from the bottom right */
+.sj-tree {
+  position: absolute;
+  right: 6vw;
+  bottom: -2vh;
+  width: min(34vw, 420px);
+  height: min(78vh, 720px);
+  transform-origin: 50% 100%;
+  transition: transform 200ms linear;
+  pointer-events: none;
+}
+
+.sj-trunk {
+  position: absolute;
+  bottom: 0;
+  left: 30%;
+  width: 22%;
+  height: 100%;
+}
+
+.sj-branch-wrap {
+  position: absolute;
+  display: block;
+  transform-origin: 50% 100%;
+  transition: opacity 300ms ease, transform 300ms ease;
+}
+
+.sj-branch {
+  display: block;
+  width: 100%;
+  color: #4f6e47;
+}
+
+.sj-branch-wrap:nth-child(odd) .sj-branch {
+  color: #5f7f55;
+}
+
+/* Story panels */
+.sj-panels {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 90px 6vw 0;
+  pointer-events: none;
+}
+
+.sj-panel {
+  grid-area: 1 / 1;
+  max-width: 640px;
+  color: var(--ink);
+  transition: opacity 120ms linear;
+  will-change: opacity, transform;
+}
+
+.sj-panel p:not(.wl-kicker) {
+  margin: 0 0 14px;
+  color: #4e5b4c;
+  font-size: 18px;
+  line-height: 1.75;
+}
+
+.sj-panel em {
+  color: var(--sage);
+  font-style: italic;
+  font-weight: 300;
+}
+
+.sj-panel--title {
+  text-align: center;
+}
+
+/* A soft pool of light keeps centred text readable over the landscape */
+.sj-panel--title,
+.sj-panel--quote {
+  position: relative;
+}
+
+.sj-panel--title::before,
+.sj-panel--quote::before {
+  position: absolute;
+  z-index: -1;
+  inset: -18% -14%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(250, 245, 233, 0.92) 0%, rgba(250, 245, 233, 0.7) 45%, rgba(250, 245, 233, 0) 72%);
+  content: '';
+}
+
+.sj-panel--title h1 {
+  margin: 0 0 24px;
+  font-size: clamp(60px, 9vw, 140px);
+  font-weight: 400;
+  line-height: 0.96;
+  letter-spacing: -0.035em;
+}
+
+.sj-panel--title h1 em {
+  display: block;
+}
+
+.sj-panel--title p:not(.wl-kicker) {
+  max-width: 520px;
+  margin-inline: auto;
+}
+
+.sj-panel--quote {
+  max-width: 900px;
+  text-align: center;
+}
+
+.sj-panel--quote blockquote {
+  margin: 0;
+  font: 400 clamp(32px, 4vw, 58px)/1.18 var(--serif);
+  letter-spacing: -0.02em;
+}
+
+/* Chapters sit on a soft frosted card on the left, clear of the tree */
+.sj-panel--chapter {
+  justify-self: start;
+  max-width: 520px;
+  margin-left: 2vw;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 32px;
+  background: rgba(250, 247, 239, 0.78);
+  padding: 44px 46px 34px;
+  box-shadow: 0 30px 60px -30px rgba(46, 70, 54, 0.35);
+  backdrop-filter: blur(10px);
+}
+
+.sj-panel--chapter h2 {
+  margin: 0 0 18px;
+  font-size: clamp(36px, 3.6vw, 54px);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.sj-number {
+  display: block;
+  margin-bottom: 14px;
+  color: var(--sage);
+  font: 400 16px var(--serif);
+  letter-spacing: 0.12em;
+}
+
+.sj-number::after {
+  display: inline-block;
+  width: 44px;
+  height: 1px;
+  margin-left: 12px;
+  background: #b9c3ac;
+  content: '';
+  vertical-align: middle;
+}
+
+/* Chapter progress rail */
+.sj-progress {
+  position: absolute;
+  top: 50%;
+  right: 22px;
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  transform: translateY(-50%);
+}
+
+.sj-progress li {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid rgba(58, 90, 69, 0.25);
+  border-radius: 50%;
+  background: rgba(250, 247, 239, 0.6);
+  color: var(--muted);
+  font: 600 10px var(--sans);
+  transition: background-color 300ms ease, color 300ms ease, transform 300ms ease;
+}
+
+.sj-progress li.is-active {
+  background: var(--moss);
+  color: var(--cream);
+  transform: scale(1.12);
+}
+
+.sj-scroll-cue {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  color: var(--moss);
+  font: 600 11px var(--sans);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  transform: translateX(-50%);
+}
+
+.sj-scroll-cue::after {
+  display: block;
+  width: 1px;
+  height: 36px;
+  margin: 10px auto 0;
+  background: linear-gradient(180deg, var(--moss), rgba(58, 90, 69, 0));
+  content: '';
+}
+
+@media (max-width: 860px) {
+  .sj-tree {
+    right: -8vw;
+    width: 62vw;
+    height: 56vh;
+    opacity: 0.85;
+  }
+
+  /* Chapter cards sit at the top so the tree stays visible below */
+  .sj-panels {
+    align-items: start;
+    padding: 108px 16px 0;
+  }
+
+  .sj-panel--title,
+  .sj-panel--quote {
+    align-self: center;
+  }
+
+  .sj-panel p:not(.wl-kicker) {
+    font-size: 16px;
+  }
+
+  .sj-panel--chapter {
+    justify-self: stretch;
+    background: rgba(250, 247, 239, 0.93);
+    margin: 0;
+    padding: 28px 24px 18px;
+    border-radius: 24px;
+  }
+
+  .sj-progress {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sj-tree,
+  .sj-branch-wrap,
+  .sj-panel {
+    transition: none;
   }
 }

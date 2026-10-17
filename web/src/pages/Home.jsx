@@ -6,6 +6,7 @@ import ShopByNeed from '../components/home/ShopByNeed';
 import DailyRitual from '../components/home/DailyRitual';
 import MadeWithCare from '../components/home/MadeWithCare';
 import ClosingInvite from '../components/home/ClosingInvite';
+import useScrollReveal from '../lib/useScrollReveal';
 
 const FEATURED_SLUG = 'moringa-leaf-amla-tablets';
 
@@ -23,6 +24,8 @@ function Home() {
     };
     fetchProducts();
   }, []);
+
+  useScrollReveal([products.length]);
 
   const featured = products.find((product) => product.slug === FEATURED_SLUG) || products[0];
 

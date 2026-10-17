@@ -12,7 +12,7 @@ const promises = [
 export default function PromiseStrip() {
   return (
     <section className="wl-promise" aria-label="The Jayam promise">
-      <ul>
+      <ul data-reveal>
         {promises.map(({ icon: Icon, label }) => (
           <li key={label}>
             <Icon size={20} strokeWidth={1.5} aria-hidden="true" />

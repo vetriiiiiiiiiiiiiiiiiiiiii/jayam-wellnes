@@ -1,5 +1,4 @@
-import { Leaf } from 'lucide-react';
-import { CATEGORY_LABELS } from '../../lib/store';
+import ProductPack from './ProductPack';
 
 const FORMS = ['Capsules', 'Tablets'];
 
@@ -18,26 +17,34 @@ export function labelParts(product) {
 
 const specValue = (product, name) => product.specs?.find((spec) => spec.name === name)?.value;
 
+// Soft backdrop colour behind each product's packaging
+const BACKDROPS = {
+  'moringa-leaf-amla-tablets': 'sage',
+  'moringa-leaf-capsules': 'leaf',
+  'moringa-flower-tablets': 'blush',
+  'moringa-seed-capsules': 'sand',
+  'beauty-drops-moringa-facial-elixir': 'sun',
+};
+
 /**
- * Paper-label artwork shown in place of a product photo.
- * size: "card" (shop grid) or "hero" (product page)
+ * Illustrated packaging shown in place of a product photo.
+ * size: "card" (grids) or "hero" (product page)
  */
 export default function ProductArt({ product, size = 'card' }) {
   const { title, form } = labelParts(product);
-  const isOrganic = /^Organic\s/i.test(product.name);
-  const meta = specValue(product, 'Contents') || specValue(product, 'Skin type') || '';
-  const tone = product.productType === 'SKINCARE' ? 'warm' : 'sage';
+  const contents = specValue(product, 'Contents');
+  const tone = BACKDROPS[product.slug] || (product.productType === 'SKINCARE' ? 'sun' : 'sage');
 
   return (
     <div className={`jayam-art jayam-art--${size} jayam-art--${tone}`} role="img" aria-label={product.name}>
-      <div className="jayam-art-label">
-        <Leaf className="jayam-art-mark" strokeWidth={1.4} aria-hidden="true" />
-        <span className="jayam-art-brand">Jayam{isOrganic ? ' · Organic' : ''}</span>
-        <strong className="jayam-art-title">{title}</strong>
-        {form && <em className="jayam-art-form">{form}</em>}
-        <span className="jayam-art-rule" aria-hidden="true" />
-        <span className="jayam-art-meta">{meta || product.category || CATEGORY_LABELS[product.productType]}</span>
-      </div>
+      <span className="jayam-art-halo" aria-hidden="true" />
+      <ProductPack
+        product={product}
+        title={title}
+        form={form}
+        meta={contents ? contents.split('·')[0].trim() : ''}
+        organic={/^Organic\s/i.test(product.name)}
+      />
     </div>
   );
 }

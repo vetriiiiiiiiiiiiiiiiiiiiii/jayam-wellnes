@@ -1,41 +1,102 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import MoringaSprig from '../components/home/MoringaSprig';
+import axios from 'axios';
+import { Bean, Droplet, Eye, Feather, Flower2, House, Leaf, Sprout, Sunrise, Wind } from 'lucide-react';
+import StoryJourney from '../components/story/StoryJourney';
+import useScrollReveal from '../lib/useScrollReveal';
 
 const principles = [
-  'Simple, clean products',
-  'Carefully selected ingredients',
-  'Plant-based wellness',
-  'No unnecessary complexity',
-  'Quality and transparency',
-  'Products we would feel comfortable giving to our own families',
-  'Long-term everyday wellness, not quick fixes',
+  { icon: Feather, text: 'Simple, clean products' },
+  { icon: Sprout, text: 'Carefully selected ingredients' },
+  { icon: Leaf, text: 'Plant-based wellness' },
+  { icon: Wind, text: 'No unnecessary complexity' },
+  { icon: Eye, text: 'Quality and transparency' },
+  { icon: House, text: 'Products we would feel comfortable giving to our own families' },
+  { icon: Sunrise, text: 'Long-term everyday wellness, not quick fixes' },
+];
+
+// Every part of the moringa tree, and the Jayam products made from it
+const plantParts = [
+  { icon: Leaf, part: 'Leaves', line: 'A nutrient-dense green superfood, gently vacuum-dried.', slugs: ['moringa-leaf-capsules', 'moringa-leaf-amla-tablets'] },
+  { icon: Flower2, part: 'Flowers', line: 'A distinctive botanical, crafted for women’s wellness.', slugs: ['moringa-flower-tablets'] },
+  { icon: Bean, part: 'Seeds', line: 'Pure seed, for everyday vitality.', slugs: ['moringa-seed-capsules'] },
+  { icon: Droplet, part: 'Seed & root oils', line: 'Nourishing oils for a radiant-looking glow.', slugs: ['beauty-drops-moringa-facial-elixir'] },
 ];
 
 export default function OurStoryPage() {
-  return (
-    <main className="story-page">
-      <header className="story-hero wl-page-head">
-        <MoringaSprig className="wl-page-sprig" pairs={10} />
-        <p className="story-eyebrow">A little about us</p>
-        <h1>Wellness,<br /><em>with care.</em></h1>
-        <p className="story-intro">A simpler way to care for yourself, inspired by nature and made with the people we love in mind.</p>
-      </header>
+  const [products, setProducts] = useState([]);
 
-      <article className="story-copy">
-        <p>Jayam began with a simple belief: the things we choose for our health should be chosen with care.</p>
-        <p>For generations, families have trusted nature, traditional ingredients, and simple everyday habits as part of their well-being. That wisdom continues to inspire us.</p>
-        <p>Today, wellness can feel complicated, with endless choices and long lists of unfamiliar ingredients. Jayam was created to offer something simpler — thoughtful products, carefully chosen, and worthy of your trust.</p>
-        <p>Our bodies are precious, and what we choose to put into them matters. We believe in keeping wellness simple, staying close to nature, respecting the body, avoiding unnecessary complexity, and supporting lasting everyday wellness — not quick fixes.</p>
-        <p>Our journey began with Moringa, but Jayam is about more than one ingredient. We continue to explore purposeful wellness products that we would be proud to place in the hands of our own families.</p>
-        <h2 className="story-subhead">What Jayam stands for</h2>
-        <ul className="story-principles">
-          {principles.map((principle) => <li key={principle}>{principle}</li>)}
+  useEffect(() => {
+    axios
+      .get(`${import.meta.env.VITE_API_URL}/api/products`)
+      .then((response) => Array.isArray(response.data) && setProducts(response.data))
+      .catch((error) => console.error('Error fetching products', error));
+  }, []);
+
+  useScrollReveal([products.length]);
+
+  const bySlug = Object.fromEntries(products.map((product) => [product.slug, product]));
+  return (
+    <main className="st-page">
+      <StoryJourney />
+
+      {/* ---------- One remarkable plant ---------- */}
+      <section className="st-plant">
+        <header className="wl-section-head wl-section-head--center" data-reveal>
+          <p className="wl-kicker">One remarkable plant</p>
+          <h2>Every part of the moringa tree <em>has its own story.</em></h2>
+          <p>Jayam crafts each product from a different part of the tree — leaves, flowers and seeds — alongside complementary botanicals like Amla.</p>
+        </header>
+        <div className="st-plant-grid">
+          {plantParts.map(({ icon: Icon, part, line, slugs }, index) => {
+            const items = slugs.map((slug) => bySlug[slug]).filter(Boolean);
+            return (
+              <article key={part} className="st-plant-card" data-reveal style={{ transitionDelay: `${index * 90}ms` }}>
+                <span className="st-plant-icon"><Icon size={22} strokeWidth={1.5} aria-hidden="true" /></span>
+                <h3>{part}</h3>
+                <p>{line}</p>
+                <ul>
+                  {items.map((product) => (
+                    <li key={product.id}>
+                      <Link to={`/products/${product.slug}`}>
+                        {product.name.replace(/^Organic\s+/i, '').split(' — ')[0]} <span aria-hidden="true">→</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ---------- What we stand for ---------- */}
+      <section className="st-values">
+        <header className="wl-section-head wl-section-head--center" data-reveal>
+          <p className="wl-kicker">What Jayam stands for</p>
+          <h2>Seven promises, <em>kept simply.</em></h2>
+        </header>
+        <ul className="st-values-grid">
+          {principles.map(({ icon: Icon, text }, index) => (
+            <li key={text} data-reveal style={{ transitionDelay: `${index * 60}ms` }}>
+              <Icon size={22} strokeWidth={1.4} aria-hidden="true" />
+              <span>{text}</span>
+            </li>
+          ))}
         </ul>
-        <p>Because wellness is personal, and trust matters.</p>
-        <img className="story-logo" src="/jayam-logo.png" alt="Jayam — Bringing the best to your hands" />
-        <p className="story-signoff">Jayam — Bringing the best to your hands.</p>
-        <Link to="/shop" className="story-link">Explore our products <span aria-hidden="true">↗</span></Link>
-      </article>
+      </section>
+
+      {/* ---------- Sign-off ---------- */}
+      <section className="st-signoff" data-reveal>
+        <div className="st-signoff-emblem">
+          <img src="/jayam-logo.png" alt="Jayam — Bringing the best to your hands" />
+        </div>
+        <p className="st-signoff-line">Because wellness is personal, <em>and trust matters.</em></p>
+        <div className="wl-hero-actions">
+          <Link to="/shop" className="wl-button">Explore our products</Link>
+          <Link to="/contact" className="wl-button wl-button--ghost">Get in touch</Link>
+        </div>
+      </section>
     </main>
   );
 }

@@ -3,7 +3,7 @@ import MoringaSprig from './MoringaSprig';
 
 export default function ClosingInvite() {
   return (
-    <section className="wl-closing">
+    <section className="wl-closing" data-reveal>
       <MoringaSprig className="wl-closing-sprig wl-closing-sprig--left" pairs={8} />
       <MoringaSprig className="wl-closing-sprig wl-closing-sprig--right" pairs={8} />
       <p className="wl-kicker">Wellness is personal</p>

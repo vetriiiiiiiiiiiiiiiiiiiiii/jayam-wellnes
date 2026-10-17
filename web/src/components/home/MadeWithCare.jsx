@@ -11,7 +11,7 @@ const stages = [
 export default function MadeWithCare() {
   return (
     <section className="wl-section wl-made">
-      <div className="wl-made-intro">
+      <div className="wl-made-intro" data-reveal>
         <p className="wl-kicker">From plant to pack</p>
         <h2>Nothing hidden. <em>Nothing unnecessary.</em></h2>
         <p>No fillers, binders, artificial colors or preservatives — just carefully chosen botanicals and a process we’re proud to share.</p>
@@ -20,7 +20,7 @@ export default function MadeWithCare() {
       </div>
       <ol className="wl-made-stages">
         {stages.map(({ title, body }, index) => (
-          <li key={title}>
+          <li key={title} data-reveal>
             <span className="wl-made-number">{String(index + 1).padStart(2, '0')}</span>
             <div>
               <h3>{title}</h3>

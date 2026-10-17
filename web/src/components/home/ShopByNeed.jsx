@@ -22,17 +22,17 @@ export default function ShopByNeed({ products }) {
 
   return (
     <section className="wl-section wl-needs">
-      <header className="wl-section-head">
+      <header className="wl-section-head" data-reveal>
         <p className="wl-kicker">Shop by need</p>
         <h2>What does your body <em>need today?</em></h2>
         <p>Five simple botanicals, each made for one part of your everyday routine.</p>
       </header>
 
       <div className="wl-needs-grid">
-        {items.map((product) => {
+        {items.map((product, index) => {
           const { need, tone } = NEEDS[product.slug];
           return (
-            <Link key={product.id} to={`/products/${product.slug}`} className={`wl-need-card wl-tone--${tone}`}>
+            <Link key={product.id} to={`/products/${product.slug}`} className={`wl-need-card wl-tone--${tone}`} data-reveal style={{ transitionDelay: `${index * 80}ms` }}>
               <span className="wl-need-label">{need}</span>
               <div className="wl-need-art">
                 <ProductArt product={product} />
