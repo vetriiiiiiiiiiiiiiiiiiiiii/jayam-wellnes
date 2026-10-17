@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import StoryLandscape from './StoryLandscape';
-import MoringaSprig from '../home/MoringaSprig';
+import MoringaTree from './MoringaTree';
 
 // The Our Story opening: a pinned full-screen scene that evolves as the visitor scrolls.
 // Each panel takes one screen of scrolling; the sun rises and the tree grows across them.
@@ -54,15 +54,6 @@ const PANELS = [
   },
 ];
 
-// Branches of the tree: position on the trunk, angle, size and the progress at which each appears
-const BRANCHES = [
-  { left: '38%', bottom: '34%', rotate: -58, width: '58%', at: -0.2 },
-  { left: '4%', bottom: '42%', rotate: 52, width: '54%', at: 0.2, flip: true },
-  { left: '36%', bottom: '55%', rotate: -36, width: '52%', at: 0.38 },
-  { left: '8%', bottom: '62%', rotate: 30, width: '48%', at: 0.55, flip: true },
-  { left: '22%', bottom: '70%', rotate: -6, width: '46%', at: 0.72 },
-];
-
 export default function StoryJourney() {
   const sectionRef = useRef(null);
   const [progress, setProgress] = useState(0);
@@ -96,37 +87,15 @@ export default function StoryJourney() {
 
   const step = progress * (PANELS.length - 1);
   const active = Math.round(step);
-  const treeGrowth = 0.55 + 0.45 * Math.min(progress / 0.85, 1);
+  const treeGrowth = 0.72 + 0.28 * Math.min(progress / 0.85, 1);
 
   return (
     <section ref={sectionRef} className="sj" style={{ height: `${PANELS.length * 100}vh` }} aria-label="Our story">
       <div className="sj-stage">
         <StoryLandscape progress={progress} compact={compact} />
 
-        <div className="sj-tree" style={{ transform: `scale(${treeGrowth})` }} aria-hidden="true">
-          <svg className="sj-trunk" viewBox="0 0 120 600" preserveAspectRatio="none">
-            <path d="M70 600 C62 520 78 450 64 380 C52 318 72 250 60 180 C54 140 62 100 58 60" stroke="#5a4a36" strokeWidth="14" strokeLinecap="round" fill="none" />
-            <path d="M66 420 C40 400 26 380 14 350" stroke="#5a4a36" strokeWidth="7" strokeLinecap="round" fill="none" />
-            <path d="M62 300 C88 280 100 262 112 236" stroke="#5a4a36" strokeWidth="6" strokeLinecap="round" fill="none" />
-          </svg>
-          {BRANCHES.map((branch) => {
-            const visible = Math.min(Math.max((progress - branch.at) / 0.12, 0), 1);
-            return (
-              <span
-                key={`${branch.left}-${branch.bottom}`}
-                className="sj-branch-wrap"
-                style={{
-                  left: branch.left,
-                  bottom: branch.bottom,
-                  width: branch.width,
-                  opacity: visible,
-                  transform: `rotate(${branch.rotate}deg) scale(${(branch.flip ? -1 : 1) * (0.7 + 0.3 * visible)}, ${0.7 + 0.3 * visible})`,
-                }}
-              >
-                <MoringaSprig className="sj-branch" pairs={10} />
-              </span>
-            );
-          })}
+        <div className="sj-tree" style={{ transform: `scale(${treeGrowth})`, '--p': progress }} aria-hidden="true">
+          <MoringaTree className="sj-tree-svg" />
         </div>
 
         <div className="sj-panels">

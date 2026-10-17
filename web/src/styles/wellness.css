@@ -191,8 +191,7 @@ h3,
 }
 
 .jayam-product-card:hover .jayam-pack,
-.wl-need-card:hover .jayam-pack,
-.wl-hero-product:hover .jayam-pack {
+.wl-need-card:hover .jayam-pack {
   transform: translateY(-8px) rotate(-1.5deg);
 }
 
@@ -300,89 +299,6 @@ h3,
   padding: 10px 0 30px;
 }
 
-.wl-arch {
-  position: relative;
-  width: min(100%, 440px);
-  aspect-ratio: 0.82;
-  overflow: hidden;
-  border-radius: 999px 999px 36px 36px;
-  box-shadow: 0 40px 70px -30px rgba(46, 70, 54, 0.35);
-}
-
-.wl-scene {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.wl-scene-sun {
-  animation: wl-sunrise 2.6s var(--ease-soft) both;
-}
-
-.wl-scene-clouds {
-  animation: wl-drift 24s ease-in-out infinite alternate;
-}
-
-/* Moringa branch hanging in from the top of the arch */
-.wl-hero-branch {
-  position: absolute;
-  top: -24%;
-  right: -18%;
-  width: 66%;
-  color: #4f6b4b;
-  transform-origin: 50% 50%;
-  animation: wl-sway 7s ease-in-out infinite alternate;
-}
-
-/* Featured product breaks out of the frame */
-.wl-hero-product {
-  position: absolute;
-  z-index: 2;
-  bottom: 0;
-  left: 2%;
-  display: grid;
-  width: min(42%, 190px);
-  gap: 10px;
-  color: var(--ink);
-  text-decoration: none;
-  transition: transform 500ms var(--ease-soft);
-}
-
-.wl-hero-product:hover {
-  transform: translateY(-6px);
-}
-
-.wl-hero-product .jayam-art {
-  aspect-ratio: 4 / 5;
-  padding: 0;
-  background: transparent;
-  overflow: visible;
-}
-
-.wl-hero-product .jayam-art-halo {
-  display: none;
-}
-
-.wl-hero-product .jayam-pack {
-  filter: drop-shadow(0 18px 24px rgba(46, 70, 54, 0.22));
-}
-
-@keyframes wl-sunrise {
-  from { transform: translateY(120px); opacity: 0.2; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-@keyframes wl-sway {
-  from { transform: rotate(196deg); }
-  to { transform: rotate(201deg); }
-}
-
-@keyframes wl-drift {
-  from { transform: translateX(-10px); }
-  to { transform: translateX(14px); }
-}
-
 @media (max-width: 860px) {
   .wl-hero::before {
     top: 40%;
@@ -392,27 +308,6 @@ h3,
 
   .wl-hero-visual {
     padding: 0 0 24px;
-  }
-
-  .wl-arch {
-    width: min(86%, 340px);
-  }
-
-  .wl-hero-product {
-    left: 0;
-    width: 38%;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .wl-hero-branch {
-    transform: rotate(198deg);
-  }
-
-  .wl-scene-sun,
-.wl-scene-clouds,
-.wl-hero-branch {
-    animation: none;
   }
 }
 
@@ -743,10 +638,6 @@ h3,
 
   .wl-hero-intro {
     font-size: 16px;
-  }
-
-  .wl-arch {
-    width: min(100%, 380px);
   }
 
   .wl-section {
@@ -1201,38 +1092,24 @@ body::after {
 /* Moringa tree growing from the bottom right */
 .sj-tree {
   position: absolute;
-  right: 6vw;
-  bottom: -2vh;
-  width: min(34vw, 420px);
-  height: min(78vh, 720px);
+  right: 3vw;
+  bottom: -1vh;
+  width: min(46vw, 640px);
+  height: min(86vh, 800px);
   transform-origin: 50% 100%;
   transition: transform 200ms linear;
   pointer-events: none;
 }
 
-.sj-trunk {
-  position: absolute;
-  bottom: 0;
-  left: 30%;
-  width: 22%;
+.sj-tree-svg {
+  display: block;
+  width: 100%;
   height: 100%;
 }
 
-.sj-branch-wrap {
-  position: absolute;
-  display: block;
-  transform-origin: 50% 100%;
-  transition: opacity 300ms ease, transform 300ms ease;
-}
-
-.sj-branch {
-  display: block;
-  width: 100%;
-  color: #4f6e47;
-}
-
-.sj-branch-wrap:nth-child(odd) .sj-branch {
-  color: #5f7f55;
+/* Canopy reveal: each frond fades in once --p passes its --at threshold */
+.mt-reveal {
+  opacity: clamp(0, calc((var(--p, 1) - var(--at, 0)) / 0.18 + 0.35), 1);
 }
 
 /* Story panels */
@@ -1406,11 +1283,11 @@ body::after {
 }
 
 @media (max-width: 860px) {
+  /* Shorter on phones so the crown sits below the chapter card */
   .sj-tree {
     right: -8vw;
-    width: 62vw;
-    height: 56vh;
-    opacity: 0.85;
+    width: 76vw;
+    height: 37vh;
   }
 
   /* Chapter cards sit at the top so the tree stays visible below */
@@ -1443,8 +1320,7 @@ body::after {
 
 @media (prefers-reduced-motion: reduce) {
   .sj-tree,
-  .sj-branch-wrap,
-  .sj-panel {
+.sj-panel {
     transition: none;
   }
 }
@@ -1606,5 +1482,168 @@ body::after {
 
   .st-values-grid li {
     font-size: 18px;
+  }
+}
+
+/* ==========================================
+   HERO STILL-LIFE
+   Products on a plinth with soft moringa-leaf shadows (HeroStillLife.jsx)
+   ========================================== */
+.wl-still {
+  position: relative;
+  width: min(100%, 470px);
+  aspect-ratio: 0.84;
+}
+
+.wl-still-backdrop {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 999px 999px 32px 32px;
+  background: linear-gradient(180deg, #f7f0e2 0%, #f1efe4 48%, #e4eadb 100%);
+}
+
+/* Blurred leaf shadows, drifting slowly like light through branches */
+.wl-still-shadow {
+  position: absolute;
+  color: #3f5a3e;
+  filter: blur(6px);
+  pointer-events: none;
+  animation: wl-leaf-breeze 14s ease-in-out infinite alternate;
+}
+
+.wl-still-shadow--one {
+  --base: -38deg;
+  top: -12%;
+  left: -14%;
+  width: 78%;
+  opacity: 0.2;
+  transform: rotate(var(--base));
+}
+
+.wl-still-shadow--two {
+  --base: 148deg;
+  top: 2%;
+  right: -12%;
+  width: 60%;
+  opacity: 0.13;
+  filter: blur(9px);
+  transform: rotate(var(--base));
+  animation-duration: 18s;
+  animation-delay: -6s;
+}
+
+@keyframes wl-leaf-breeze {
+  from { transform: rotate(var(--base)) translate(0, 0); }
+  to { transform: rotate(calc(var(--base) + 3deg)) translate(8px, 6px); }
+}
+
+/* Plinth: a soft sand cylinder */
+.wl-still-plinth {
+  position: absolute;
+  bottom: 7%;
+  left: 50%;
+  width: 74%;
+  height: 11%;
+  border-radius: 0 0 50% 50% / 0 0 30% 30%;
+  background: linear-gradient(90deg, #ddd0b6 0%, #ece3d1 38%, #e8ddc8 62%, #d8caae 100%);
+  transform: translateX(-50%);
+}
+
+.wl-still-plinth::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 34%;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #f6f0e4 0%, #efe6d4 100%);
+  content: '';
+  transform: translateY(-50%);
+}
+
+.wl-still-plinth::after {
+  position: absolute;
+  z-index: -1;
+  bottom: -14%;
+  left: 6%;
+  width: 88%;
+  height: 26%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(46, 70, 54, 0.22) 0%, rgba(46, 70, 54, 0) 70%);
+  content: '';
+}
+
+/* Products standing on the plinth */
+.wl-still-products {
+  position: absolute;
+  bottom: 15%;
+  left: 50%;
+  display: flex;
+  width: 100%;
+  align-items: flex-end;
+  justify-content: center;
+  transform: translateX(-50%);
+}
+
+.wl-still-item {
+  position: relative;
+  display: block;
+  transition: transform 600ms var(--ease-soft);
+}
+
+.wl-still-item:hover {
+  transform: translateY(-6px);
+}
+
+/* Pack drawings include empty space around them, so items overlap generously */
+.wl-still-item--left {
+  order: 1;
+  width: 40%;
+  margin-right: -17%;
+}
+
+.wl-still-item--center {
+  z-index: 2;
+  order: 2;
+  width: 62%;
+}
+
+.wl-still-item--right {
+  z-index: 1;
+  order: 3;
+  width: 48%;
+  margin-left: -20%;
+}
+
+.wl-still-item .jayam-art {
+  aspect-ratio: 260 / 320;
+  overflow: visible;
+  padding: 0;
+  background: transparent;
+}
+
+.wl-still-item .jayam-art-halo {
+  display: none;
+}
+
+/* Packs carry their own ground shadow; lift them gently off the plinth */
+.wl-still-item .jayam-pack {
+  filter: drop-shadow(0 16px 18px rgba(46, 70, 54, 0.14));
+}
+
+.wl-still-item:hover .jayam-pack {
+  transform: none;
+}
+
+@media (max-width: 860px) {
+  .wl-still {
+    width: min(88%, 360px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wl-still-shadow {
+    animation: none;
   }
 }

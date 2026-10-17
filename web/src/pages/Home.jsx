@@ -8,8 +8,6 @@ import MadeWithCare from '../components/home/MadeWithCare';
 import ClosingInvite from '../components/home/ClosingInvite';
 import useScrollReveal from '../lib/useScrollReveal';
 
-const FEATURED_SLUG = 'moringa-leaf-amla-tablets';
-
 function Home() {
   const [products, setProducts] = useState([]);
 
@@ -27,11 +25,9 @@ function Home() {
 
   useScrollReveal([products.length]);
 
-  const featured = products.find((product) => product.slug === FEATURED_SLUG) || products[0];
-
   return (
     <div className="wl-home">
-      <WellnessHero featured={featured} />
+      <WellnessHero products={products} />
       <PromiseStrip />
       <ShopByNeed products={products} />
       <DailyRitual />

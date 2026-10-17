@@ -1,9 +1,7 @@
 import { Link } from 'react-router-dom';
-import HeroScene from './HeroScene';
-import MoringaSprig from './MoringaSprig';
-import ProductArt from '../storefront/ProductArt';
+import HeroStillLife from './HeroStillLife';
 
-export default function WellnessHero({ featured }) {
+export default function WellnessHero({ products = [] }) {
   return (
     <section className="wl-hero">
       <div className="wl-hero-copy">
@@ -23,17 +21,7 @@ export default function WellnessHero({ featured }) {
       </div>
 
       <div className="wl-hero-visual">
-        <div className="wl-arch">
-          <HeroScene />
-          <MoringaSprig className="wl-hero-branch" pairs={11} />
-        </div>
-
-
-        {featured && (
-          <Link to={`/products/${featured.slug}`} className="wl-hero-product" aria-label={`View ${featured.name}`}>
-            <ProductArt product={featured} />
-          </Link>
-        )}
+        <HeroStillLife products={products} />
       </div>
     </section>
   );
