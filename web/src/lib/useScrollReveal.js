@@ -16,7 +16,9 @@ export default function useScrollReveal(deps = []) {
       window.setTimeout(() => { element.style.transitionDelay = ''; }, 1400);
     };
 
+    let frame = 0;
     const check = () => {
+      frame = 0;
       const threshold = window.innerHeight * 0.94;
       pending = pending.filter((element) => {
         if (element.getBoundingClientRect().top < threshold) {
@@ -26,9 +28,13 @@ export default function useScrollReveal(deps = []) {
         return true;
       });
       if (pending.length === 0) {
-        window.removeEventListener('scroll', check);
-        window.removeEventListener('resize', check);
+        window.removeEventListener('scroll', onScroll);
+        window.removeEventListener('resize', onScroll);
       }
+    };
+    // At most one position check per animation frame
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(check);
     };
 
     // Hide only what is still below the fold; anything already visible stays put
@@ -42,11 +48,12 @@ export default function useScrollReveal(deps = []) {
       return true;
     });
 
-    window.addEventListener('scroll', check, { passive: true });
-    window.addEventListener('resize', check);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
     return () => {
-      window.removeEventListener('scroll', check);
-      window.removeEventListener('resize', check);
+      cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);

@@ -66,14 +66,18 @@ export default function StoryJourney() {
       if (!section) return;
       const rect = section.getBoundingClientRect();
       const travel = section.offsetHeight - window.innerHeight;
-      setProgress(travel > 0 ? Math.min(Math.max(-rect.top / travel, 0), 1) : 0);
+      const raw = travel > 0 ? Math.min(Math.max(-rect.top / travel, 0), 1) : 0;
+      // Rounded so tiny scroll movements don't trigger new renders
+      setProgress(Math.round(raw * 400) / 400);
       setCompact(window.innerWidth < 860);
     };
+    // At most one update per animation frame
     const onScroll = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(update);
-      // Also update directly so the scene stays correct where animation frames are throttled
-      update();
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        update();
+      });
     };
     update();
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -88,14 +92,16 @@ export default function StoryJourney() {
   const step = progress * (PANELS.length - 1);
   const active = Math.round(step);
   const treeGrowth = 0.72 + 0.28 * Math.min(progress / 0.85, 1);
+  // The canopy updates in small steps: each change repaints thousands of leaflets
+  const canopy = Math.round(progress * 25) / 25;
 
   return (
     <section ref={sectionRef} className="sj" style={{ height: `${PANELS.length * 100}vh` }} aria-label="Our story">
       <div className="sj-stage">
         <StoryLandscape progress={progress} compact={compact} />
 
-        <div className="sj-tree" style={{ transform: `scale(${treeGrowth})`, '--p': progress }} aria-hidden="true">
-          <MoringaTree className="sj-tree-svg" />
+        <div className="sj-tree" style={{ transform: `scale(${treeGrowth.toFixed(3)})`, '--p': canopy }} aria-hidden="true">
+          <MoringaTree className="sj-tree-svg" lite={compact} />
         </div>
 
         <div className="sj-panels">

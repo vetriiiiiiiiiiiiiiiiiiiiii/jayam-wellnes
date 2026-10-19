@@ -725,21 +725,16 @@ h3,
    One visual language: paper as a background, soft pills for every control.
    ========================================== */
 
-/* Paper sits behind the content, so text, cards and buttons stay crisp */
-#root::after {
-  display: none;
-}
-
-body::after {
+/* Crumpled-paper texture behind the content (PaperOverlay.jsx sets its opacity on scroll) */
+.paper-crumple {
   position: fixed;
-  z-index: 0;
+  z-index: -1;
   inset: 0;
-  background: url('/jayam-crumpled-paper.png') center / cover no-repeat;
-  content: '';
-  opacity: calc(var(--paper-wrinkle-opacity, 0.32) * 0.75);
-  mix-blend-mode: multiply;
+  background: url('/jayam-crumpled-paper.jpg') center / cover no-repeat;
+  opacity: 0.26;
   pointer-events: none;
-  transition: opacity 80ms linear;
+  transform: translateZ(0);
+  will-change: opacity;
 }
 
 /* ---------- Navigation ---------- */
@@ -1097,8 +1092,9 @@ body::after {
   width: min(46vw, 640px);
   height: min(86vh, 800px);
   transform-origin: 50% 100%;
-  transition: transform 200ms linear;
   pointer-events: none;
+  /* Scale on the GPU instead of redrawing the tree */
+  will-change: transform;
 }
 
 .sj-tree-svg {
@@ -1126,7 +1122,6 @@ body::after {
   grid-area: 1 / 1;
   max-width: 640px;
   color: var(--ink);
-  transition: opacity 120ms linear;
   will-change: opacity, transform;
 }
 
@@ -1198,10 +1193,9 @@ body::after {
   margin-left: 2vw;
   border: 1px solid rgba(255, 255, 255, 0.6);
   border-radius: 32px;
-  background: rgba(250, 247, 239, 0.78);
+  background: rgba(250, 247, 239, 0.9);
   padding: 44px 46px 34px;
   box-shadow: 0 30px 60px -30px rgba(46, 70, 54, 0.35);
-  backdrop-filter: blur(10px);
 }
 
 .sj-panel--chapter h2 {
@@ -1643,6 +1637,17 @@ body::after {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .wl-still-shadow {
+    animation: none;
+  }
+}
+
+/* ==========================================
+   PERFORMANCE ON PHONES
+   Keep scrolling smooth on lower-powered devices.
+   ========================================== */
+@media (max-width: 860px), (hover: none) {
+  /* Blurred, animated shadows repaint every frame: keep them still */
   .wl-still-shadow {
     animation: none;
   }

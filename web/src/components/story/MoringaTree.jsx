@@ -134,7 +134,8 @@ function buildTree() {
 
 const TREE = buildTree();
 
-function MoringaTree({ className = '' }) {
+// `lite` draws every other leaflet: half the work on phones, still reads as a full crown
+function MoringaTree({ className = '', lite = false }) {
   const tree = TREE;
 
   return (
@@ -162,7 +163,7 @@ function MoringaTree({ className = '' }) {
       {tree.fronds.map(({ key, rachis, leaflets, at }) => (
         <g key={key} className="mt-reveal" style={{ '--at': at }}>
           <path d={rachis} stroke="#6f7f55" strokeWidth="1.2" fill="none" opacity="0.8" />
-          {leaflets.map((leaf, index) => (
+          {(lite ? leaflets.filter((_, index) => index % 2 === 0) : leaflets).map((leaf, index) => (
             <ellipse
               key={index}
               cx={leaf.cx.toFixed(1)}

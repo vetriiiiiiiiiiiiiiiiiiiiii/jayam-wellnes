@@ -32,7 +32,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className={`fixed top-0 z-[100] w-full border-b transition-colors duration-300 ${isScrolled || location.pathname !== '/' ? 'border-[#d8d3c7] bg-[#f2efe6]/95 text-brand-dark backdrop-blur-md' : 'border-transparent bg-[#f2efe6]/90 text-brand-dark backdrop-blur-md'}`}>
+      <nav className={`fixed top-0 z-[100] w-full border-b transition-colors duration-300 ${isScrolled || location.pathname !== '/' ? 'border-[#e3dfd4] bg-[#f6f3ec] text-brand-dark' : 'border-transparent bg-[#f6f3ec] text-brand-dark'}`}>
         <div className="jayam-topline"><span>Free U.S. shipping on orders $49+</span></div>
         <div className="jayam-nav-inner">
           <Link to="/" aria-label="Jayam home" className="jayam-wordmark">

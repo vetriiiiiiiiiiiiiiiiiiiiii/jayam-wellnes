@@ -1,10 +1,11 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 // Layout components
 import Navbar from './components/storefront/Navbar';
 import Footer from './components/storefront/Footer';
 import { CartProvider } from './components/storefront/CartProvider';
+import PaperOverlay from './components/storefront/PaperOverlay';
 
 // Pages — Storefront
 import Home from './pages/Home';
@@ -30,34 +31,11 @@ import AdminEnquiries from './pages/admin/AdminEnquiries';
 import { AppProvider } from './context/Appcontext';
 
 function App() {
-  // Fade the crumpled-paper overlay as the visitor scrolls down the page
-  useEffect(() => {
-    let frame = 0;
-    const updatePaper = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        const progress = Math.min(window.scrollY / 1400, 1);
-        const easedProgress = progress * progress * (3 - 2 * progress);
-        document.documentElement.style.setProperty(
-          '--paper-wrinkle-opacity',
-          `${0.32 * (1 - easedProgress)}`,
-        );
-      });
-    };
-
-    updatePaper();
-    window.addEventListener('scroll', updatePaper, { passive: true });
-    return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener('scroll', updatePaper);
-      document.documentElement.style.removeProperty('--paper-wrinkle-opacity');
-    };
-  }, []);
-
   return (
     <AppProvider authEnabled={false}>
       <CartProvider>
         <Router>
+          <PaperOverlay />
           <Navbar />
           <main className="flex-grow flex flex-col">
             <Routes>
