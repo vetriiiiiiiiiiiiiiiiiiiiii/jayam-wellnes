@@ -5,7 +5,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Navbar from './components/storefront/Navbar';
 import Footer from './components/storefront/Footer';
 import { CartProvider } from './components/storefront/CartProvider';
-import PaperOverlay from './components/storefront/PaperOverlay';
 
 // Pages — Storefront
 import Home from './pages/Home';
@@ -35,7 +34,6 @@ function App() {
     <AppProvider authEnabled={false}>
       <CartProvider>
         <Router>
-          <PaperOverlay />
           <Navbar />
           <main className="flex-grow flex flex-col">
             <Routes>

@@ -4,6 +4,7 @@ import axios from 'axios';
 import ProductGallery from '../components/storefront/ProductGallery';
 import ProductActions from '../components/storefront/ProductActions';
 import ReviewSection from '../components/storefront/ReviewSection';
+import BuyBar from '../components/storefront/BuyBar';
 import { CATEGORY_LABELS, FREE_SHIPPING_THRESHOLD, formatPrice } from '../lib/store';
 
 // Required alongside structure/function statements on U.S. dietary supplements
@@ -223,6 +224,8 @@ export default function ProductPage() {
           <ReviewSection productId={product.id} reviews={product.reviews || []} />
         </div>
       </section>
+
+      <BuyBar product={product} selectedVariant={selectedVariant} />
     </div>
   );
 }

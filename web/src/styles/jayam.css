@@ -25,18 +25,6 @@ body {
   isolation: isolate;
 }
 
-/* Paper effect: fine grain everywhere, plus a crumpled sheet that fades out as you scroll */
-body::before {
-  position: fixed;
-  z-index: 0;
-  inset: 0;
-  background-image: url('/jayam-paper-texture.png');
-  background-repeat: repeat;
-  content: '';
-  opacity: 0.035;
-  pointer-events: none;
-}
-
 button,
 a {
   -webkit-tap-highlight-color: transparent;
@@ -286,90 +274,6 @@ a {
   line-height: 1.65;
 }
 
-.jayam-footer {
-  padding: 60px 8vw 24px;
-  border-top: 1px solid #d8d4c9;
-  background: #eae6db;
-  color: var(--ink);
-}
-
-.jayam-footer-main {
-  display: grid;
-  grid-template-columns: 1.2fr 1fr auto;
-  align-items: center;
-  gap: 40px;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding-bottom: 48px;
-}
-
-.jayam-footer-brand {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.jayam-footer-brand img {
-  width: 58px;
-  mix-blend-mode: multiply;
-}
-
-.jayam-footer-wordmark {
-  margin: 0 0 5px;
-  font: 500 17px var(--serif);
-  letter-spacing: 0.12em;
-}
-
-.jayam-footer-tagline {
-  margin: 0;
-  color: #686c61;
-  font-size: 10px;
-}
-
-.jayam-footer-note {
-  max-width: 290px;
-  margin: 0;
-  color: #65695f;
-  font-size: 11px;
-  line-height: 1.75;
-}
-
-.jayam-footer-links {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 12px 20px;
-  max-width: 260px;
-}
-
-.jayam-footer-links a {
-  color: #4f594d;
-  font-size: 10px;
-  text-decoration: none;
-}
-
-.jayam-footer-links a:hover {
-  color: #758366;
-}
-
-.jayam-footer-disclaimer {
-  margin: 0 0 18px;
-  color: #77776c;
-  font-size: 10px;
-  line-height: 1.6;
-}
-
-.jayam-footer-bottom {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  border-top: 1px solid #d2cec2;
-  padding-top: 17px;
-  color: #77776c;
-  font: 11px var(--mono);
-  letter-spacing: 0.04em;
-}
-
 .jayam-home-products {
   padding: 95px 7vw 110px;
   border-top: 1px solid #d2cec2;
@@ -555,7 +459,6 @@ a {
   height: 100%;
   place-items: center;
   background-color: #e8e4da;
-  background-image: url('/jayam-paper-texture.png');
   color: #718069;
   font: 500 85px var(--serif);
 }
@@ -1162,24 +1065,6 @@ a {
     padding: 90px 26px;
   }
 
-  .jayam-footer {
-    padding: 42px 26px 20px;
-  }
-
-  .jayam-footer-main {
-    grid-template-columns: 1fr;
-    gap: 26px;
-    padding-bottom: 32px;
-  }
-
-  .jayam-footer-links {
-    justify-content: flex-start;
-  }
-
-  .jayam-footer-bottom {
-    flex-direction: column;
-  }
-
   .jayam-shop-intro {
     padding: 125px 26px 62px;
   }
@@ -1266,84 +1151,9 @@ a {
   --gold: #9a8057;
 }
 
-.jayam-topline {
-  display: flex;
-  height: 28px;
-  align-items: center;
-  justify-content: center;
-  gap: 15px;
-  background: #263d30;
-  color: #f4f1e8;
-  font: 11px var(--mono);
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
-}
-
-.jayam-topline i {
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: #baa174;
-}
-
-.jayam-nav-inner {
-  display: flex;
-  max-width: 1540px;
-  height: 74px;
-  align-items: center;
-  justify-content: space-between;
-  margin: 0 auto;
-  padding: 0 6vw;
-}
-
-.jayam-nav-left,
-.jayam-nav-right,
 .jayam-wordmark {
   display: flex;
   align-items: center;
-}
-
-.jayam-nav-left {
-  gap: clamp(18px, 3vw, 48px);
-}
-
-.jayam-nav-search {
-  display: flex;
-  width: clamp(180px, 23vw, 300px);
-  height: 37px;
-  align-items: center;
-  gap: 9px;
-  border-bottom: 1px solid #bfc2b5;
-  color: #65715f;
-}
-
-.jayam-nav-search:focus-within {
-  border-color: #536b51;
-}
-
-.jayam-nav-search input {
-  width: 100%;
-  min-width: 0;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  color: var(--ink);
-  font: 10px var(--sans);
-}
-
-.jayam-nav-search input::placeholder {
-  color: #76796e;
-  opacity: 1;
-}
-
-.jayam-nav-search input::-webkit-search-cancel-button {
-  cursor: pointer;
-}
-
-.jayam-nav-search button {
-  flex: none;
-  color: #536b51;
-  font-size: 15px;
 }
 
 .jayam-wordmark {
@@ -1370,80 +1180,6 @@ a {
   color: #65715f;
   font: 11px var(--mono);
   letter-spacing: 0.23em;
-}
-
-.jayam-nav-inner button,
-.jayam-nav-right a {
-  color: var(--ink);
-  font: 11px var(--mono);
-  letter-spacing: 0.1em;
-  text-decoration: none;
-  text-transform: uppercase;
-}
-
-.jayam-nav-inner button {
-  border: 0;
-  background: transparent;
-  padding: 9px 0;
-}
-
-.jayam-nav-left > button {
-  position: relative;
-}
-
-.jayam-nav-left > button::after,
-.jayam-nav-right a::after {
-  position: absolute;
-  right: 0;
-  bottom: 3px;
-  left: 0;
-  height: 1px;
-  background: #819078;
-  content: '';
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 240ms ease;
-}
-
-.jayam-nav-left > button:hover::after,
-.jayam-nav-right a:hover::after {
-  transform: scaleX(1);
-}
-
-.jayam-nav-right {
-  gap: clamp(18px, 3vw, 42px);
-}
-
-.jayam-nav-right a {
-  position: relative;
-}
-
-.jayam-nav-right .jayam-nav-shop {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  border: 1px solid #86917e;
-  padding: 12px 15px;
-  transition: background 180ms ease, color 180ms ease;
-}
-
-.jayam-nav-right .jayam-nav-products {
-  font-weight: 500;
-}
-
-.jayam-nav-right .jayam-nav-shop::after {
-  display: none;
-}
-
-.jayam-nav-right .jayam-nav-shop:hover {
-  background: var(--ink);
-  color: var(--cream);
-}
-
-.jayam-nav-bag {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
 }
 
 .jayam-bag-count {
@@ -1861,50 +1597,7 @@ a {
   margin-bottom: 48px;
 }
 
-.jayam-footer {
-  background: #263d30;
-  color: #f4f1e8;
-}
-
-.jayam-footer-brand img {
-  filter: grayscale(1) brightness(0) invert(1);
-  opacity: 0.82;
-  mix-blend-mode: screen;
-}
-
-.jayam-footer-wordmark,
-.jayam-footer-links a {
-  color: #f4f1e8;
-}
-
-.jayam-footer-tagline,
-.jayam-footer-note,
-.jayam-footer-bottom {
-  color: #c2c8bb;
-}
-
-.jayam-footer-bottom {
-  border-color: rgba(225, 221, 205, 0.22);
-}
-
 @media (max-width: 760px) {
-  .jayam-topline {
-    height: 25px;
-    gap: 8px;
-    font-size: 7px;
-    letter-spacing: 0.08em;
-  }
-
-  .jayam-topline span:last-child,
-  .jayam-topline i:last-of-type {
-    display: none;
-  }
-
-  .jayam-nav-inner {
-    height: 66px;
-    gap: 12px;
-    padding: 0 14px;
-  }
 
   .jayam-wordmark {
     gap: 6px;
@@ -1921,42 +1614,6 @@ a {
 
   .jayam-wordmark small {
     font-size: 6px;
-  }
-
-  .jayam-nav-search {
-    width: auto;
-    min-width: 70px;
-    height: 34px;
-    flex: 1;
-    gap: 6px;
-  }
-
-  .jayam-nav-search input {
-    font-size: 9px;
-  }
-
-  .jayam-nav-search > svg {
-    width: 13px;
-    flex: none;
-  }
-
-  .jayam-nav-right {
-    flex: none;
-    gap: 10px;
-  }
-
-  .jayam-nav-story {
-    display: none;
-  }
-
-  .jayam-nav-right .jayam-nav-products {
-    font-size: 8px;
-    letter-spacing: 0.05em;
-  }
-
-  .jayam-nav-bag {
-    gap: 5px;
-    font-size: 8px !important;
   }
 
   .jayam-bag-count {
@@ -2089,19 +1746,6 @@ a {
 @media (max-width: 390px) {
   .jayam-home-copy h1 {
     font-size: clamp(50px, 12vw, 70px);
-  }
-
-  .jayam-nav-inner {
-    gap: 9px;
-    padding: 0 10px;
-  }
-
-  .jayam-nav-right {
-    gap: 7px;
-  }
-
-  .jayam-nav-right .jayam-nav-products {
-    font-size: 7px;
   }
 
   .jayam-home-actions {
@@ -2636,13 +2280,6 @@ body {
   font-weight: 600;
 }
 
-/* Top bar: quiet single message */
-.jayam-topline {
-  height: 30px;
-  font-size: 11px;
-  letter-spacing: 0.08em;
-}
-
 /* Labels: lighter tracking for a cleaner look */
 .jayam-eyebrow {
   font-size: 11px;
@@ -2662,32 +2299,6 @@ body {
 
   .jayam-home-art img {
     width: min(60%, 240px);
-  }
-
-  /* The top bar has a single message, so keep it visible on small screens */
-  .jayam-topline span:last-child {
-    display: inline;
-  }
-}
-
-/* Phones: logo, Our Products and Bag only — keeps the bar uncluttered and on one line */
-@media (max-width: 480px) {
-  .jayam-nav-search {
-    display: none;
-  }
-
-  .jayam-nav-inner {
-    justify-content: space-between;
-  }
-
-  .jayam-nav-right {
-    gap: 16px;
-  }
-
-  .jayam-nav-right .jayam-nav-products,
-  .jayam-nav-bag {
-    font-size: 10px !important;
-    letter-spacing: 0.08em;
   }
 }
 

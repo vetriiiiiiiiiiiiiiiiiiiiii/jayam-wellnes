@@ -1,24 +1,29 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..600,0..100;1,9..144,300..600,0..100&family=Manrope:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400..800&display=swap');
 @import "./styles/all.css";
 @import "./styles/jayam.css";
 @import "./styles/wellness.css";
+@import "./styles/jayam-white.css";
 @import "tailwindcss";
 
 @theme {
-  --color-brand-pearl: #f8f5ee;
-  --color-brand-dark: #2e4636;
-  --color-brand-forest-700: #3a5a45;
-  --color-brand-forest-500: #5f7f63;
-  --color-brand-forest-900: #2a4232;
-  --color-brand-green-500: #7d9070;
-  --color-brand-green-100: #e1e8d6;
-  --color-brand-gold: #c99a4b;
+  /* Client palette: Forest Fern, Tilled Earth, Wheat Field Sunrise, Cherry Grove, Alabaster Hay */
+  --color-brand-pearl: #ffffff;
+  --color-brand-dark: #133020;
+  --color-brand-forest-700: #327039;
+  --color-brand-forest-500: #4a8a50;
+  --color-brand-forest-900: #133020;
+  --color-brand-green-500: #327039;
+  --color-brand-green-100: #e7f0e3;
+  --color-brand-gold: #f0be49;
+  --color-brand-cherry: #dd5c36;
+  --color-brand-hay: #f8edd9;
   --color-brand-white: #fffdf8;
   --color-brand-purple-500: #58734e;
   --color-brand-purple-700: #234330;
   --color-brand-lavender: #e7e3d9;
 
-  --font-serif: 'Fraunces', Georgia, serif;
-  --font-sans: 'Manrope', sans-serif;
-  --font-mono: 'Manrope', sans-serif;
+  /* San Francisco on Apple devices, Inter elsewhere */
+  --font-serif: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', 'Helvetica Neue', Arial, sans-serif;
 }

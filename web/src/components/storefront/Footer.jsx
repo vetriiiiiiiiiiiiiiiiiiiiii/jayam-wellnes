@@ -1,47 +1,64 @@
 import { Link } from 'react-router-dom';
 import { CONTACT } from '../../lib/store';
 
-const footerLinks = [
-  { label: 'Shop', to: '/shop' },
-  { label: 'Our Story', to: '/our-story' },
-  { label: 'FAQ', to: '/faq' },
-  { label: 'Shipping', to: '/faq#shipping' },
-  { label: 'Track Order', to: '/track-order' },
-  { label: 'Contact', to: '/contact' },
+// Light, orderly footer in the style of apple.com: fine print first, then link columns.
+const PRODUCTS = [
+  { label: 'Moringa Leaf + Amla Tablets', to: '/products/moringa-leaf-amla-tablets' },
+  { label: 'Moringa Leaf Capsules', to: '/products/moringa-leaf-capsules' },
+  { label: 'Moringa Flower Tablets', to: '/products/moringa-flower-tablets' },
+  { label: 'Moringa Seed Capsules', to: '/products/moringa-seed-capsules' },
+  { label: 'Beauty Drops', to: '/products/beauty-drops-moringa-facial-elixir' },
+  { label: 'All products', to: '/shop' },
 ];
+
+const HELP = [
+  { label: 'FAQ', to: '/faq' },
+  { label: 'Shipping & delivery', to: '/faq#shipping' },
+  { label: 'Track your order', to: '/track-order' },
+  { label: 'Contact us', to: '/contact' },
+];
+
 const currentYear = new Date().getFullYear();
 
 export default function Footer() {
-  const socialLinks = [
+  const social = [
     CONTACT.email && { label: 'Email', href: `mailto:${CONTACT.email}` },
     CONTACT.whatsapp && { label: 'WhatsApp', href: `https://wa.me/${CONTACT.whatsapp}` },
     CONTACT.instagram && { label: 'Instagram', href: CONTACT.instagram },
   ].filter(Boolean);
 
   return (
-    <footer className="jayam-footer">
-      <div className="jayam-footer-main">
-        <div className="jayam-footer-brand">
-          <img src="/jayam-logo.png" alt="" />
-          <div>
-            <p className="jayam-footer-wordmark">JAYAM</p>
-            <p className="jayam-footer-tagline">Bringing the best to your hands.</p>
-          </div>
+    <footer className="af">
+      <div className="af-inner">
+        <div className="af-fineprint">
+          <p>*These statements have not been evaluated by the Food and Drug Administration. Our products are not intended to diagnose, treat, cure, or prevent any disease.</p>
+          <p>Free standard shipping on U.S. orders of $49 and above; $5.99 otherwise. Delivery usually takes 2–7 business days. Alaska, Hawaii and U.S. territories may take longer.</p>
         </div>
-        <p className="jayam-footer-note">Simple, clean, plant-based wellness. Shipping across the United States, with free shipping on orders $49 and above.</p>
-        <nav aria-label="Footer navigation" className="jayam-footer-links">
-          {footerLinks.map(({ label, to }) => <Link key={to} to={to}>{label}</Link>)}
-          {socialLinks.map(({ label, href }) => (
-            <a key={label} href={href} target={href.startsWith('http') ? '_blank' : undefined} rel="noreferrer">{label}</a>
-          ))}
-        </nav>
-      </div>
-      <p className="jayam-footer-disclaimer">
-        *These statements have not been evaluated by the Food and Drug Administration. Our products are not intended to diagnose, treat, cure, or prevent any disease.
-      </p>
-      <div className="jayam-footer-bottom">
-        <span>© {currentYear} Jayam Wellness</span>
-        <span>Wellness is personal. Trust matters.</span>
+
+        <div className="af-columns">
+          <section>
+            <h2>Shop</h2>
+            <ul>{PRODUCTS.map(({ label, to }) => <li key={to}><Link to={to}>{label}</Link></li>)}</ul>
+          </section>
+          <section>
+            <h2>Help</h2>
+            <ul>{HELP.map(({ label, to }) => <li key={to}><Link to={to}>{label}</Link></li>)}</ul>
+          </section>
+          <section>
+            <h2>Jayam</h2>
+            <ul>
+              <li><Link to="/our-story">Our Story</Link></li>
+              {social.map(({ label, href }) => (
+                <li key={label}><a href={href} target={href.startsWith('http') ? '_blank' : undefined} rel="noreferrer">{label}</a></li>
+              ))}
+            </ul>
+          </section>
+        </div>
+
+        <div className="af-bottom">
+          <span>Copyright © {currentYear} Jayam Wellness. All rights reserved.</span>
+          <span>United States</span>
+        </div>
       </div>
     </footer>
   );

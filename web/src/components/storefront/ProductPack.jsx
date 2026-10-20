@@ -11,8 +11,8 @@ const PALETTES = {
 };
 const DEFAULT_PALETTE = { body: '#d6dcc8', cap: '#3a5a45', accent: '#4f6b4b' };
 
-const SERIF = "'Fraunces', Georgia, serif";
-const SANS = "'Manrope', sans-serif";
+const SERIF = "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif";
+const SANS = "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', sans-serif";
 
 // Greedy line wrap so long names fit the label
 function wrap(text, max) {
@@ -95,7 +95,7 @@ function Tube({ id, title, form, meta, organic, palette }) {
         </text>
       ))}
       {form && (
-        <text x="130" y={titleStart + titleLines.length * lineHeight} textAnchor="middle" fontFamily={SERIF} fontStyle="italic" fontSize="12.5" fill="#6f8461">
+        <text x="130" y={titleStart + titleLines.length * lineHeight} textAnchor="middle" fontFamily={SERIF} fontSize="12.5" fill="#6f8461">
           {form}
         </text>
       )}
@@ -150,7 +150,7 @@ function DropperBottle({ id, title, form }) {
       <LeafMark x={130} y={206} color="#7a5a2e" />
       <text x="130" y="222" textAnchor="middle" fontFamily={SANS} fontSize="7" fontWeight="700" letterSpacing="2.4" fill="#7a5a2e">JAYAM</text>
       <text x="130" y="241" textAnchor="middle" fontFamily={SERIF} fontSize="15" fill="#2e4636">{title}</text>
-      {form && <text x="130" y="256" textAnchor="middle" fontFamily={SERIF} fontStyle="italic" fontSize="10.5" fill="#8a6a3c">{form}</text>}
+      {form && <text x="130" y="256" textAnchor="middle" fontFamily={SERIF} fontSize="10.5" fill="#8a6a3c">{form}</text>}
 
       {/* Collar and dropper bulb */}
       <rect x="104" y="100" width="52" height="28" rx="5" fill={`url(#${id}-bulb)`} />
