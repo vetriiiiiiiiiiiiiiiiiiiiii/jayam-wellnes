@@ -78,7 +78,6 @@ h2 em,
 }
 
 .wl-kicker,
-.jayam-eyebrow,
 .story-eyebrow {
   color: var(--cherry);
   font: 700 12px var(--sans);
@@ -86,16 +85,14 @@ h2 em,
 }
 
 /* ---------- Buttons ---------- */
-.wl-button,
-.jayam-primary-link {
+.wl-button {
   border-color: var(--fern);
   background: var(--fern);
   color: var(--white);
   font-weight: 700;
 }
 
-.wl-button:hover,
-.jayam-primary-link:hover {
+.wl-button:hover {
   border-color: var(--earth);
   background: var(--earth);
 }
@@ -128,22 +125,13 @@ nav.fixed {
   border-color: var(--line) !important;
 }
 
-.jayam-bag-count {
-  background: var(--cherry);
-}
-
 /* ---------- Product packs: 3D on white ---------- */
 .jayam-art,
 .jayam-art--sage,
 .jayam-art--leaf,
 .jayam-art--blush,
 .jayam-art--sand,
-.jayam-art--sun,
-.jayam-product-image .jayam-art--sage,
-.jayam-product-image .jayam-art--leaf,
-.jayam-product-image .jayam-art--blush,
-.jayam-product-image .jayam-art--sand,
-.jayam-product-image .jayam-art--sun {
+.jayam-art--sun {
   background: var(--surface);
 }
 
@@ -155,56 +143,9 @@ nav.fixed {
   filter: var(--product-shadow);
 }
 
-.jayam-product-image {
-  border-radius: 28px;
-  background: var(--surface);
-}
-
-.jayam-product-info h2 {
-  font-weight: 650;
-}
-
-.jayam-product-price {
-  color: var(--earth);
-}
-
-.jayam-quick-add {
-  border-color: var(--earth);
-  color: var(--earth);
-}
-
-.jayam-quick-add:hover {
-  border-color: var(--fern);
-  background: var(--fern);
-  color: var(--white);
-}
-
-/* Shop filters */
-.jayam-category-filters button {
-  border-color: var(--line);
-  color: var(--earth);
-}
-
-.jayam-category-filters button.is-active,
-.jayam-category-filters button:hover {
-  border-color: var(--earth);
-  background: var(--earth);
-  color: var(--white);
-}
-
-.jayam-shop-sort select {
-  border-color: var(--line);
-}
-
 /* Product page */
 .jayam-art--hero {
   background: var(--surface);
-}
-
-.jayam-trust-points li {
-  border-color: transparent;
-  background: var(--hay);
-  color: var(--earth);
 }
 
 .wl-button--dark {
@@ -768,38 +709,11 @@ nav.fixed {
 }
 
 /* ---------- Page titles: same bold display style everywhere ---------- */
-.jayam-shop-intro h1,
-.jayam-faq-hero h1,
-.jayam-contact-intro h1,
-.jayam-checkout-heading h1,
-.jayam-checkout-empty h1,
-.jayam-product-page h1,
 .st-plant h2,
 .st-values h2 {
   color: var(--earth);
   font-weight: 700;
   letter-spacing: -0.03em;
-}
-
-.jayam-shop-intro h1 em,
-.jayam-faq-hero h1 em,
-.jayam-contact-intro h1 em,
-.jayam-checkout-empty h1 em {
-  color: var(--fern);
-  font-style: normal;
-  font-weight: inherit;
-}
-
-.jayam-product-page .font-serif.italic,
-.jayam-product-page p.italic {
-  color: var(--fern);
-  font-style: normal;
-  font-weight: 600;
-}
-
-.jayam-product-page h3 .italic {
-  color: var(--fern);
-  font-style: normal;
 }
 
 /* ==========================================

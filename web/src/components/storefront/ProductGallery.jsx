@@ -1,18 +1,27 @@
+import { useState } from 'react';
 import ProductArt from './ProductArt';
 
-export default function ProductGallery({
-  images,
-  product
-}) {
+// Product photos with thumbnails, or the illustrated pack when there are none
+export default function ProductGallery({ images, product }) {
   const displayImages = images?.filter((image) => image.url) || [];
+  const [active, setActive] = useState(0);
+
   if (displayImages.length === 0) {
-    return product
-      ? <ProductArt product={product} size="hero" />
-      : <div className="jayam-product-no-image" role="img" aria-label="No product image available">J</div>;
+    return product ? <ProductArt product={product} size="hero" /> : null;
   }
-  return <div className="flex flex-col gap-12 w-full pb-32">
-      {displayImages.map((image, index) => <div key={`${image.url}-${index}`} className="relative w-full aspect-[4/5] overflow-hidden bg-gray-100 group">
-          <img src={image.url} alt={`Product view ${index + 1}`} className="object-cover transition-transform duration-[2s] ease-[cubic-bezier(0.19,1,0.22,1)] group-hover:scale-105" sizes="(max-width: 1024px) 100vw, 60vw" />
-        </div>)}
-    </div>;
+
+  return (
+    <div className="pp-gallery">
+      <img src={displayImages[active]?.url} alt={product ? product.name : 'Product'} />
+      {displayImages.length > 1 && (
+        <div className="pp-thumbs">
+          {displayImages.map((image, index) => (
+            <button key={`${image.url}-${index}`} type="button" className={index === active ? 'is-active' : ''} onClick={() => setActive(index)} aria-label={`Show image ${index + 1}`}>
+              <img src={image.url} alt="" />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }

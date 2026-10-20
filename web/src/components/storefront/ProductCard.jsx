@@ -1,8 +1,11 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from './CartProvider';
-import { formatPrice } from '../../lib/store';
+import { CATEGORY_LABELS, formatPrice } from '../../lib/store';
 import ProductArt from './ProductArt';
 
+export const shortName = (product) => product.name.replace(/^Organic\s+/i, '').split(' — ')[0];
+
+// A product standing on a light tile: the pack first, then name, tagline, price, Buy.
 export default function ProductCard({ product }) {
   const { addToCart } = useCart();
   const navigate = useNavigate();
@@ -12,41 +15,30 @@ export default function ProductCard({ product }) {
     ? Math.min(...product.variants.map((variant) => variant.price))
     : product.price;
 
-  const addProduct = (event) => {
-    event.preventDefault();
+  const buy = () => {
     if (hasVariants) {
       navigate(`/products/${product.slug}`);
       return;
     }
-    addToCart({
-      id: product.id,
-      productId: product.id,
-      name: product.name,
-      price: product.price,
-      image,
-    });
+    addToCart({ id: product.id, productId: product.id, name: product.name, price: product.price, image });
     window.dispatchEvent(new Event('jayam:cart-open'));
   };
 
   return (
-    <article className="jayam-product-card">
-      <Link to={`/products/${product.slug}`} className="jayam-product-image" aria-label={`View ${product.name}`}>
-        {image ? (
-          <img src={image} alt={product.name} loading="lazy" />
-        ) : (
-          <ProductArt product={product} />
-        )}
+    <article className="sc">
+      <Link to={`/products/${product.slug}`} className="sc-art" aria-label={`View ${product.name}`}>
+        {image ? <img src={image} alt={product.name} loading="lazy" /> : <ProductArt product={product} />}
       </Link>
-      <div className="jayam-product-info">
-        <div>
-          <h2><Link to={`/products/${product.slug}`}>{product.name}</Link></h2>
-          {(product.tagline || product.shortDescription) && <p>{product.tagline || product.shortDescription}</p>}
+      <div className="sc-body">
+        <p className="sc-kicker">{product.category || CATEGORY_LABELS[product.productType] || 'Wellness'}</p>
+        <h2><Link to={`/products/${product.slug}`}>{shortName(product)}</Link></h2>
+        {product.tagline && <p className="sc-tagline">{product.tagline}</p>}
+        <p className="sc-price">{hasVariants ? 'From ' : ''}{formatPrice(price)}</p>
+        <div className="sc-ctas">
+          <button type="button" className="ap-pill sc-buy" onClick={buy}>{hasVariants ? 'Choose' : 'Buy'}</button>
+          <Link to={`/products/${product.slug}`} className="ap-link sc-more">Learn more ›</Link>
         </div>
-        <span className="jayam-product-price">{formatPrice(price)}{hasVariants ? <small> onwards</small> : null}</span>
       </div>
-      <button type="button" className="jayam-quick-add" onClick={addProduct}>
-        {hasVariants ? 'Choose option' : 'Add to bag'} <span aria-hidden="true">↗</span>
-      </button>
     </article>
   );
 }

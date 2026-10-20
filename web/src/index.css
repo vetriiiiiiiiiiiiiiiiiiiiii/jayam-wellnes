@@ -3,6 +3,7 @@
 @import "./styles/jayam.css";
 @import "./styles/wellness.css";
 @import "./styles/jayam-white.css";
+@import "./styles/jayam-pages.css";
 @import "tailwindcss";
 
 @theme {

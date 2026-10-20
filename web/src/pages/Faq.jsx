@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { Plus } from 'lucide-react';
+import PageHead from '../components/storefront/PageHead';
 import { FREE_SHIPPING_THRESHOLD, SHIPPING_FEE, formatPrice } from '../lib/store';
 
 const sections = [
@@ -137,32 +139,41 @@ export default function FaqPage() {
   }, [hash]);
 
   return (
-    <main className="jayam-faq">
-      <header className="jayam-faq-hero">
-        <p className="jayam-eyebrow">Help &amp; FAQ</p>
-        <h1>Good questions,<br /><em>clear answers.</em></h1>
-        <p>Everything you’d want to know before choosing Jayam — what’s inside, how to use it, and how your order reaches you.</p>
-        <nav aria-label="FAQ sections" className="jayam-faq-nav">
+    <main className="pg fq">
+      <PageHead
+        eyebrow="Help"
+        title="Questions?"
+        accent="Clear answers."
+        sub="Everything you’d want to know before choosing Jayam — what’s inside, how to use it, and how your order reaches you."
+      >
+        <nav aria-label="FAQ sections" className="pg-chips fq-nav">
           {sections.map(({ id, title }) => <a key={id} href={`#${id}`}>{title}</a>)}
         </nav>
-      </header>
+      </PageHead>
 
-      {sections.map(({ id, title, questions }) => (
-        <section key={id} id={id} className="jayam-faq-section" aria-labelledby={`${id}-title`}>
-          <h2 id={`${id}-title`}>{title}</h2>
-          {questions.map(({ q, a }) => (
-            <details key={q} className="jayam-faq-item">
-              <summary>{q}</summary>
-              <div className="jayam-faq-answer">{a}</div>
-            </details>
-          ))}
-        </section>
-      ))}
+      <div className="fq-body">
+        {sections.map(({ id, title, questions }) => (
+          <section key={id} id={id} className="fq-section" aria-labelledby={`${id}-title`}>
+            <h2 id={`${id}-title`}>{title}</h2>
+            <div className="fq-list">
+              {questions.map(({ q, a }) => (
+                <details key={q} className="fq-item">
+                  <summary>
+                    {q}
+                    <Plus size={20} strokeWidth={1.6} aria-hidden="true" />
+                  </summary>
+                  <div className="fq-answer">{a}</div>
+                </details>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
 
-      <section className="jayam-faq-cta">
+      <section className="fq-cta">
         <h2>Still have a question?</h2>
         <p>We’re happy to help — we reply within 1 business day.</p>
-        <Link to="/contact" className="jayam-primary-link">Contact us <span aria-hidden="true">↗</span></Link>
+        <Link to="/contact" className="ap-pill">Contact us</Link>
       </section>
     </main>
   );

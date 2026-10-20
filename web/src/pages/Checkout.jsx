@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { useCart } from '../components/storefront/CartProvider';
+import PageHead from '../components/storefront/PageHead';
+import ItemThumb from '../components/storefront/ItemThumb';
 import { createOrder } from '../services/api';
 import { FREE_SHIPPING_THRESHOLD, US_STATES, formatPrice, shippingFor } from '../lib/store';
 
@@ -10,18 +12,18 @@ const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
 const stripePromise = publishableKey ? loadStripe(publishableKey) : null;
 
 const stripeAppearance = {
-  theme: 'flat',
+  theme: 'stripe',
   variables: {
-    colorPrimary: '#20372b',
-    colorText: '#20372b',
-    colorBackground: '#f2efe6',
-    colorDanger: '#7b3026',
-    fontFamily: 'Manrope, system-ui, sans-serif',
-    borderRadius: '0px',
+    colorPrimary: '#327039',
+    colorText: '#133020',
+    colorBackground: '#ffffff',
+    colorDanger: '#dd5c36',
+    fontFamily: '-apple-system, BlinkMacSystemFont, Inter, Helvetica Neue, Arial, sans-serif',
+    borderRadius: '12px',
   },
   rules: {
-    '.Input': { border: '1px solid #c8c4b8' },
-    '.Tab': { border: '1px solid #d2cec2' },
+    '.Input': { border: '1px solid #d2d2d7', boxShadow: 'none' },
+    '.Tab': { border: '1px solid #d2d2d7', boxShadow: 'none' },
   },
 };
 
@@ -62,21 +64,21 @@ function PaymentStep({ order, total, details, onEdit }) {
 
   const address = details.address;
   return (
-    <form onSubmit={handlePay} className="jayam-checkout-form">
-      <section>
+    <form onSubmit={handlePay} className="co-form">
+      <section className="pg-tile co-step">
         <h2>Shipping to</h2>
-        <div className="jayam-checkout-review">
+        <div className="co-review">
           <p>
             {details.name} · {details.email}<br />
             {address.street}{address.street2 ? `, ${address.street2}` : ''}<br />
             {address.city}, {address.state} {address.zipCode}
           </p>
-          <button type="button" onClick={onEdit} disabled={paying}>Edit</button>
+          <button type="button" className="ap-link" onClick={onEdit} disabled={paying}>Edit</button>
         </div>
       </section>
-      <section>
+      <section className="pg-tile co-step">
         <h2>Payment</h2>
-        <p className="jayam-checkout-note">All payments are processed securely by Stripe in U.S. dollars.</p>
+        <p className="pg-note">All payments are processed securely by Stripe in U.S. dollars.</p>
         <PaymentElement
           options={{
             layout: 'tabs',
@@ -84,11 +86,11 @@ function PaymentStep({ order, total, details, onEdit }) {
           }}
         />
       </section>
-      {errorMessage && <p className="jayam-checkout-error" role="alert">{errorMessage}</p>}
-      <button className="jayam-place-order" type="submit" disabled={!stripe || paying}>
+      {errorMessage && <p className="pg-error" role="alert">{errorMessage}</p>}
+      <button className="ap-pill ap-pill--block" type="submit" disabled={!stripe || paying}>
         {paying ? 'Processing…' : `Pay ${formatPrice(total)}`}
       </button>
-      <p className="jayam-checkout-note">Order {order.orderNumber}</p>
+      <p className="pg-note">Order {order.orderNumber}</p>
     </form>
   );
 }
@@ -154,11 +156,10 @@ export default function CheckoutPage() {
 
   if (cartCount === 0) {
     return (
-      <main className="jayam-checkout-empty">
-        <p className="jayam-eyebrow">Your bag is waiting</p>
-        <h1>Your bag is<br /><em>empty.</em></h1>
-        <p>Take a look at our thoughtfully chosen wellness essentials.</p>
-        <Link to="/shop" className="jayam-primary-link">Continue shopping <span aria-hidden="true">↗</span></Link>
+      <main className="pg co-empty">
+        <PageHead eyebrow="Bag" title="Your bag" accent="is empty." sub="Take a look at our simple, plant-based essentials.">
+          <div className="ap-ctas"><Link to="/shop" className="ap-pill">Shop the collection</Link></div>
+        </PageHead>
       </main>
     );
   }
@@ -167,85 +168,90 @@ export default function CheckoutPage() {
   const addressValue = (name) => details?.address?.[name] ?? '';
 
   return (
-    <main className="jayam-checkout">
-      <header className="jayam-checkout-heading">
-        <p className="jayam-eyebrow">{order ? 'Step 2 of 2' : 'Step 1 of 2'}</p>
+    <main className="pg co">
+      <header className="co-head">
         <h1>Checkout</h1>
+        <ol className="co-progress" aria-label="Checkout steps">
+          <li className={order ? 'is-done' : 'is-current'}>Details</li>
+          <li className={order ? 'is-current' : ''}>Payment</li>
+        </ol>
       </header>
-      <div className="jayam-checkout-layout">
+      <div className="co-layout">
         {order ? (
           <Elements stripe={stripePromise} options={{ clientSecret: order.clientSecret, appearance: stripeAppearance }} key={order.clientSecret}>
             <PaymentStep order={order} total={order.total} details={details} onEdit={() => setOrder(null)} />
           </Elements>
         ) : (
-          <form onSubmit={handleDetails} className="jayam-checkout-form">
-            <section>
+          <form onSubmit={handleDetails} className="co-form">
+            <section className="pg-tile co-step">
               <h2>Contact information</h2>
-              <label>Email address
+              <label className="pg-field">Email address
                 <input type="email" name="email" autoComplete="email" required defaultValue={value('email')} />
               </label>
-              <label>Full name
+              <label className="pg-field">Full name
                 <input type="text" name="name" autoComplete="name" required defaultValue={value('name')} />
               </label>
-              <label>Phone <small>(optional, for delivery updates)</small>
+              <label className="pg-field">Phone <small>(optional, for delivery updates)</small>
                 <input type="tel" name="phone" autoComplete="tel" defaultValue={value('phone')} />
               </label>
             </section>
-            <section>
+            <section className="pg-tile co-step">
               <h2>Shipping address</h2>
-              <p className="jayam-checkout-note">We ship within the United States, including U.S. territories.</p>
-              <label>Street address
+              <p className="pg-note">We ship within the United States, including U.S. territories.</p>
+              <label className="pg-field">Street address
                 <input type="text" name="street" autoComplete="address-line1" required defaultValue={addressValue('street')} />
               </label>
-              <label>Apartment, suite, etc. <small>(optional)</small>
+              <label className="pg-field">Apartment, suite, etc. <small>(optional)</small>
                 <input type="text" name="street2" autoComplete="address-line2" defaultValue={addressValue('street2')} />
               </label>
-              <div className="jayam-checkout-fields">
-                <label>City
+              <div className="pg-row">
+                <label className="pg-field">City
                   <input type="text" name="city" autoComplete="address-level2" required defaultValue={addressValue('city')} />
                 </label>
-                <label>State / territory
+                <label className="pg-field">State / territory
                   <select name="state" autoComplete="address-level1" required defaultValue={addressValue('state')}>
                     <option value="" disabled>Select</option>
                     {US_STATES.map(([code, label]) => <option key={code} value={code}>{label}</option>)}
                   </select>
                 </label>
               </div>
-              <div className="jayam-checkout-fields">
-                <label>ZIP code
+              <div className="pg-row">
+                <label className="pg-field">ZIP code
                   <input type="text" name="zipCode" autoComplete="postal-code" inputMode="numeric" pattern="\d{5}(-\d{4})?" title="5-digit ZIP code" required defaultValue={addressValue('zipCode')} />
                 </label>
-                <label>Country
+                <label className="pg-field">Country
                   <input type="text" value="United States" readOnly aria-readonly="true" />
                 </label>
               </div>
             </section>
-            <p className="jayam-checkout-note">
+            <p className="pg-note">
               Next, pay securely with card, Apple Pay or Google Pay. We’ll email your order confirmation and receipt, and tracking details when it ships.
             </p>
-            {errorMessage && <p className="jayam-checkout-error" role="alert">{errorMessage}</p>}
-            <button className="jayam-place-order" type="submit" disabled={loading}>
+            {errorMessage && <p className="pg-error" role="alert">{errorMessage}</p>}
+            <button className="ap-pill ap-pill--block" type="submit" disabled={loading}>
               {loading ? 'Please wait…' : 'Continue to payment'}
             </button>
-            <Link to="/shop" className="jayam-back-to-shop">← Continue shopping</Link>
+            <Link to="/shop" className="ap-link co-back">‹ Continue shopping</Link>
           </form>
         )}
 
-        <aside className="jayam-checkout-summary">
-          <h2>Your order</h2>
-          <div className="jayam-order-lines">
+        <aside className="co-summary">
+          <h2>Your bag</h2>
+          <div className="os-lines">
             {cart.map((item) => (
-              <div className="jayam-order-line" key={item.id}>
-                {item.image ? <img src={item.image} alt="" /> : <span className="jayam-order-image-placeholder">J</span>}
+              <div className="os-line" key={item.id}>
+                <ItemThumb item={item} />
                 <div><strong>{item.name}</strong><span>Qty {item.quantity}</span></div>
                 <b>{formatPrice(item.price * item.quantity)}</b>
               </div>
             ))}
           </div>
-          <div className="jayam-order-total"><span>Subtotal</span><b>{formatPrice(cartTotal)}</b></div>
-          <div className="jayam-order-total"><span>Shipping</span><b>{shipping === 0 ? 'Free' : formatPrice(shipping)}</b></div>
-          <div className="jayam-order-total"><span>Total</span><b>{formatPrice(orderTotal)}</b></div>
-          <p>
+          <dl className="os-totals">
+            <div><dt>Subtotal</dt><dd>{formatPrice(cartTotal)}</dd></div>
+            <div><dt>Shipping</dt><dd>{shipping === 0 ? 'Free' : formatPrice(shipping)}</dd></div>
+            <div className="os-total"><dt>Total</dt><dd>{formatPrice(orderTotal)}</dd></div>
+          </dl>
+          <p className="pg-note">
             {shipping === 0
               ? 'Your order qualifies for free U.S. shipping.'
               : `Add ${formatPrice(FREE_SHIPPING_THRESHOLD - cartTotal)} more for free shipping.`}

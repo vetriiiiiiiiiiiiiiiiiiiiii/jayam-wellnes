@@ -1,15 +1,35 @@
-import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
-import ProductCard from '../components/storefront/ProductCard';
+import { Leaf, MessageCircle, ShieldCheck, Truck } from 'lucide-react';
+import ProductCard, { shortName } from '../components/storefront/ProductCard';
+import ProductArt from '../components/storefront/ProductArt';
 import FilterSidebar from '../components/storefront/FilterSidebar';
-import { CATEGORY_LABELS } from '../lib/store';
+import PageHead from '../components/storefront/PageHead';
+import { CATEGORY_LABELS, FREE_SHIPPING_THRESHOLD } from '../lib/store';
+
+const DIFFERENCE = [
+  { icon: Truck, tone: 'fern', title: 'Free U.S. shipping', body: `On every order of $${FREE_SHIPPING_THRESHOLD} and above. Delivered in 2–7 business days.` },
+  { icon: Leaf, tone: 'wheat', title: 'Organic and plant-based', body: 'Vegan and Non-GMO, with no fillers, binders or artificial colors.' },
+  { icon: ShieldCheck, tone: 'earth', title: 'Third-party tested', body: 'Made in GMP-certified facilities and tested for purity and potency.' },
+  { icon: MessageCircle, tone: 'cherry', title: 'Real people, quick replies', body: 'Questions about an ingredient or an order? We reply within 1 business day.' },
+];
 
 export default function ShopPage() {
   const [products, setProducts] = useState([]);
+  const [lineup, setLineup] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchParams, setSearchParams] = useSearchParams();
+  const search = searchParams.get('search');
+  const type = searchParams.get('type');
+
+  // The full lineup for the product strip, independent of filters
+  useEffect(() => {
+    axios.get(`${import.meta.env.VITE_API_URL}/api/products`)
+      .then(({ data }) => Array.isArray(data) && setLineup(data))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -17,12 +37,9 @@ export default function ShopPage() {
       setError('');
       try {
         const params = {};
-        if (searchParams.get('minPrice')) params.minPrice = searchParams.get('minPrice');
-        if (searchParams.get('maxPrice')) params.maxPrice = searchParams.get('maxPrice');
-        if (searchParams.get('sort')) params.sort = searchParams.get('sort');
-        if (searchParams.get('search')) params.search = searchParams.get('search');
-        if (searchParams.get('type')) params.type = searchParams.get('type');
-
+        ['minPrice', 'maxPrice', 'sort', 'search', 'type'].forEach((key) => {
+          if (searchParams.get(key)) params[key] = searchParams.get(key);
+        });
         const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/products`, { params });
         if (!Array.isArray(response.data)) throw new Error('The product catalogue returned an invalid response.');
         setProducts(response.data);
@@ -37,54 +54,85 @@ export default function ShopPage() {
     fetchProducts();
   }, [searchParams]);
 
-  const categories = [...new Set(products.map(({ productType }) => productType).filter(Boolean))];
-  const categoryLabels = CATEGORY_LABELS;
+  const categories = [...new Set(lineup.map(({ productType }) => productType).filter(Boolean))];
+
+  const setType = (value) => {
+    const next = new URLSearchParams(searchParams);
+    if (value) next.set('type', value);
+    else next.delete('type');
+    setSearchParams(next);
+  };
 
   return (
-    <main className="jayam-shop-page">
-      <header className="jayam-shop-intro">
-        <p className="jayam-eyebrow">Thoughtful wellness, made simple</p>
-        <h1>Shop the<br /><em>collection.</em></h1>
-        <p>Simple, clean, plant-based wellness — carefully selected ingredients, nothing unnecessary. Free U.S. shipping on orders $49 and above.</p>
-      </header>
-      <section className="jayam-shop-content" aria-label="Product catalogue">
-        <div className="jayam-shop-toolbar">
-          <div className="jayam-category-filters" aria-label="Filter by category">
-            <button type="button" className={!searchParams.get('type') ? 'is-active' : ''} onClick={() => { const next = new URLSearchParams(searchParams); next.delete('type'); setSearchParams(next); }}>Everything</button>
+    <main className="pg sh">
+      <PageHead
+        eyebrow="Shop"
+        title="All of Jayam."
+        accent="Nothing unnecessary."
+        sub={`Five plant-based essentials, made with care. Free U.S. shipping on orders $${FREE_SHIPPING_THRESHOLD} and above.`}
+      />
+
+      {lineup.length > 0 && (
+        <nav className="sh-strip" aria-label="Products">
+          {lineup.map((product) => (
+            <Link key={product.id} to={`/products/${product.slug}`} className="sh-strip-item">
+              <span className="sh-strip-art"><ProductArt product={product} /></span>
+              <span>{shortName(product)}</span>
+            </Link>
+          ))}
+        </nav>
+      )}
+
+      <section className="sh-catalogue" aria-label="Product catalogue">
+        <div className="sh-toolbar">
+          <div className="pg-chips" aria-label="Filter by category">
+            <button type="button" className={!type ? 'is-active' : ''} onClick={() => setType(null)}>All</button>
             {categories.map((category) => (
-              <button key={category} type="button" className={searchParams.get('type') === category ? 'is-active' : ''} onClick={() => { const next = new URLSearchParams(searchParams); next.set('type', category); setSearchParams(next); }}>
-                {categoryLabels[category] || category}
+              <button key={category} type="button" className={type === category ? 'is-active' : ''} onClick={() => setType(category)}>
+                {CATEGORY_LABELS[category] || category}
               </button>
             ))}
           </div>
-          <div className="jayam-shop-sort">
-            <FilterSidebar />
-          </div>
-          <p aria-live="polite">{loading ? 'Loading products…' : `${products.length} ${products.length === 1 ? 'product' : 'products'}`}</p>
+          <FilterSidebar />
         </div>
+        <p className="sh-count" aria-live="polite">
+          {loading ? 'Loading products…' : `${products.length} ${products.length === 1 ? 'product' : 'products'}${search ? ` for “${search}”` : ''}`}
+        </p>
+
         {loading ? (
-          <div className="jayam-product-grid" aria-label="Loading products">
-            {[...Array(4)].map((_, index) => <div key={index} className="jayam-product-skeleton" />)}
+          <div className="sh-grid" aria-label="Loading products">
+            {[...Array(3)].map((_, index) => <div key={index} className="sc sc--skeleton" />)}
           </div>
         ) : error ? (
-          <div className="jayam-shop-empty">
-            <p className="jayam-eyebrow">A moment, please</p>
+          <div className="pg-empty">
             <h2>Our shelves aren’t loading.</h2>
             <p>{error}</p>
-            <button type="button" onClick={() => window.location.reload()}>Try again</button>
+            <button type="button" className="ap-pill" onClick={() => window.location.reload()}>Try again</button>
           </div>
         ) : products.length ? (
-          <div className="jayam-product-grid">
+          <div className="sh-grid">
             {products.map((product) => <ProductCard key={product.id} product={product} />)}
           </div>
         ) : (
-          <div className="jayam-shop-empty">
-            <p className="jayam-eyebrow">Made with care</p>
-            <h2>{searchParams.get('search') || searchParams.get('type') ? 'Nothing in this selection just yet.' : 'Our collection is taking shape.'}</h2>
-            <p>{searchParams.get('search') || searchParams.get('type') ? 'Try another category or clear your search.' : 'We’re preparing thoughtful wellness essentials for you. Please check back soon.'}</p>
-            {(searchParams.get('search') || searchParams.get('type')) && <button type="button" onClick={() => setSearchParams({})}>View everything</button>}
+          <div className="pg-empty">
+            <h2>{search || type ? 'Nothing in this selection.' : 'Our collection is taking shape.'}</h2>
+            <p>{search || type ? 'Try another category or clear your search.' : 'Please check back soon.'}</p>
+            {(search || type) && <button type="button" className="ap-pill" onClick={() => setSearchParams({})}>View everything</button>}
           </div>
         )}
+      </section>
+
+      <section className="sh-why" aria-labelledby="sh-why-title">
+        <h2 id="sh-why-title">The Jayam <em>difference.</em></h2>
+        <div className="sh-why-grid">
+          {DIFFERENCE.map(({ icon: Icon, tone, title, body }) => (
+            <article key={title} className={`sh-why-tile sh-why-tile--${tone}`}>
+              <span className="sh-why-icon" aria-hidden="true"><Icon size={22} strokeWidth={1.8} /></span>
+              <h3>{title}</h3>
+              <p>{body}</p>
+            </article>
+          ))}
+        </div>
       </section>
     </main>
   );

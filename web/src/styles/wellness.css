@@ -43,17 +43,6 @@ h3,
   font-variation-settings: 'SOFT' 100;
 }
 
-/* Existing headings were tracked very tightly for the previous typeface */
-.jayam-home-copy h1,
-.jayam-faq-hero h1,
-.jayam-contact-intro h1,
-.jayam-shop-intro h1,
-.jayam-checkout-heading h1,
-.jayam-checkout-empty h1 {
-  font-weight: 400;
-  letter-spacing: -0.03em;
-}
-
 .tracking-tighter {
   letter-spacing: -0.02em;
 }
@@ -64,8 +53,7 @@ h3,
 }
 
 /* ---------- Buttons: soft pills ---------- */
-.wl-button,
-.jayam-primary-link {
+.wl-button {
   display: inline-flex;
   white-space: nowrap;
   min-width: 0;
@@ -84,8 +72,7 @@ h3,
   transition: background-color 300ms var(--ease-soft), border-color 300ms var(--ease-soft), transform 300ms var(--ease-soft);
 }
 
-.wl-button:hover,
-.jayam-primary-link:hover {
+.wl-button:hover {
   border-color: #2e4a38;
   background: #2e4a38;
   color: #fff;
@@ -102,41 +89,12 @@ h3,
   color: var(--ink);
 }
 
-.wl-kicker,
-.jayam-eyebrow {
+.wl-kicker {
   margin: 0 0 18px;
   color: var(--sage);
   font: 600 12px var(--sans);
   letter-spacing: 0.16em;
   text-transform: uppercase;
-}
-
-/* ---------- Product cards ---------- */
-.jayam-product-image {
-  border-radius: var(--radius-lg);
-}
-
-.jayam-product-info h2 {
-  font-weight: 400;
-}
-
-.jayam-quick-add {
-  margin-top: 6px;
-  justify-content: center;
-  gap: 8px;
-  border: 1px solid #c9cfbf;
-  border-radius: 999px;
-  padding: 11px 16px;
-  color: var(--moss);
-  font: 600 12px var(--sans);
-  letter-spacing: 0.02em;
-  text-transform: none;
-  transition: background-color 300ms var(--ease-soft), color 300ms var(--ease-soft);
-}
-
-.jayam-quick-add:hover {
-  background: var(--moss);
-  color: var(--cream);
 }
 
 /* ---------- Product label art: rounded, soft ---------- */
@@ -176,24 +134,9 @@ h3,
   transition: transform 600ms var(--ease-soft);
 }
 
-.jayam-product-card:hover .jayam-pack {
-  transform: translateY(-8px) rotate(-1.5deg);
-}
-
 .jayam-art--hero {
   border-radius: 36px;
   padding: 10% 14% 6%;
-}
-
-/* Product page: soft pills and rounded gallery */
-.jayam-trust-points li {
-  border-color: #cdd6c2;
-  background: rgba(227, 233, 218, 0.45);
-  color: var(--moss);
-}
-
-.jayam-product-page h1 {
-  font-weight: 400;
 }
 
 .wl-hero-actions {
@@ -244,84 +187,6 @@ h3,
   .wl-hero-actions .wl-button {
     width: 100%;
   }
-}
-
-/* ==========================================
-   COHESION PASS
-   One visual language: soft pills for every control.
-   ========================================== */
-
-.jayam-bag-count {
-  width: 24px;
-  height: 24px;
-  border: 0;
-  background: var(--moss);
-  color: var(--cream);
-  font: 700 11px var(--sans);
-}
-
-.jayam-wordmark > span {
-  letter-spacing: 0.14em;
-}
-
-/* ---------- Shop filters ---------- */
-.jayam-category-filters {
-  gap: 8px;
-}
-
-.jayam-category-filters button {
-  border: 1px solid #d3d9c8;
-  border-radius: 999px;
-  padding: 9px 16px;
-  color: var(--moss);
-  font: 600 13px var(--sans);
-  letter-spacing: 0;
-  text-transform: none;
-}
-
-.jayam-category-filters button.is-active,
-.jayam-category-filters button:hover {
-  border-color: var(--moss);
-  background: var(--moss);
-  color: var(--cream);
-}
-
-.jayam-shop-sort select {
-  border: 1px solid #d3d9c8;
-  border-radius: 999px;
-  padding: 9px 36px 9px 16px;
-  font: 600 13px var(--sans);
-  letter-spacing: 0;
-  text-transform: none;
-}
-
-/* ---------- Checkout ---------- */
-.jayam-place-order {
-  border-radius: 999px;
-  padding: 16px;
-  font: 600 14px var(--sans);
-  letter-spacing: 0.01em;
-  text-transform: none;
-}
-
-.jayam-checkout-form label {
-  font: 600 12px var(--sans);
-  letter-spacing: 0.02em;
-  text-transform: none;
-}
-
-/* Forms: soft field labels everywhere */
-.jayam-contact-form label {
-  font: 600 12px var(--sans);
-  letter-spacing: 0.02em;
-  text-transform: none;
-}
-
-.jayam-contact-form button {
-  border-radius: 999px;
-  font: 600 14px var(--sans);
-  letter-spacing: 0.01em;
-  text-transform: none;
 }
 
 /* ---------- Scroll reveal (see lib/useScrollReveal.js) ---------- */
@@ -768,13 +633,6 @@ h3,
     transition: none;
   }
 }
-
-/* Product cards: lighter backdrops */
-.jayam-product-image .jayam-art--sage { background: #eef1e8; }
-.jayam-product-image .jayam-art--leaf { background: #ecf1e3; }
-.jayam-product-image .jayam-art--blush { background: #f6ede8; }
-.jayam-product-image .jayam-art--sand { background: #f4eee3; }
-.jayam-product-image .jayam-art--sun { background: #f7f0de; }
 
 /* ---------- Our Story: quiet lists instead of cards ---------- */
 .st-plant {

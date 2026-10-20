@@ -1,3 +1,4 @@
+import ItemThumb from './ItemThumb';
 import { formatPrice } from '../../lib/store';
 
 const STEPS = [
@@ -22,18 +23,19 @@ export default function OrderStatus({ order }) {
   const address = order.address || {};
 
   return (
-    <article className="jayam-order-status">
-      <header>
-        <p className="jayam-eyebrow">Order {order.orderNumber}</p>
+    <article className="os">
+      <header className="os-head">
+        <p className="pg-eyebrow">Order {order.orderNumber}</p>
         <h2>{headline(order)}</h2>
-        <p className="jayam-checkout-note">Placed {formatDate(order.createdAt)}</p>
+        <p className="pg-note">Placed {formatDate(order.createdAt)}</p>
       </header>
 
       {order.status !== 'CANCELLED' && (
-        <ol className="jayam-order-steps">
+        <ol className="os-steps">
           {STEPS.map((step, index) => (
             <li key={step.status} className={index <= current ? 'is-done' : ''}>
-              <span>{step.label}</span>
+              <span className="os-dot" aria-hidden="true" />
+              <b>{step.label}</b>
               {index <= current && formatDate(order[step.dateKey]) && <small>{formatDate(order[step.dateKey])}</small>}
             </li>
           ))}
@@ -41,38 +43,36 @@ export default function OrderStatus({ order }) {
       )}
 
       {order.trackingNumber && (
-        <div className="jayam-order-tracking">
+        <div className="os-tracking">
           <span>{order.carrier} tracking</span>
           <b>{order.trackingNumber}</b>
           {order.trackingUrl && (
-            <a href={order.trackingUrl} target="_blank" rel="noreferrer" className="jayam-primary-link">
-              Track with {order.carrier} <span aria-hidden="true">↗</span>
-            </a>
+            <a href={order.trackingUrl} target="_blank" rel="noreferrer" className="ap-link">Track with {order.carrier} ›</a>
           )}
         </div>
       )}
 
-      <div className="jayam-order-lines">
+      <div className="os-lines">
         {order.items.map((item, index) => (
-          <div className="jayam-order-line" key={index}>
-            {item.image ? <img src={item.image} alt="" /> : <span className="jayam-order-image-placeholder">J</span>}
+          <div className="os-line" key={index}>
+            <ItemThumb item={item} />
             <div><strong>{item.name}{item.variantName ? ` · ${item.variantName}` : ''}</strong><span>Qty {item.quantity}</span></div>
             <b>{formatPrice(item.price * item.quantity)}</b>
           </div>
         ))}
       </div>
-      <div className="jayam-order-total"><span>Subtotal</span><b>{formatPrice(order.subtotal)}</b></div>
-      <div className="jayam-order-total"><span>Shipping</span><b>{order.shippingFee ? formatPrice(order.shippingFee) : 'Free'}</b></div>
-      <div className="jayam-order-total"><span>Total</span><b>{formatPrice(order.total)}</b></div>
+      <dl className="os-totals">
+        <div><dt>Subtotal</dt><dd>{formatPrice(order.subtotal)}</dd></div>
+        <div><dt>Shipping</dt><dd>{order.shippingFee ? formatPrice(order.shippingFee) : 'Free'}</dd></div>
+        <div className="os-total"><dt>Total</dt><dd>{formatPrice(order.total)}</dd></div>
+      </dl>
 
-      <p className="jayam-checkout-note jayam-order-shipto">
+      <p className="pg-note">
         Shipping to {order.name}, {address.street}{address.street2 ? `, ${address.street2}` : ''}, {address.city}, {address.state} {address.zipCode}
       </p>
 
       {order.receiptUrl && (
-        <a href={order.receiptUrl} target="_blank" rel="noreferrer" className="jayam-primary-link">
-          View / print receipt <span aria-hidden="true">↗</span>
-        </a>
+        <a href={order.receiptUrl} target="_blank" rel="noreferrer" className="ap-link os-receipt">View or print receipt ›</a>
       )}
     </article>
   );

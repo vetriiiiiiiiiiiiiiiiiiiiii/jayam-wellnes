@@ -10,9 +10,7 @@ import { CartProvider } from './components/storefront/CartProvider';
 import Home from './pages/Home';
 import Shop from './pages/Shop';
 import Product from './pages/Product';
-import Collections from './pages/Collections';
 import OurStory from './pages/OurStory';
-import Journal from './pages/Journal';
 import Contact from './pages/Contact';
 import Faq from './pages/Faq';
 import Checkout from './pages/Checkout';
@@ -49,9 +47,9 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/shop" element={<Shop />} />
                 <Route path="/products/:slug" element={<Product />} />
-                <Route path="/collections" element={<Collections />} />
+                <Route path="/collections" element={<Navigate to="/shop" replace />} />
                 <Route path="/our-story" element={<OurStory />} />
-                <Route path="/journal" element={<Journal />} />
+                <Route path="/journal" element={<Navigate to="/our-story" replace />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/faq" element={<Faq />} />
                 <Route path="/checkout" element={<Checkout />} />

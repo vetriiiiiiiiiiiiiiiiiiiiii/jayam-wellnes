@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import OrderStatus from '../components/storefront/OrderStatus';
+import PageHead from '../components/storefront/PageHead';
 import { trackOrder } from '../services/api';
 
 export default function TrackOrder() {
@@ -25,29 +26,32 @@ export default function TrackOrder() {
   };
 
   return (
-    <main className="jayam-checkout jayam-order-page">
-      <p className="jayam-eyebrow">Order status</p>
-      <h1>Track your <em>order.</em></h1>
-      <p>Enter the order number from your confirmation email and the email address you used at checkout.</p>
+    <main className="pg to">
+      <PageHead
+        eyebrow="Order status"
+        title="Track your"
+        accent="order."
+        sub="Enter the order number from your confirmation email and the email address you used at checkout."
+      />
 
-      <form onSubmit={handleSubmit} className="jayam-checkout-form jayam-track-form">
-        <div className="jayam-checkout-fields">
-          <label>Order number
+      <form onSubmit={handleSubmit} className="pg-tile to-form">
+        <div className="pg-row">
+          <label className="pg-field">Order number
             <input type="text" name="orderNumber" placeholder="ORD-XXXXXXXX" required defaultValue={params.get('order') || ''} autoCapitalize="characters" />
           </label>
-          <label>Email address
+          <label className="pg-field">Email address
             <input type="email" name="email" autoComplete="email" required />
           </label>
         </div>
-        {errorMessage && <p className="jayam-checkout-error" role="alert">{errorMessage}</p>}
-        <button className="jayam-place-order" type="submit" disabled={loading}>
+        {errorMessage && <p className="pg-error" role="alert">{errorMessage}</p>}
+        <button className="ap-pill ap-pill--block" type="submit" disabled={loading}>
           {loading ? 'Looking up…' : 'Find my order'}
         </button>
       </form>
 
       {order && <OrderStatus order={order} />}
 
-      <p className="jayam-checkout-note">
+      <p className="pg-note to-help">
         Need help? <Link to="/contact?category=ORDER_SUPPORT">Contact us</Link> and we’ll reply within 1 business day.
       </p>
     </main>

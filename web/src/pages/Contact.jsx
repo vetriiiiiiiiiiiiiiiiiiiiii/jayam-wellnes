@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
+import { AtSign, Check, Clock, HelpCircle, Mail, MessageCircle } from 'lucide-react';
+import PageHead from '../components/storefront/PageHead';
 import { CONTACT, ENQUIRY_CATEGORIES } from '../lib/store';
 
 const ORDER_CATEGORIES = ['ORDER_SUPPORT', 'SHIPPING', 'RETURNS'];
@@ -16,9 +18,9 @@ export default function ContactPage() {
   const [submittedName, setSubmittedName] = useState('');
 
   const channels = [
-    CONTACT.email && { label: 'Email', value: CONTACT.email, href: `mailto:${CONTACT.email}` },
-    CONTACT.whatsapp && { label: 'WhatsApp', value: 'Message us', href: `https://wa.me/${CONTACT.whatsapp}` },
-    CONTACT.instagram && { label: 'Instagram', value: 'Follow along', href: CONTACT.instagram },
+    CONTACT.email && { label: 'Email', value: CONTACT.email, href: `mailto:${CONTACT.email}`, icon: Mail, tone: 'wheat' },
+    CONTACT.whatsapp && { label: 'WhatsApp', value: 'Message us', href: `https://wa.me/${CONTACT.whatsapp}`, icon: MessageCircle, tone: 'earth' },
+    CONTACT.instagram && { label: 'Instagram', value: 'Follow along', href: CONTACT.instagram, icon: AtSign, tone: 'cherry' },
   ].filter(Boolean);
 
   const handleSubmit = async (event) => {
@@ -39,72 +41,82 @@ export default function ContactPage() {
   };
 
   return (
-    <main className="jayam-contact">
-      <div className="jayam-contact-layout">
-        <header className="jayam-contact-intro">
-          <p className="jayam-eyebrow">Contact us</p>
-          <h1>We’re here<br /><em>to help.</em></h1>
-          <p>Questions about an ingredient, your order, shipping or returns — or interested in carrying Jayam? Send us a note and we’ll respond within 1 business day.</p>
-          <p>You may also find a quick answer in our <Link to="/faq" className="underline underline-offset-4">FAQ</Link>.</p>
-          <ul className="jayam-contact-channels">
-            <li><span>Response time</span>Within 1 business day</li>
-            {channels.map(({ label, value, href }) => (
-              <li key={label}>
-                <span>{label}</span>
-                <a href={href} target={href.startsWith('http') ? '_blank' : undefined} rel="noreferrer">{value}</a>
-              </li>
-            ))}
-          </ul>
-        </header>
+    <main className="pg ct">
+      <PageHead
+        eyebrow="Contact"
+        title="We’re here"
+        accent="to help."
+        sub="Questions about an ingredient, your order, shipping or returns — or interested in carrying Jayam? Send us a note."
+      />
 
-        {status === 'sent' ? (
-          <section className="jayam-contact-success" role="status">
-            <p className="jayam-eyebrow">Message received</p>
-            <h2>Thank you{submittedName ? `, ${submittedName}` : ''}.</h2>
-            <p>We’ve received your enquiry and sent a confirmation to your email. Our team will get back to you within 1 business day.</p>
-            <Link to="/shop" className="jayam-primary-link">Continue shopping <span aria-hidden="true">↗</span></Link>
-          </section>
-        ) : (
-          <form className="jayam-contact-form" onSubmit={handleSubmit}>
-            <div className="jayam-contact-row">
-              <label>Name
-                <input type="text" name="name" autoComplete="name" required maxLength={120} />
-              </label>
-              <label>Email
-                <input type="email" name="email" autoComplete="email" required maxLength={200} />
-              </label>
-            </div>
-            <div className="jayam-contact-row">
-              <label>Topic
-                <select name="category" value={category} onChange={(event) => setCategory(event.target.value)}>
-                  {ENQUIRY_CATEGORIES.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
-                </select>
-              </label>
-              {ORDER_CATEGORIES.includes(category) ? (
-                <label>Order number <small>(if you have one)</small>
-                  <input type="text" name="orderNumber" placeholder="ORD-…" maxLength={40} />
-                </label>
-              ) : (
-                <label>Phone <small>(optional)</small>
-                  <input type="tel" name="phone" autoComplete="tel" maxLength={40} />
-                </label>
-              )}
-            </div>
-            <label>Subject
-              <input type="text" name="subject" required maxLength={200} />
+      <ul className="ct-channels">
+        <li className="ct-channel ct-channel--fern">
+          <Clock size={22} strokeWidth={1.7} aria-hidden="true" />
+          <span>Response time</span>
+          <b>Within 1 business day</b>
+        </li>
+        {channels.map(({ label, value, href, icon: Icon, tone }) => (
+          <li key={label} className={`ct-channel ct-channel--${tone}`}>
+            <Icon size={22} strokeWidth={1.7} aria-hidden="true" />
+            <span>{label}</span>
+            <a href={href} target={href.startsWith('http') ? '_blank' : undefined} rel="noreferrer">{value}</a>
+          </li>
+        ))}
+        <li className="ct-channel ct-channel--hay">
+          <HelpCircle size={22} strokeWidth={1.7} aria-hidden="true" />
+          <span>Quick answers</span>
+          <Link to="/faq">Read the FAQ</Link>
+        </li>
+      </ul>
+
+      {status === 'sent' ? (
+        <section className="pg-tile ct-card ct-success" role="status">
+          <span className="ct-success-mark" aria-hidden="true"><Check size={28} strokeWidth={2} /></span>
+          <h2>Thank you{submittedName ? `, ${submittedName}` : ''}.</h2>
+          <p>We’ve received your enquiry and sent a confirmation to your email. We’ll get back to you within 1 business day.</p>
+          <Link to="/shop" className="ap-pill">Continue shopping</Link>
+        </section>
+      ) : (
+        <form className="pg-tile ct-card" onSubmit={handleSubmit}>
+          <h2>Send us a message</h2>
+          <div className="pg-row">
+            <label className="pg-field">Name
+              <input type="text" name="name" autoComplete="name" required maxLength={120} />
             </label>
-            <label>Message
-              <textarea name="message" rows={6} required maxLength={5000} />
+            <label className="pg-field">Email
+              <input type="email" name="email" autoComplete="email" required maxLength={200} />
             </label>
-            {/* Spam trap — hidden from people, filled in by bots */}
-            <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" style={{ position: 'absolute', left: '-9999px' }} />
-            {errorMessage && <p className="jayam-contact-error" role="alert">{errorMessage}</p>}
-            <button type="submit" disabled={status === 'sending'}>
-              {status === 'sending' ? 'Sending…' : 'Send message'}
-            </button>
-          </form>
-        )}
-      </div>
+          </div>
+          <div className="pg-row">
+            <label className="pg-field">Topic
+              <select name="category" value={category} onChange={(event) => setCategory(event.target.value)}>
+                {ENQUIRY_CATEGORIES.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
+              </select>
+            </label>
+            {ORDER_CATEGORIES.includes(category) ? (
+              <label className="pg-field">Order number <small>(if you have one)</small>
+                <input type="text" name="orderNumber" placeholder="ORD-…" maxLength={40} />
+              </label>
+            ) : (
+              <label className="pg-field">Phone <small>(optional)</small>
+                <input type="tel" name="phone" autoComplete="tel" maxLength={40} />
+              </label>
+            )}
+          </div>
+          <label className="pg-field">Subject
+            <input type="text" name="subject" required maxLength={200} />
+          </label>
+          <label className="pg-field">Message
+            <textarea name="message" rows={6} required maxLength={5000} />
+          </label>
+          {/* Spam trap — hidden from people, filled in by bots */}
+          <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" style={{ position: 'absolute', left: '-9999px' }} />
+          {errorMessage && <p className="pg-error" role="alert">{errorMessage}</p>}
+          <button type="submit" className="ap-pill ap-pill--block" disabled={status === 'sending'}>
+            {status === 'sending' ? 'Sending…' : 'Send message'}
+          </button>
+        </form>
+      )}
     </main>
   );
 }
