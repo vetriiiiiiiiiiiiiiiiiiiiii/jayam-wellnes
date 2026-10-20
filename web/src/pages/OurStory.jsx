@@ -15,12 +15,13 @@ const principles = [
   { icon: Sunrise, text: 'Long-term everyday wellness, not quick fixes' },
 ];
 
-// Every part of the moringa tree, and the Jayam products made from it
+// Every part of the moringa tree, and the Jayam products made from it.
+// Tiles alternate grey and hay; each icon sits on a disc in one of the palette colours.
 const plantParts = [
-  { icon: Leaf, part: 'Leaves', line: 'A nutrient-dense green superfood, gently vacuum-dried.', slugs: ['moringa-leaf-capsules', 'moringa-leaf-amla-tablets'] },
-  { icon: Flower2, part: 'Flowers', line: 'A distinctive botanical, crafted for women’s wellness.', slugs: ['moringa-flower-tablets'] },
-  { icon: Bean, part: 'Seeds', line: 'Pure seed, for everyday vitality.', slugs: ['moringa-seed-capsules'] },
-  { icon: Droplet, part: 'Seed & root oils', line: 'Nourishing oils for a radiant-looking glow.', slugs: ['beauty-drops-moringa-facial-elixir'] },
+  { icon: Leaf, part: 'Leaves', tone: 'grey', accent: 'fern', line: 'A nutrient-dense green superfood, gently vacuum-dried.', slugs: ['moringa-leaf-capsules', 'moringa-leaf-amla-tablets'] },
+  { icon: Flower2, part: 'Flowers', tone: 'hay', accent: 'cherry', line: 'A distinctive botanical, crafted for women’s wellness.', slugs: ['moringa-flower-tablets'] },
+  { icon: Bean, part: 'Seeds', tone: 'hay', accent: 'earth', line: 'Pure seed, for everyday vitality.', slugs: ['moringa-seed-capsules'] },
+  { icon: Droplet, part: 'Seed & root oils', tone: 'grey', accent: 'wheat', line: 'Nourishing oils for a radiant-looking glow.', slugs: ['beauty-drops-moringa-facial-elixir'] },
 ];
 
 export default function OurStoryPage() {
@@ -48,11 +49,11 @@ export default function OurStoryPage() {
           <p>Jayam crafts each product from a different part of the tree — leaves, flowers and seeds — alongside complementary botanicals like Amla.</p>
         </header>
         <div className="st-plant-grid">
-          {plantParts.map(({ icon: Icon, part, line, slugs }, index) => {
+          {plantParts.map(({ icon: Icon, part, tone, accent, line, slugs }, index) => {
             const items = slugs.map((slug) => bySlug[slug]).filter(Boolean);
             return (
-              <article key={part} className="st-plant-card" data-reveal style={{ transitionDelay: `${index * 90}ms` }}>
-                <span className="st-plant-icon"><Icon size={22} strokeWidth={1.5} aria-hidden="true" /></span>
+              <article key={part} className={`st-plant-card st-plant-card--${tone}`} data-reveal style={{ transitionDelay: `${index * 90}ms` }}>
+                <span className={`st-plant-icon st-plant-icon--${accent}`}><Icon size={30} strokeWidth={1.6} aria-hidden="true" /></span>
                 <h3>{part}</h3>
                 <p>{line}</p>
                 <ul>
@@ -79,7 +80,7 @@ export default function OurStoryPage() {
         <ul className="st-values-grid">
           {principles.map(({ icon: Icon, text }, index) => (
             <li key={text} data-reveal style={{ transitionDelay: `${index * 60}ms` }}>
-              <Icon size={22} strokeWidth={1.4} aria-hidden="true" />
+              <Icon size={26} strokeWidth={1.6} aria-hidden="true" />
               <span>{text}</span>
             </li>
           ))}
@@ -92,9 +93,9 @@ export default function OurStoryPage() {
           <img src="/jayam-logo.png" alt="Jayam — Bringing the best to your hands" />
         </div>
         <p className="st-signoff-line">Because wellness is personal, <em>and trust matters.</em></p>
-        <div className="wl-hero-actions">
-          <Link to="/shop" className="wl-button">Explore our products</Link>
-          <Link to="/contact" className="wl-button wl-button--ghost">Get in touch</Link>
+        <div className="ap-ctas">
+          <Link to="/shop" className="ap-pill">Explore our products</Link>
+          <Link to="/contact" className="ap-pill ap-pill--outline">Get in touch</Link>
         </div>
       </section>
     </main>
