@@ -17,7 +17,8 @@ function seeded(seed) {
   };
 }
 
-const LEAF_GREENS = ['#5d7a4e', '#6b8a57', '#7a9a62', '#86a56c', '#4f6b44', '#93b078'];
+// Leaf shades drawn from the palette's teal and sea green
+const LEAF_GREENS = ['#4f8f80', '#5aa190', '#68b2a0', '#7dbca8', '#3f7c78', '#8fc5b0'];
 
 // Trunk and limbs as tapered strokes: [path, width]
 const WOOD = [
@@ -142,13 +143,13 @@ function MoringaTree({ className = '', lite = false }) {
     <svg className={className} viewBox="40 150 520 660" preserveAspectRatio="xMidYMax meet" aria-hidden="true" focusable="false">
       <defs>
         <linearGradient id="mt-bark" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#7d6d5a" />
-          <stop offset="0.45" stopColor="#a8998a" />
-          <stop offset="1" stopColor="#6e604f" />
+          <stop offset="0" stopColor="#4d6a6c" />
+          <stop offset="0.45" stopColor="#80999a" />
+          <stop offset="1" stopColor="#3f5a5d" />
         </linearGradient>
         <radialGradient id="mt-ground" cx="0.5" cy="0.5" r="0.5">
-          <stop offset="0" stopColor="#2e4636" stopOpacity="0.25" />
-          <stop offset="1" stopColor="#2e4636" stopOpacity="0" />
+          <stop offset="0" stopColor="#2c6975" stopOpacity="0.25" />
+          <stop offset="1" stopColor="#2c6975" stopOpacity="0" />
         </radialGradient>
       </defs>
 
@@ -162,7 +163,7 @@ function MoringaTree({ className = '', lite = false }) {
       {/* Drooping leaf fronds */}
       {tree.fronds.map(({ key, rachis, leaflets, at }) => (
         <g key={key} className="mt-reveal" style={{ '--at': at }}>
-          <path d={rachis} stroke="#6f7f55" strokeWidth="1.2" fill="none" opacity="0.8" />
+          <path d={rachis} stroke="#4f8f80" strokeWidth="1.2" fill="none" opacity="0.8" />
           {(lite ? leaflets.filter((_, index) => index % 2 === 0) : leaflets).map((leaf, index) => (
             <ellipse
               key={index}
@@ -180,14 +181,14 @@ function MoringaTree({ className = '', lite = false }) {
 
       {/* Drumstick pods */}
       {tree.pods.map(({ d, at }) => (
-        <path key={d} d={d} className="mt-reveal" style={{ '--at': at }} stroke="#6c7a47" strokeWidth="3.2" strokeLinecap="round" fill="none" />
+        <path key={d} d={d} className="mt-reveal" style={{ '--at': at }} stroke="#3f7c78" strokeWidth="3.2" strokeLinecap="round" fill="none" />
       ))}
 
       {/* Flower clusters */}
       {tree.flowers.map(({ x, y, dots }) => (
         <g key={`${x}-${y}`} className="mt-reveal" style={{ '--at': 0.45 }}>
           {dots.map(([dx, dy, r], index) => (
-            <circle key={index} cx={dx.toFixed(1)} cy={dy.toFixed(1)} r={r.toFixed(1)} fill="#f6eed6" stroke="#e7d9ae" strokeWidth="0.6" />
+            <circle key={index} cx={dx.toFixed(1)} cy={dy.toFixed(1)} r={r.toFixed(1)} fill="#ffffff" stroke="#cde0c9" strokeWidth="0.6" />
           ))}
         </g>
       ))}

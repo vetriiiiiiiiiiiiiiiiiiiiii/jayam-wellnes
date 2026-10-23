@@ -6,18 +6,26 @@
    ========================================== */
 
 :root {
-  /* Client palette */
-  --fern: #327039;      /* Forest Fern */
-  --earth: #133020;     /* Tilled Earth */
-  --wheat: #f0be49;     /* Wheat Field Sunrise */
-  --cherry: #dd5c36;    /* Cherry Grove */
-  --hay: #f8edd9;       /* Alabaster Hay */
+  /* Client palette: white first, then deep teal, sea green, sage and mist */
+  --teal: #2c6975;
+  --sea: #68b2a0;
+  --sage-tint: #cde0c9;
+  --mist: #e0ecde;
+  --teal-glow: linear-gradient(135deg, #2c6975 0%, #68b2a0 100%);
+  --sea-glow: linear-gradient(135deg, #68b2a0 0%, #cde0c9 100%);
+
+  /* Role names used across the site, mapped onto the palette */
+  --fern: var(--teal);
+  --earth: var(--teal);
+  --wheat: var(--sea);
+  --cherry: var(--teal);
+  --hay: var(--mist);
 
   --white: #ffffff;
-  --surface: #f5f5f7;   /* apple.com light grey for tiles and cards */
-  --ink: #133020;
-  --muted: #5b6a5f;
-  --line: #ebebe6;
+  --surface: #f1f6f0;   /* a lighter mist for tiles and cards */
+  --ink: #2c6975;
+  --muted: #4f7f88;
+  --line: #e0ecde;
 
   /* Earlier layers read these names */
   --cream: #ffffff;
@@ -32,9 +40,9 @@
   --mono: var(--sans);
 
   /* Mild 3D shadow for products: contact shadow + soft cast shadow */
-  --product-shadow: drop-shadow(0 2px 2px rgba(19, 48, 32, 0.18)) drop-shadow(0 22px 26px rgba(19, 48, 32, 0.16));
+  --product-shadow: drop-shadow(0 2px 2px rgba(44, 105, 117, 0.18)) drop-shadow(0 22px 26px rgba(44, 105, 117, 0.16));
   /* Tactile tile: raised surface with a soft bevel */
-  --tile-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), inset 0 -2px 0 rgba(0, 0, 0, 0.12), 0 18px 34px -16px rgba(19, 48, 32, 0.45);
+  --tile-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), inset 0 -2px 0 rgba(0, 0, 0, 0.12), 0 18px 34px -16px rgba(44, 105, 117, 0.45);
 }
 
 html,
@@ -115,7 +123,7 @@ h2 em,
 }
 
 .wl-button--light:hover {
-  border-color: var(--wheat);
+  border-color: var(--sage-tint);
   background: var(--wheat);
   color: var(--earth);
 }
@@ -229,14 +237,14 @@ nav.fixed {
 .jh-leaf {
   position: absolute;
   transform-origin: 45% 94.5%;
-  filter: drop-shadow(0 14px 14px rgba(19, 48, 32, 0.28));
+  filter: drop-shadow(0 14px 14px rgba(44, 105, 117, 0.28));
 }
 
 .jh-leaf--back {
   top: -454px;
   left: 296px;
   width: 320px;
-  color: #1d4a2a;
+  color: #1d4750;
   transform: rotate(204deg);
 }
 
@@ -252,7 +260,7 @@ nav.fixed {
   top: -354px;
   left: 327px;
   width: 250px;
-  color: #5e9b5d;
+  color: var(--sea);
   transform: rotate(252deg);
 }
 
@@ -272,7 +280,7 @@ nav.fixed {
   width: 82%;
   aspect-ratio: 1;
   border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, #fff7e8 0%, var(--hay) 58%, #f3e1bf 100%);
+  background: radial-gradient(circle at 40% 35%, #ffffff 0%, var(--mist) 58%, var(--sage-tint) 100%);
   transform: translateX(-50%);
 }
 
@@ -330,7 +338,7 @@ nav.fixed {
   width: 70%;
   height: 7%;
   border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(19, 48, 32, 0.2) 0%, rgba(19, 48, 32, 0) 70%);
+  background: radial-gradient(ellipse, rgba(44, 105, 117, 0.2) 0%, rgba(44, 105, 117, 0) 70%);
   transform: translateX(-50%);
 }
 
@@ -346,7 +354,7 @@ nav.fixed {
   place-items: center;
   border-radius: 50%;
   background: var(--white);
-  box-shadow: 0 16px 30px -14px rgba(19, 48, 32, 0.35);
+  box-shadow: 0 16px 30px -14px rgba(44, 105, 117, 0.35);
 }
 
 .jh-badge svg {
@@ -400,11 +408,11 @@ nav.fixed {
 }
 
 .jw-head h2 em {
-  color: var(--wheat);
+  color: var(--sage-tint);
 }
 
 .jw-head .wl-kicker {
-  color: var(--wheat);
+  color: var(--sage-tint);
 }
 
 .jw-facts {
@@ -423,7 +431,7 @@ nav.fixed {
 
 .jw-facts strong {
   display: block;
-  color: var(--wheat);
+  color: var(--sage-tint);
   font: 750 clamp(64px, 7vw, 108px)/0.9 var(--display);
   letter-spacing: -0.04em;
 }
@@ -539,7 +547,7 @@ nav.fixed {
 }
 
 .js-copy .wl-kicker {
-  color: var(--wheat);
+  color: var(--sage-tint);
 }
 
 .js-copy h2 {
@@ -547,7 +555,7 @@ nav.fixed {
 }
 
 .js-copy h2 em {
-  color: var(--wheat);
+  color: var(--sage-tint);
 }
 
 .js-copy > p:not(.wl-kicker) {
@@ -841,7 +849,7 @@ h2 {
 }
 
 .an-links a {
-  color: rgba(19, 48, 32, 0.8);
+  color: rgba(44, 105, 117, 0.8);
   font: 400 13px var(--sans);
   letter-spacing: -0.005em;
   text-decoration: none;
@@ -967,7 +975,7 @@ h2 {
 /* ---------- Footer ---------- */
 .af {
   background: var(--surface);
-  color: rgba(19, 48, 32, 0.72);
+  color: rgba(44, 105, 117, 0.72);
   font: 400 12px/1.5 var(--sans);
 }
 
@@ -978,7 +986,7 @@ h2 {
 }
 
 .af-fineprint {
-  border-bottom: 1px solid #d2d2d7;
+  border-bottom: 1px solid #cde0c9;
   padding: 16px 0 12px;
 }
 
@@ -1011,7 +1019,7 @@ h2 {
 }
 
 .af-columns a {
-  color: rgba(19, 48, 32, 0.72);
+  color: rgba(44, 105, 117, 0.72);
   text-decoration: none;
 }
 
@@ -1024,7 +1032,7 @@ h2 {
   display: flex;
   justify-content: space-between;
   gap: 16px;
-  border-top: 1px solid #d2d2d7;
+  border-top: 1px solid #cde0c9;
   padding-top: 14px;
 }
 
@@ -1330,7 +1338,7 @@ h2 {
   left: 0;
   border-top: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.97);
-  box-shadow: 0 -8px 24px rgba(19, 48, 32, 0.06);
+  box-shadow: 0 -8px 24px rgba(44, 105, 117, 0.06);
   transform: translateY(100%);
   transition: transform 0.35s ease;
 }
@@ -1490,7 +1498,7 @@ h2 {
 }
 
 .sj-scroll-cue::after {
-  background: linear-gradient(180deg, var(--fern), rgba(50, 112, 57, 0));
+  background: linear-gradient(180deg, var(--fern), rgba(104, 178, 160, 0));
 }
 
 /* ---------- One remarkable plant: 2 × 2 tiles ---------- */
@@ -1592,7 +1600,7 @@ h2 {
 }
 
 .st-values .wl-kicker {
-  color: var(--wheat);
+  color: var(--sage-tint);
 }
 
 .st-values h2 {
@@ -1600,7 +1608,7 @@ h2 {
 }
 
 .st-values h2 em {
-  color: var(--wheat);
+  color: var(--sage-tint);
 }
 
 .st-values-grid {
@@ -1623,7 +1631,7 @@ h2 {
 }
 
 .st-values-grid svg {
-  color: var(--wheat);
+  color: var(--sage-tint);
 }
 
 /* ---------- Sign-off: a grey tile, like the home page's closing call to action ---------- */

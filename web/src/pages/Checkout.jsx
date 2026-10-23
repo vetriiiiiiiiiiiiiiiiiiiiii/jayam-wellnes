@@ -14,16 +14,16 @@ const stripePromise = publishableKey ? loadStripe(publishableKey) : null;
 const stripeAppearance = {
   theme: 'stripe',
   variables: {
-    colorPrimary: '#327039',
-    colorText: '#133020',
+    colorPrimary: '#2c6975',
+    colorText: '#2c6975',
     colorBackground: '#ffffff',
-    colorDanger: '#dd5c36',
+    colorDanger: '#a33a2a',
     fontFamily: '-apple-system, BlinkMacSystemFont, Inter, Helvetica Neue, Arial, sans-serif',
     borderRadius: '12px',
   },
   rules: {
-    '.Input': { border: '1px solid #d2d2d7', boxShadow: 'none' },
-    '.Tab': { border: '1px solid #d2d2d7', boxShadow: 'none' },
+    '.Input': { border: '1px solid #cde0c9', boxShadow: 'none' },
+    '.Tab': { border: '1px solid #cde0c9', boxShadow: 'none' },
   },
 };
 

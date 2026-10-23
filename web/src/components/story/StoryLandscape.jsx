@@ -23,17 +23,17 @@ export default function StoryLandscape({ progress, compact = false }) {
     <svg className="sj-landscape" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">
       <defs>
         <radialGradient id="sj-disc" cx="0.4" cy="0.35" r="0.65">
-          <stop offset="0" stopColor="#fff7e8" />
-          <stop offset="0.6" stopColor="#f8edd9" />
-          <stop offset="1" stopColor="#f3e1bf" />
+          <stop offset="0" stopColor="#ffffff" />
+          <stop offset="0.6" stopColor="#e0ecde" />
+          <stop offset="1" stopColor="#cde0c9" />
         </radialGradient>
       </defs>
 
       <circle cx={discX} cy={discY} r={discR} fill="url(#sj-disc)" />
-      <circle cx={sunX} cy={sunY} r={sunR} fill="#f0be49" />
+      <circle cx={sunX} cy={sunY} r={sunR} fill="#68b2a0" />
 
       {/* Horizon */}
-      <line x1="0" y1="866" x2="1600" y2="866" stroke="#ebebe6" strokeWidth="2" />
+      <line x1="0" y1="866" x2="1600" y2="866" stroke="#e0ecde" strokeWidth="2" />
     </svg>
   );
 }

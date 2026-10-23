@@ -7,21 +7,21 @@
 @import "tailwindcss";
 
 @theme {
-  /* Client palette: Forest Fern, Tilled Earth, Wheat Field Sunrise, Cherry Grove, Alabaster Hay */
+  /* Client palette: white, deep teal #2C6975, sea green #68B2A0, sage #CDE0C9, mist #E0ECDE */
   --color-brand-pearl: #ffffff;
-  --color-brand-dark: #133020;
-  --color-brand-forest-700: #327039;
-  --color-brand-forest-500: #4a8a50;
-  --color-brand-forest-900: #133020;
-  --color-brand-green-500: #327039;
-  --color-brand-green-100: #e7f0e3;
-  --color-brand-gold: #f0be49;
-  --color-brand-cherry: #dd5c36;
-  --color-brand-hay: #f8edd9;
-  --color-brand-white: #fffdf8;
-  --color-brand-purple-500: #58734e;
-  --color-brand-purple-700: #234330;
-  --color-brand-lavender: #e7e3d9;
+  --color-brand-dark: #2c6975;
+  --color-brand-forest-700: #2c6975;
+  --color-brand-forest-500: #68b2a0;
+  --color-brand-forest-900: #2c6975;
+  --color-brand-green-500: #2c6975;
+  --color-brand-green-100: #e0ecde;
+  --color-brand-gold: #68b2a0;
+  --color-brand-cherry: #2c6975;
+  --color-brand-hay: #e0ecde;
+  --color-brand-white: #ffffff;
+  --color-brand-purple-500: #68b2a0;
+  --color-brand-purple-700: #2c6975;
+  --color-brand-lavender: #cde0c9;
 
   /* San Francisco on Apple devices, Inter elsewhere */
   --font-serif: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Helvetica Neue', Arial, sans-serif;

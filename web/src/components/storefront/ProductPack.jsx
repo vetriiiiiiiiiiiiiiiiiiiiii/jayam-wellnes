@@ -1,15 +1,20 @@
 import { useId } from 'react';
 
 // Illustrated Jayam packaging, used until real product photos are added:
-// supplements come in a paper tube, Beauty Drops in an amber dropper bottle.
+// supplements come in a paper tube, Beauty Drops in a tinted glass dropper bottle.
+// Colours come from the client palette: teal #2C6975, sea #68B2A0, sage #CDE0C9, mist #E0ECDE.
+
+const TEAL = '#2c6975';
+const SEA = '#68b2a0';
+const SHADE = '#1d4750'; // teal in shadow, for the roundness shading
 
 const PALETTES = {
-  'moringa-leaf-amla-tablets': { body: '#c9d6b6', cap: '#3a5a45', accent: '#4f6b4b' },
-  'moringa-leaf-capsules': { body: '#b7cb98', cap: '#46663a', accent: '#46663a' },
-  'moringa-flower-tablets': { body: '#ecd2c6', cap: '#a8705e', accent: '#8a5a4a' },
-  'moringa-seed-capsules': { body: '#e3d3b3', cap: '#7a5c3a', accent: '#6f5636' },
+  'moringa-leaf-amla-tablets': { body: TEAL, cap: SEA, accent: TEAL },
+  'moringa-leaf-capsules': { body: SEA, cap: TEAL, accent: TEAL },
+  'moringa-flower-tablets': { body: '#e0ecde', cap: SEA, accent: TEAL },
+  'moringa-seed-capsules': { body: '#cde0c9', cap: TEAL, accent: TEAL },
 };
-const DEFAULT_PALETTE = { body: '#d6dcc8', cap: '#3a5a45', accent: '#4f6b4b' };
+const DEFAULT_PALETTE = { body: '#cde0c9', cap: TEAL, accent: TEAL };
 
 const SERIF = "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif";
 const SANS = "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', sans-serif";
@@ -39,8 +44,8 @@ function Shadow({ id, cx, cy, rx }) {
     <>
       <defs>
         <radialGradient id={`${id}-shadow`} cx="0.5" cy="0.5" r="0.5">
-          <stop offset="0" stopColor="#2e4636" stopOpacity="0.28" />
-          <stop offset="1" stopColor="#2e4636" stopOpacity="0" />
+          <stop offset="0" stopColor={SHADE} stopOpacity="0.28" />
+          <stop offset="1" stopColor={SHADE} stopOpacity="0" />
         </radialGradient>
       </defs>
       <ellipse cx={cx} cy={cy} rx={rx} ry="14" fill={`url(#${id}-shadow)`} />
@@ -61,12 +66,12 @@ function Tube({ id, title, form, meta, organic, palette }) {
     <>
       <defs>
         <linearGradient id={`${id}-round`} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#1f2f24" stopOpacity="0.32" />
-          <stop offset="0.22" stopColor="#1f2f24" stopOpacity="0" />
+          <stop offset="0" stopColor={SHADE} stopOpacity="0.32" />
+          <stop offset="0.22" stopColor={SHADE} stopOpacity="0" />
           <stop offset="0.34" stopColor="#ffffff" stopOpacity="0.32" />
           <stop offset="0.46" stopColor="#ffffff" stopOpacity="0" />
-          <stop offset="0.8" stopColor="#1f2f24" stopOpacity="0.08" />
-          <stop offset="1" stopColor="#1f2f24" stopOpacity="0.34" />
+          <stop offset="0.8" stopColor={SHADE} stopOpacity="0.08" />
+          <stop offset="1" stopColor={SHADE} stopOpacity="0.34" />
         </linearGradient>
         <linearGradient id={`${id}-paper`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#ffffff" stopOpacity="0.12" />
@@ -81,7 +86,7 @@ function Tube({ id, title, form, meta, organic, palette }) {
       <path d={body} fill={`url(#${id}-paper)`} />
 
       {/* Wrap-around label */}
-      <path d={label} fill="#fbf8ef" />
+      <path d={label} fill="#ffffff" />
       <path d="M72 136 A58 13 0 0 0 188 136" stroke={palette.accent} strokeOpacity="0.35" fill="none" />
       <path d="M72 254 A58 13 0 0 0 188 254" stroke={palette.accent} strokeOpacity="0.35" fill="none" />
 
@@ -90,12 +95,12 @@ function Tube({ id, title, form, meta, organic, palette }) {
         JAYAM
       </text>
       {titleLines.map((line, index) => (
-        <text key={line} x="130" y={titleStart + index * lineHeight} textAnchor="middle" fontFamily={SERIF} fontSize={twoLines ? 16 : 17} fill="#2e4636">
+        <text key={line} x="130" y={titleStart + index * lineHeight} textAnchor="middle" fontFamily={SERIF} fontSize={twoLines ? 16 : 17} fill={TEAL}>
           {line}
         </text>
       ))}
       {form && (
-        <text x="130" y={titleStart + titleLines.length * lineHeight} textAnchor="middle" fontFamily={SERIF} fontSize="12.5" fill="#6f8461">
+        <text x="130" y={titleStart + titleLines.length * lineHeight} textAnchor="middle" fontFamily={SERIF} fontSize="12.5" fill={SEA}>
           {form}
         </text>
       )}
@@ -105,7 +110,7 @@ function Tube({ id, title, form, meta, organic, palette }) {
         </text>
       )}
       {meta && (
-        <text x="130" y="245" textAnchor="middle" fontFamily={SANS} fontSize="6.5" fontWeight="600" letterSpacing="1.1" fill="#6b6f62">
+        <text x="130" y="245" textAnchor="middle" fontFamily={SANS} fontSize="6.5" fontWeight="600" letterSpacing="1.1" fill={TEAL} opacity="0.7">
           {meta.toUpperCase()}
         </text>
       )}
@@ -127,15 +132,15 @@ function DropperBottle({ id, title, form }) {
     <>
       <defs>
         <linearGradient id={`${id}-glass`} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#8a4f1c" />
-          <stop offset="0.3" stopColor="#c27b33" />
-          <stop offset="0.45" stopColor="#d6954b" />
-          <stop offset="1" stopColor="#7c4517" />
+          <stop offset="0" stopColor={SHADE} />
+          <stop offset="0.3" stopColor={TEAL} />
+          <stop offset="0.45" stopColor={SEA} />
+          <stop offset="1" stopColor={SHADE} />
         </linearGradient>
         <linearGradient id={`${id}-bulb`} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#1f3328" />
-          <stop offset="0.35" stopColor="#3f5f4a" />
-          <stop offset="1" stopColor="#1c2e24" />
+          <stop offset="0" stopColor={SHADE} />
+          <stop offset="0.35" stopColor={TEAL} />
+          <stop offset="1" stopColor={SHADE} />
         </linearGradient>
       </defs>
 
@@ -146,11 +151,11 @@ function DropperBottle({ id, title, form }) {
       <rect x="94" y="170" width="7" height="104" rx="3.5" fill="#ffffff" opacity="0.28" />
 
       {/* Label */}
-      <rect x="84" y="192" width="92" height="74" fill="#fbf8ef" />
-      <LeafMark x={130} y={206} color="#7a5a2e" />
-      <text x="130" y="222" textAnchor="middle" fontFamily={SANS} fontSize="7" fontWeight="700" letterSpacing="2.4" fill="#7a5a2e">JAYAM</text>
-      <text x="130" y="241" textAnchor="middle" fontFamily={SERIF} fontSize="15" fill="#2e4636">{title}</text>
-      {form && <text x="130" y="256" textAnchor="middle" fontFamily={SERIF} fontSize="10.5" fill="#8a6a3c">{form}</text>}
+      <rect x="84" y="192" width="92" height="74" fill="#ffffff" />
+      <LeafMark x={130} y={206} color={SEA} />
+      <text x="130" y="222" textAnchor="middle" fontFamily={SANS} fontSize="7" fontWeight="700" letterSpacing="2.4" fill={SEA}>JAYAM</text>
+      <text x="130" y="241" textAnchor="middle" fontFamily={SERIF} fontSize="15" fill={TEAL}>{title}</text>
+      {form && <text x="130" y="256" textAnchor="middle" fontFamily={SERIF} fontSize="10.5" fill={SEA}>{form}</text>}
 
       {/* Collar and dropper bulb */}
       <rect x="104" y="100" width="52" height="28" rx="5" fill={`url(#${id}-bulb)`} />
