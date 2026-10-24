@@ -1075,3 +1075,33 @@
   .jh h1 { font-size: 36px; }
   .hs-seal { width: 188px; }
 }
+
+/* Photo cards: the photo runs full-bleed from the top and fades into the card colour,
+   with the icon disc and number sitting over it */
+.od-scene--photo {
+  top: 0;
+  height: 68%;
+}
+
+.od-scene--photo img {
+  object-position: center 60%;
+}
+
+.od-card:has(.od-scene--photo)::after {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 38%, var(--od-bg) 70%);
+}
+
+.od-card--deep:has(.od-scene--photo)::before,
+.od-card--teal:has(.od-scene--photo)::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.18) 0%, rgba(0, 0, 0, 0) 30%);
+  content: '';
+}
+
+/* Card colours tuned to sit with the photos */
+.od-card--deep:has(.od-scene--photo) { --od-bg: #1f4a48; background: #1f4a48; }
+.od-card--sage:has(.od-scene--photo) { --od-bg: #e3ecd9; background: #e3ecd9; }
+.od-card--teal:has(.od-scene--photo) { --od-bg: #24494a; background: #24494a; }
+.od-card--cream:has(.od-scene--photo) { --od-bg: #f3ece2; background: #f3ece2; }

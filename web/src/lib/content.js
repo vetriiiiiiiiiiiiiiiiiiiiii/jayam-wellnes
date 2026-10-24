@@ -61,12 +61,12 @@ export const HOME_DEFAULTS = {
     title: 'Nothing hidden.',
     accent: 'Nothing unnecessary.',
     intro: 'From farm to your hands, every step is intentional — clean ingredients, gentle processing and packaging that respects you and the planet.',
-    // image: optional photo URL; without one the card shows its illustration
+    // image: the card photo (replaceable from the admin panel later); empty shows the illustration
     steps: [
-      { title: 'Organic botanicals', body: 'Moringa leaves, flowers and seeds, and Amla — carefully selected and sourced from India.', link: '/our-story', image: '' },
-      { title: 'Gently vacuum-dried', body: 'A careful process that helps preserve naturally occurring nutrients and botanical character.', link: '/faq#products', image: '' },
-      { title: 'Made with care', body: 'Produced in GMP-certified facilities and third-party tested for purity.', link: '/faq#products', image: '' },
-      { title: 'Plastic-free packs', body: 'Biodegradable paper tubes that protect freshness — and the planet.', link: '/shop', image: '' },
+      { title: 'Organic botanicals', body: 'Moringa leaves, flowers and seeds, and Amla — carefully selected and sourced from India.', link: '/our-story', image: '/difference/botanicals.jpg' },
+      { title: 'Gently vacuum-dried', body: 'A careful process that helps preserve naturally occurring nutrients and botanical character.', link: '/faq#products', image: '/difference/vacuum-dried.jpg' },
+      { title: 'Made with care', body: 'Produced in GMP-certified facilities and third-party tested for purity.', link: '/faq#products', image: '/difference/made-with-care.jpg' },
+      { title: 'Plastic-free packs', body: 'Biodegradable paper tubes that protect freshness — and the planet.', link: '/shop', image: '/difference/plastic-free.jpg' },
     ],
   },
   story: {

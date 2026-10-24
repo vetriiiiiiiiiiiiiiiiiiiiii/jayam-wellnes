@@ -30,8 +30,8 @@ export default function PlantToPack({ content }) {
           const to = link || '/our-story';
           return (
             <li key={`${index}-${title}`} className={`od-card od-card--${tone}`} data-reveal style={{ transitionDelay: `${index * 80}ms` }}>
-              <div className="od-scene">
-                {image ? <img src={image} alt="" loading="lazy" /> : <Scene />}
+              <div className={`od-scene${image ? ' od-scene--photo' : ''}`}>
+                {image ? <img src={image} alt="" loading="lazy" decoding="async" /> : <Scene />}
               </div>
               <div className="od-top">
                 <span className="od-icon"><Icon size={22} strokeWidth={1.7} aria-hidden="true" /></span>
