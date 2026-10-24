@@ -1634,7 +1634,6 @@
 }
 
 /* Tiles: four looks taken straight from the palette */
-.jp-tile--fern,
 .sh-why-tile--fern,
 .pp-highlight--fern,
 .ct-channel--fern {
@@ -1642,7 +1641,6 @@
   color: var(--white);
 }
 
-.jp-tile--wheat,
 .sh-why-tile--wheat,
 .pp-highlight--wheat,
 .ct-channel--wheat {
@@ -1650,7 +1648,6 @@
   color: var(--teal);
 }
 
-.jp-tile--earth,
 .sh-why-tile--earth,
 .pp-highlight--earth,
 .ct-channel--earth {
@@ -1658,7 +1655,6 @@
   color: var(--white);
 }
 
-.jp-tile--cherry,
 .sh-why-tile--cherry,
 .pp-highlight--cherry,
 .ct-channel--cherry {

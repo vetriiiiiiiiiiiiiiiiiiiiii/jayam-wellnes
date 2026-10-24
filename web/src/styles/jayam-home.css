@@ -759,3 +759,234 @@
   .an-wordmark b { font-size: 20px; }
   .an-wordmark small { font-size: 9px; letter-spacing: 0.44em; padding-left: 0.44em; }
 }
+
+/* ---------- Our difference: four tall illustrated cards ---------- */
+.od {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 120px 22px 100px;
+}
+
+.od-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px 48px;
+  margin-bottom: 36px;
+}
+
+.od-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin: 0 0 14px;
+  color: var(--muted);
+  font: 600 12px var(--sans);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.od-eyebrow::after {
+  width: 72px;
+  height: 1px;
+  background: var(--sea);
+  content: '';
+}
+
+.od-head h2 {
+  margin: 0;
+  color: var(--teal);
+  font: 750 clamp(36px, 5vw, 60px) / 1.04 var(--display);
+  letter-spacing: -0.035em;
+}
+
+.od-head h2 em {
+  display: block;
+}
+
+.od-intro {
+  max-width: 380px;
+  margin: 0 0 8px;
+  color: var(--muted);
+  font: 400 16px / 1.6 var(--sans);
+}
+
+.od-cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.od-card {
+  position: relative;
+  display: flex;
+  min-height: 460px;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+  border-radius: 26px;
+  padding: 24px 22px 22px;
+  box-shadow: 0 30px 50px -34px rgba(44, 105, 117, 0.65);
+  isolation: isolate;
+  transition: transform 500ms var(--ease-soft), box-shadow 500ms var(--ease-soft);
+}
+
+.od-card:hover {
+  box-shadow: 0 40px 60px -34px rgba(44, 105, 117, 0.75);
+  transform: translateY(-6px);
+}
+
+.od-scene {
+  position: absolute;
+  z-index: -2;
+  top: 64px;
+  right: 0;
+  left: 0;
+  height: 58%;
+}
+
+.od-scene svg,
+.od-scene img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.od-scene svg {
+  transition: transform 900ms var(--ease-soft);
+}
+
+.od-card:hover .od-scene svg,
+.od-card:hover .od-scene img {
+  transform: scale(1.05);
+}
+
+/* Fade the scene into the card colour behind the text */
+.od-card::after {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 45%, var(--od-bg) 74%);
+  content: '';
+}
+
+.od-top {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  left: 22px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.od-icon {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 10px 20px -12px rgba(0, 0, 0, 0.4);
+  color: var(--teal);
+}
+
+.od-number {
+  margin-top: 6px;
+  font: 700 13px var(--sans);
+  letter-spacing: 0.08em;
+}
+
+.od-body {
+  padding-right: 44px;
+}
+
+.od-body h3 {
+  margin: 0 0 10px;
+  font: 700 clamp(22px, 2vw, 26px) / 1.15 var(--display);
+  letter-spacing: -0.02em;
+}
+
+.od-body p {
+  margin: 0;
+  font: 400 14px / 1.55 var(--sans);
+  opacity: 0.85;
+}
+
+.od-arrow {
+  position: absolute;
+  right: 20px;
+  bottom: 22px;
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  color: inherit;
+  opacity: 0.85;
+  transition: background 200ms ease, color 200ms ease, opacity 200ms ease;
+}
+
+.od-arrow:hover {
+  background: currentColor;
+  opacity: 1;
+}
+
+.od-arrow:hover svg {
+  color: var(--od-bg);
+}
+
+/* Tones */
+.od-card--deep {
+  --od-bg: #1d4750;
+  background: radial-gradient(circle at 30% 20%, #3d8580 0%, #1d4750 70%);
+  color: var(--white);
+}
+
+.od-card--sage {
+  --od-bg: #d4e5d0;
+  background: linear-gradient(180deg, #f4f8f2 0%, #d4e5d0 100%);
+  color: var(--teal);
+}
+
+.od-card--teal {
+  --od-bg: #24555f;
+  background: radial-gradient(circle at 70% 15%, #3d8580 0%, #24555f 70%);
+  color: var(--white);
+}
+
+.od-card--cream {
+  --od-bg: #f1f5ee;
+  background: linear-gradient(180deg, #fbfaf6 0%, #f1f5ee 100%);
+  box-shadow: inset 0 0 0 1px var(--mist), 0 30px 50px -34px rgba(44, 105, 117, 0.5);
+  color: var(--teal);
+}
+
+@media (max-width: 1100px) {
+  .od-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 640px) {
+  .od { padding: 88px 0 72px; }
+  .od-head { padding: 0 16px; }
+  .od-cards {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    padding: 6px 16px 24px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .od-cards::-webkit-scrollbar { display: none; }
+  .od-card { flex: 0 0 78%; min-height: 430px; scroll-snap-align: start; }
+}
+
+@media (max-width: 640px) {
+  .od-cards { scroll-padding-inline: 16px; }
+}

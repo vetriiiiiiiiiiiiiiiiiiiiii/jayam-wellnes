@@ -295,79 +295,6 @@ nav.fixed {
   scroll-margin-top: 90px;
 }
 
-/* ---------- Plant to pack (tactile tiles) ---------- */
-.jp {
-  max-width: 1340px;
-  margin: 0 auto;
-  padding: 120px 6vw;
-}
-
-.jp-head {
-  max-width: 640px;
-  margin-bottom: 48px;
-}
-
-.jp-tiles {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 18px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.jp-tile {
-  position: relative;
-  display: flex;
-  min-height: 300px;
-  flex-direction: column;
-  border-radius: 30px;
-  padding: 28px 26px;
-  box-shadow: var(--tile-shadow);
-  transition: transform 500ms var(--ease-soft);
-}
-
-.jp-tile:hover {
-  transform: translateY(-6px);
-}
-
-.jp-tile--fern { background: linear-gradient(160deg, #3f8447 0%, var(--fern) 70%); color: var(--white); }
-.jp-tile--wheat { background: linear-gradient(160deg, #f6cd6c 0%, var(--wheat) 70%); color: var(--earth); }
-.jp-tile--earth { background: linear-gradient(160deg, #22462f 0%, var(--earth) 70%); color: var(--hay); }
-.jp-tile--cherry { background: linear-gradient(160deg, #e7754f 0%, var(--cherry) 70%); color: var(--white); }
-
-.jp-step {
-  position: absolute;
-  top: 24px;
-  right: 26px;
-  font: 700 14px var(--display);
-  opacity: 0.6;
-}
-
-.jp-icon {
-  display: grid;
-  width: 56px;
-  height: 56px;
-  place-items: center;
-  margin-bottom: auto;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.18);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
-}
-
-.jp-tile h3 {
-  margin: 34px 0 10px;
-  color: inherit;
-  font-size: 24px;
-}
-
-.jp-tile p {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.6;
-  opacity: 0.9;
-}
-
 /* ---------- Story teaser ---------- */
 .js {
   padding: 0 3vw 120px;
@@ -447,12 +374,6 @@ nav.fixed {
 }
 
 /* ---------- Responsive ---------- */
-@media (max-width: 1180px) {
-  .jp-tiles {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
 @media (max-width: 860px) {
   .jh {
     grid-template-columns: 1fr;
@@ -481,18 +402,6 @@ nav.fixed {
   .js-inner,
 .jf {
     border-radius: 34px;
-  }
-
-  .jp {
-    padding: 80px 16px;
-  }
-
-  .jp-tiles {
-    grid-template-columns: 1fr;
-  }
-
-  .jp-tile {
-    min-height: 220px;
   }
 
   .js {
@@ -881,40 +790,6 @@ h2 {
   .jh-leaves { transform: scale(0.62); }
 }
 
-/* ---------- From plant to pack: horizontal scroll ---------- */
-.jp {
-  max-width: none;
-  padding: 40px 0 120px;
-}
-
-.jp-head {
-  max-width: 1080px;
-  margin: 0 auto 32px;
-  padding: 0 22px;
-}
-
-.jp-tiles {
-  display: grid;
-  grid-auto-columns: minmax(280px, 340px);
-  grid-auto-flow: column;
-  grid-template-columns: none;
-  gap: 18px;
-  overflow-x: auto;
-  padding: 10px max(22px, calc((100vw - 1080px) / 2)) 30px;
-  scroll-padding-inline: max(22px, calc((100vw - 1080px) / 2));
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-}
-
-.jp-tiles::-webkit-scrollbar {
-  display: none;
-}
-
-.jp-tile {
-  min-height: 420px;
-  scroll-snap-align: start;
-}
-
 /* ---------- Story and closing tiles ---------- */
 .js {
   padding: 0 12px 12px;
@@ -975,9 +850,6 @@ h2 {
     gap: 6px;
   }
 
-  .jp-tile {
-    min-height: 340px;
-  }
 }
 
 /* ==========================================
