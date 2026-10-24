@@ -24,6 +24,7 @@ import AdminProducts from './pages/admin/AdminProducts';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminReviews from './pages/admin/AdminReviews';
 import AdminEnquiries from './pages/admin/AdminEnquiries';
+import AdminContent from './pages/admin/AdminContent';
 
 import { AppProvider } from './context/Appcontext';
 
@@ -42,6 +43,7 @@ function App() {
                 <Route path="/admin/users" element={<AdminUsers />} />
                 <Route path="/admin/reviews" element={<AdminReviews />} />
                 <Route path="/admin/enquiries" element={<AdminEnquiries />} />
+                <Route path="/admin/content" element={<AdminContent />} />
 
                 {/* Storefront */}
                 <Route path="/" element={<Home />} />

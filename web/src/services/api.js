@@ -1042,3 +1042,13 @@ export const updateAdminEnquiryStatus = async (id, status) => {
     return { success: false };
   }
 };
+
+// Editable storefront text (Admin → Site content)
+export const saveSiteContent = async (key, data) => {
+  try {
+    const response = await api.put(`/admin/content/${key}`, { data });
+    return { success: true, data: response.data.data, updatedAt: response.data.updatedAt };
+  } catch (error) {
+    return { success: false, message: error.response?.data?.message || "Could not save content" };
+  }
+};

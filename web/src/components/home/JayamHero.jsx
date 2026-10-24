@@ -2,17 +2,17 @@ import { Link } from 'react-router-dom';
 import MoringaSprig from './MoringaSprig';
 import ProductArt from '../storefront/ProductArt';
 
-// Hero in the apple.com manner: a short centred statement, two calls to action,
-// then the Jayam family standing in 3D — with a moringa cluster and a turning badge.
+// Hero in the apple.com manner: a short centred statement and two calls to action,
+// then the Jayam seal — the real brand emblem set in a teal medallion with a turning
+// promise ring — with the family of products standing around it.
 const LINEUP = [
-  { slug: 'beauty-drops-moringa-facial-elixir', position: 'left' },
-  { slug: 'moringa-leaf-amla-tablets', position: 'center' },
-  { slug: 'moringa-seed-capsules', position: 'right' },
+  { slug: 'moringa-leaf-capsules', position: 'outer-left' },
+  { slug: 'beauty-drops-moringa-facial-elixir', position: 'inner-left' },
+  { slug: 'moringa-leaf-amla-tablets', position: 'inner-right' },
+  { slug: 'moringa-seed-capsules', position: 'outer-right' },
 ];
 
-const BADGE_TEXT = 'ORGANIC · VEGAN · NON-GMO · TESTED · ';
-
-export default function JayamHero({ products }) {
+export default function JayamHero({ products, content }) {
   const bySlug = Object.fromEntries(products.map((product) => [product.slug, product]));
   const lineup = LINEUP.map((item) => ({ ...item, product: bySlug[item.slug] })).filter((item) => item.product);
 
@@ -25,37 +25,38 @@ export default function JayamHero({ products }) {
       </div>
 
       <div className="jh-copy">
-        <p className="jh-eyebrow">Organic moringa · Plant-based wellness</p>
-        <h1>Small daily rituals.</h1>
-        <p className="jh-sub">Rooted in nature. Made with nothing unnecessary.</p>
+        {content.eyebrow && <p className="jh-eyebrow">{content.eyebrow}</p>}
+        <h1>{content.title}</h1>
+        {content.sub && <p className="jh-sub">{content.sub}</p>}
         <div className="ap-ctas">
-          <a href="#collection" className="ap-pill">Shop the collection</a>
-          <Link to="/our-story" className="ap-link">Our story ›</Link>
+          <a href="#collection" className="ap-pill">{content.primaryCta}</a>
+          <Link to="/our-story" className="ap-link">{content.secondaryCta} ›</Link>
         </div>
       </div>
 
-      <div className="jh-stage">
-        <span className="jh-disc" aria-hidden="true" />
-        <div className="jh-lineup">
+      <div className="hs">
+        <div className="hs-seal">
+          <svg className="hs-ring" viewBox="0 0 200 200" aria-hidden="true">
+            <defs>
+              <path id="hs-ring-path" d="M100 100 m-86 0 a86 86 0 1 1 172 0 a86 86 0 1 1 -172 0" />
+            </defs>
+            <text>
+              <textPath href="#hs-ring-path" textLength="538" lengthAdjust="spacing">{content.sealRing}</textPath>
+            </text>
+          </svg>
+          <div className="hs-face">
+            <img src="/jayam-logo.png" alt="Jayam — Bringing the best to your hands" width="430" height="430" />
+          </div>
+        </div>
+
+        <div className="hs-lineup">
           {lineup.map(({ product, position }) => (
-            <Link key={product.id} to={`/products/${product.slug}`} className={`jh-item jh-item--${position}`} aria-label={product.name}>
+            <Link key={product.id} to={`/products/${product.slug}`} className={`hs-item hs-item--${position}`} aria-label={product.name}>
               <ProductArt product={product} />
             </Link>
           ))}
         </div>
-        <span className="jh-ground" aria-hidden="true" />
-
-        <div className="jh-badge" aria-label="Organic, vegan, non-GMO, third-party tested">
-          <svg viewBox="0 0 120 120" aria-hidden="true">
-            <defs>
-              <path id="jh-badge-circle" d="M60 60 m-44 0 a44 44 0 1 1 88 0 a44 44 0 1 1 -88 0" />
-            </defs>
-            <text>
-              <textPath href="#jh-badge-circle">{BADGE_TEXT}</textPath>
-            </text>
-          </svg>
-          <span className="jh-badge-mark">✱</span>
-        </div>
+        <span className="hs-floor" aria-hidden="true" />
       </div>
     </section>
   );

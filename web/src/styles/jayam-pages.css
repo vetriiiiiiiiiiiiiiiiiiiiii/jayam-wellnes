@@ -1719,10 +1719,6 @@
   background: var(--sea);
 }
 
-.jh-badge-mark {
-  color: var(--sea);
-}
-
 .pg-error {
   background: #fdecea;
   color: #a33a2a;
@@ -1784,12 +1780,4 @@
 .pp-stage,
 .sc {
   background: radial-gradient(circle at 50% 30%, #ffffff 0%, var(--surface) 70%);
-}
-
-.pt-tile--grey {
-  background: radial-gradient(circle at 50% 70%, #ffffff 0%, var(--surface) 70%);
-}
-
-.pt-tile--hay {
-  background: linear-gradient(180deg, var(--mist) 0%, var(--sage-tint) 100%);
 }

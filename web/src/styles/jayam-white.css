@@ -264,47 +264,6 @@ nav.fixed {
   transform: rotate(252deg);
 }
 
-/* Product stage */
-.jh-stage {
-  position: relative;
-  z-index: 1;
-  width: min(100%, 560px);
-  aspect-ratio: 1;
-  justify-self: center;
-}
-
-.jh-disc {
-  position: absolute;
-  top: 6%;
-  left: 50%;
-  width: 82%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, #ffffff 0%, var(--mist) 58%, var(--sage-tint) 100%);
-  transform: translateX(-50%);
-}
-
-.jh-lineup {
-  position: absolute;
-  bottom: 14%;
-  left: 50%;
-  display: flex;
-  width: 96%;
-  align-items: flex-end;
-  justify-content: center;
-  transform: translateX(-50%);
-}
-
-.jh-item {
-  position: relative;
-  display: block;
-  transition: transform 600ms var(--ease-soft);
-}
-
-.jh-item:hover {
-  transform: translateY(-10px);
-}
-
 .jh-item--left {
   order: 1;
   width: 40%;
@@ -322,59 +281,6 @@ nav.fixed {
   order: 3;
   width: 48%;
   margin-left: -20%;
-}
-
-.jh-item .jayam-art {
-  aspect-ratio: 260 / 320;
-  overflow: visible;
-  padding: 0;
-  background: transparent;
-}
-
-.jh-ground {
-  position: absolute;
-  bottom: 11%;
-  left: 50%;
-  width: 70%;
-  height: 7%;
-  border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(44, 105, 117, 0.2) 0%, rgba(44, 105, 117, 0) 70%);
-  transform: translateX(-50%);
-}
-
-/* Rotating promise badge */
-.jh-badge {
-  position: absolute;
-  z-index: 3;
-  bottom: 2%;
-  left: -2%;
-  display: grid;
-  width: 128px;
-  height: 128px;
-  place-items: center;
-  border-radius: 50%;
-  background: var(--white);
-  box-shadow: 0 16px 30px -14px rgba(44, 105, 117, 0.35);
-}
-
-.jh-badge svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  animation: jh-spin 22s linear infinite;
-}
-
-.jh-badge text {
-  fill: var(--earth);
-  font: 700 8.6px var(--sans);
-  letter-spacing: 1.6px;
-}
-
-.jh-badge-mark {
-  color: var(--cherry);
-  font-size: 34px;
-  line-height: 1;
 }
 
 @keyframes jh-spin {
@@ -628,21 +534,6 @@ nav.fixed {
     transform: scale(0.36);
   }
 
-  .jh-stage {
-    width: min(100%, 420px);
-  }
-
-  .jh-badge {
-    right: -2%;
-    left: auto;
-    width: 96px;
-    height: 96px;
-  }
-
-  .jh-badge-mark {
-    font-size: 26px;
-  }
-
   .jc {
     padding: 70px 16px 90px;
   }
@@ -707,12 +598,6 @@ nav.fixed {
   .jf {
     margin: 0 12px 80px;
     padding: 64px 22px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .jh-badge svg {
-    animation: none;
   }
 }
 
@@ -1066,10 +951,6 @@ h2 {
   letter-spacing: -0.015em;
 }
 
-.jh-stage {
-  width: min(100%, 620px);
-}
-
 .jh-leaves {
   top: 92px;
 }
@@ -1081,101 +962,6 @@ h2 {
 
 @media (min-width: 861px) and (max-width: 1240px) {
   .jh-leaves { transform: scale(0.62); }
-}
-
-/* ---------- Product tiles ---------- */
-.pt {
-  display: grid;
-  gap: 12px;
-  padding: 12px;
-  scroll-margin-top: 92px;
-}
-
-.pt-row {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.pt-tile {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  overflow: hidden;
-  padding: 56px 24px 0;
-  text-align: center;
-}
-
-.pt-tile--grey {
-  background: var(--surface);
-}
-
-.pt-tile--hay {
-  background: var(--hay);
-}
-
-.pt-kicker {
-  margin: 0 0 6px;
-  color: var(--cherry);
-  font: 600 17px var(--sans);
-}
-
-.pt-tile h3 {
-  margin: 0;
-  color: var(--earth);
-  font-weight: 650;
-  letter-spacing: -0.03em;
-}
-
-.pt-tile--wide h3 {
-  font-size: clamp(40px, 5vw, 56px);
-}
-
-.pt-tile--small h3 {
-  font-size: clamp(28px, 2.8vw, 40px);
-}
-
-.pt-tagline {
-  margin: 8px 0 20px;
-  color: var(--earth);
-  font: 400 clamp(19px, 2vw, 28px)/1.25 var(--sans);
-  letter-spacing: -0.015em;
-}
-
-.pt-tile--small .pt-tagline {
-  font-size: 19px;
-}
-
-.pt-price {
-  margin: 14px 0 0;
-  color: var(--muted);
-  font: 400 14px var(--sans);
-}
-
-.pt-art {
-  display: block;
-  width: min(100%, 360px);
-  margin-top: 26px;
-  perspective: 900px;
-}
-
-.pt-tile--small .pt-art {
-  width: min(100%, 260px);
-}
-
-.pt-art .jayam-art {
-  aspect-ratio: 260 / 320;
-  overflow: visible;
-  padding: 0;
-  background: transparent;
-}
-
-.pt-art .jayam-pack {
-  transition: transform 800ms var(--ease-soft);
-}
-
-.pt-tile:hover .pt-art .jayam-pack {
-  transform: translateY(-10px) rotateY(-12deg) rotateX(3deg);
 }
 
 /* ---------- Highlights (numbers) on white ---------- */
@@ -1300,18 +1086,6 @@ h2 {
 
   .jh {
     padding: 120px 20px 30px;
-  }
-
-  .pt-row {
-    grid-template-columns: 1fr;
-  }
-
-  .pt-tile {
-    padding: 44px 20px 0;
-  }
-
-  .pt-art {
-    width: min(80%, 300px);
   }
 
   .af-columns {

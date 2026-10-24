@@ -51,6 +51,7 @@ apiRouter.use('/orders', orderRoutes);
 apiRouter.use('/admin', adminRoutes);
 apiRouter.use('/cart', require('./routes/cart.routes'));
 apiRouter.use('/enquiries', require('./routes/enquiry.routes'));
+apiRouter.use('/content', require('./routes/content.routes'));
 
 app.use('/api', apiRouter);
 

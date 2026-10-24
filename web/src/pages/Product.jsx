@@ -7,6 +7,9 @@ import ProductActions from '../components/storefront/ProductActions';
 import ProductCard from '../components/storefront/ProductCard';
 import ReviewSection from '../components/storefront/ReviewSection';
 import BuyBar from '../components/storefront/BuyBar';
+import ProductStory from '../components/storefront/ProductStory';
+import { useCart } from '../components/storefront/CartProvider';
+import { useSiteContent } from '../lib/content';
 import { CATEGORY_LABELS, FREE_SHIPPING_THRESHOLD, formatPrice } from '../lib/store';
 import useScrollReveal from '../lib/useScrollReveal';
 
@@ -29,6 +32,8 @@ export default function ProductPage() {
   const [others, setOthers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedVariant, setSelectedVariant] = useState(null);
+  const stories = useSiteContent('product-stories');
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -53,7 +58,7 @@ export default function ProductPage() {
       .catch(() => {});
   }, [slug]);
 
-  useScrollReveal([product?.id, others.length]);
+  useScrollReveal([product?.id, others.length, stories]);
 
   if (loading) {
     return <main className="pg pp-loading" aria-busy="true"><p className="pg-note">Loading…</p></main>;
@@ -65,6 +70,19 @@ export default function ProductPage() {
   const compareAt = selectedVariant ? selectedVariant.compareAtPrice : product.compareAtPrice;
   const category = product.category || CATEGORY_LABELS[product.productType] || 'Wellness';
   const specs = product.specs || [];
+
+  const buy = () => {
+    addToCart({
+      id: selectedVariant ? `${product.id}:${selectedVariant.sku || selectedVariant.name}` : product.id,
+      productId: product.id,
+      variantSku: selectedVariant?.sku,
+      name: selectedVariant ? `${product.name} (${selectedVariant.name})` : product.name,
+      price,
+      quantity: 1,
+      image: product.images?.[0]?.url,
+    });
+    window.dispatchEvent(new Event('jayam:cart-open'));
+  };
 
   return (
     <main className="pg pp">
@@ -117,7 +135,9 @@ export default function ProductPage() {
         </div>
       </section>
 
-      {product.description && (
+      {stories[product.slug] ? (
+        <ProductStory product={product} story={stories[product.slug]} description={product.description} onBuy={buy} />
+      ) : product.description && (
         <section className="pp-overview" data-reveal>
           <p className="pg-eyebrow">Overview</p>
           <h2>{product.tagline || product.name}</h2>
@@ -127,7 +147,7 @@ export default function ProductPage() {
 
       {product.highlights?.length > 0 && (
         <section className="pp-highlights" aria-labelledby="pp-highlights-title">
-          <h2 id="pp-highlights-title" className="pg-section-title">Why you’ll <em>love it.</em></h2>
+          <h2 id="pp-highlights-title" className="pg-section-title">The details <em>that matter.</em></h2>
           <div className="pp-highlight-grid">
             {product.highlights.map(({ title, body }, index) => (
               <article key={title} className={`pp-highlight pp-highlight--${TONES[index % TONES.length]}`} data-reveal>

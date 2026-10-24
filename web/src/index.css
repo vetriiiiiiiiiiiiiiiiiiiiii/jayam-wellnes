@@ -4,6 +4,8 @@
 @import "./styles/wellness.css";
 @import "./styles/jayam-white.css";
 @import "./styles/jayam-pages.css";
+@import "./styles/jayam-home.css";
+@import "./styles/jayam-story.css";
 @import "tailwindcss";
 
 @theme {

@@ -61,9 +61,12 @@ export default function Navbar() {
             {menuOpen ? <X size={20} strokeWidth={1.6} /> : <Menu size={20} strokeWidth={1.6} />}
           </button>
 
-          <Link to="/" className="an-logo" aria-label="Jayam home">
-            <img src="/jayam-logo.png" alt="" />
-            <span>Jayam</span>
+          <Link to="/" className="an-logo" aria-label="Jayam Wellness home">
+            <span className="an-logo-mark"><img src="/jayam-logo.png" alt="" width="44" height="44" /></span>
+            <span className="an-wordmark">
+              <b>JAYAM</b>
+              <small>Wellness</small>
+            </span>
           </Link>
 
           <ul className="an-links">

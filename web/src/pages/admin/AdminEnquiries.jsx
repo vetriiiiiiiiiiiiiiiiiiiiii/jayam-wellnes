@@ -42,6 +42,7 @@ export default function AdminEnquiries() {
           <Link to="/admin/users" className="block text-gray-500 hover:text-brand-dark transition-colors">Users</Link>
           <Link to="/admin/reviews" className="block text-gray-500 hover:text-brand-dark transition-colors">Reviews</Link>
           <Link to="/admin/enquiries" className="block text-brand-dark font-bold transition-colors">Enquiries</Link>
+          <Link to="/admin/content" className="block text-gray-500 hover:text-brand-dark transition-colors">Site content</Link>
         </nav>
       </div>
 

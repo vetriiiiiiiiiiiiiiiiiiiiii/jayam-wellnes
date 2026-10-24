@@ -42,4 +42,8 @@ const enquiryController = require('../controllers/enquiryController');
 router.get('/enquiries', enquiryController.getAllEnquiries);
 router.put('/enquiries/:id', enquiryController.updateEnquiryStatus);
 
+// Editable storefront text
+const contentController = require('../controllers/contentController');
+router.put('/content/:key', contentController.updateContent);
+
 module.exports = router;
