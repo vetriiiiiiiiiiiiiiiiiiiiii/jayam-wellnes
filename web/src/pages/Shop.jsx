@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { Leaf, MessageCircle, ShieldCheck, Truck } from 'lucide-react';
-import ProductCard, { shortName } from '../components/storefront/ProductCard';
+import ProductCard, { curated, shortName } from '../components/storefront/ProductCard';
 import ProductArt from '../components/storefront/ProductArt';
 import FilterSidebar from '../components/storefront/FilterSidebar';
 import PageHead from '../components/storefront/PageHead';
@@ -27,7 +27,7 @@ export default function ShopPage() {
   // The full lineup for the product strip, independent of filters
   useEffect(() => {
     axios.get(`${import.meta.env.VITE_API_URL}/api/products`)
-      .then(({ data }) => Array.isArray(data) && setLineup(data))
+      .then(({ data }) => Array.isArray(data) && setLineup(curated(data)))
       .catch(() => {});
   }, []);
 
@@ -42,7 +42,8 @@ export default function ShopPage() {
         });
         const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/products`, { params });
         if (!Array.isArray(response.data)) throw new Error('The product catalogue returned an invalid response.');
-        setProducts(response.data);
+        // Price sorting comes from the API; otherwise show the curated order
+        setProducts(params.sort ? response.data : curated(response.data));
       } catch (error) {
         console.error('Error fetching products', error);
         setError('We couldn’t load the catalogue just now. Please try again.');
@@ -101,7 +102,7 @@ export default function ShopPage() {
 
         {loading ? (
           <div className="sh-grid" aria-label="Loading products">
-            {[...Array(3)].map((_, index) => <div key={index} className="sc sc--skeleton" />)}
+            {[...Array(4)].map((_, index) => <div key={index} className="at at--skeleton" />)}
           </div>
         ) : error ? (
           <div className="pg-empty">
@@ -111,7 +112,13 @@ export default function ShopPage() {
           </div>
         ) : products.length ? (
           <div className="sh-grid">
-            {products.map((product) => <ProductCard key={product.id} product={product} />)}
+            {products.map((product, index) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                size={index === 0 && products.length % 2 === 1 ? 'feature' : 'regular'}
+              />
+            ))}
           </div>
         ) : (
           <div className="pg-empty">

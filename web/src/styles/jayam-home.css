@@ -485,3 +485,277 @@
   .hs-ring { animation: none; }
   .sw-card[data-reveal] { transition: none; }
 }
+
+/* ---------- Showcase, tighter and more continuous ----------
+   Panels overlap along a slanted edge (alternating direction), so the colour of one
+   product runs straight into the next and the next pack already peeks in. */
+.sw-panel {
+  scroll-margin-top: 110px;
+}
+
+.sw-panel + .sw-panel {
+  margin-top: -72px;
+}
+
+.sw-panel--right + .sw-panel--left {
+  clip-path: polygon(0 0, 100% 72px, 100% 100%, 0 100%);
+}
+
+.sw-panel--left + .sw-panel--right {
+  clip-path: polygon(0 72px, 100% 0, 100% 100%, 0 100%);
+}
+
+.sw-inner {
+  min-height: clamp(420px, 38vw, 500px);
+  padding: 72px 22px 56px;
+}
+
+.sw-head {
+  margin-bottom: 36px;
+}
+
+.sw-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.sw-card-top .sw-badge {
+  margin: 0;
+}
+
+.sw-count {
+  font: 600 12px var(--sans);
+  letter-spacing: 0.12em;
+  opacity: 0.6;
+}
+
+.sw-next {
+  display: inline-flex;
+  gap: 6px;
+  margin-top: 20px;
+  border-top: 1px solid currentColor;
+  padding-top: 14px;
+  width: 100%;
+  font: 500 13px var(--sans);
+  text-decoration: none;
+  opacity: 0.75;
+  transition: opacity 200ms ease;
+  border-color: rgba(127, 127, 127, 0.25);
+}
+
+.sw-next:hover {
+  opacity: 1;
+}
+
+.sw-next span {
+  display: inline-block;
+  animation: sw-nudge 1.6s ease-in-out infinite;
+}
+
+@keyframes sw-nudge {
+  50% { transform: translateY(3px); }
+}
+
+/* Colour combinations for each product's card */
+.sw-theme--teal .sw-card {
+  background: linear-gradient(150deg, #3d8580 0%, var(--teal) 70%);
+  color: var(--white);
+}
+
+.sw-theme--sage .sw-card {
+  background: linear-gradient(150deg, #ffffff 0%, var(--sage-tint) 100%);
+  color: var(--teal);
+}
+
+.sw-theme--deep .sw-card {
+  background: radial-gradient(circle at 15% 0%, rgba(104, 178, 160, 0.5) 0%, rgba(104, 178, 160, 0) 55%), #1d4750;
+  color: var(--white);
+}
+
+.sw-theme--sea .sw-card {
+  background: linear-gradient(150deg, var(--sea) 0%, #a9d4c4 100%);
+  color: #133a41;
+}
+
+.sw-theme--mist .sw-card {
+  background: linear-gradient(150deg, #ffffff 0%, var(--mist) 100%);
+  box-shadow: 0 0 0 1px var(--sea), 0 30px 60px -30px rgba(44, 105, 117, 0.45);
+  color: var(--teal);
+}
+
+.sw-card h3,
+.sw-card .sw-subtitle,
+.sw-card .sw-price {
+  color: inherit;
+}
+
+.sw-card .sw-desc {
+  color: inherit;
+  opacity: 0.85;
+}
+
+.sw-theme--teal .sw-card::before,
+.sw-theme--deep .sw-card::before {
+  background: var(--sea);
+}
+
+.sw-theme--sea .sw-card::before {
+  background: #133a41;
+}
+
+/* Badges and buttons on the dark and sea cards */
+.sw-theme--teal .sw-badge,
+.sw-theme--deep .sw-badge {
+  background: rgba(255, 255, 255, 0.16);
+  color: var(--white);
+}
+
+.sw-theme--sea .sw-badge {
+  background: rgba(255, 255, 255, 0.5);
+  color: #133a41;
+}
+
+.sw-theme--sage .sw-badge {
+  background: var(--white);
+}
+
+.sw-theme--teal .sw-card .ap-pill,
+.sw-theme--deep .sw-card .ap-pill,
+.sw-theme--sea .sw-card .ap-pill {
+  border-color: var(--white);
+  background: var(--white);
+  color: var(--teal);
+}
+
+.sw-theme--teal .sw-card .ap-pill--outline,
+.sw-theme--deep .sw-card .ap-pill--outline,
+.sw-theme--sea .sw-card .ap-pill--outline {
+  background: transparent;
+  color: inherit;
+}
+
+.sw-theme--teal .sw-card .ap-pill:hover:not(:disabled),
+.sw-theme--deep .sw-card .ap-pill:hover:not(:disabled),
+.sw-theme--sea .sw-card .ap-pill:hover:not(:disabled) {
+  border-color: var(--white);
+  background: var(--mist);
+  color: var(--teal);
+}
+
+/* Matching seal-tin rims */
+.sw-theme--teal .sw-seal { box-shadow: 0 0 0 5px var(--white), 0 0 0 7px var(--teal), 0 22px 34px -16px rgba(44, 105, 117, 0.55); }
+.sw-theme--sage .sw-seal { box-shadow: 0 0 0 5px var(--white), 0 0 0 7px var(--sage-tint), 0 22px 34px -16px rgba(44, 105, 117, 0.55); }
+.sw-theme--deep .sw-seal { box-shadow: 0 0 0 5px var(--white), 0 0 0 7px #1d4750, 0 22px 34px -16px rgba(44, 105, 117, 0.55); }
+.sw-theme--sea .sw-seal { box-shadow: 0 0 0 5px var(--white), 0 0 0 7px var(--sea), 0 22px 34px -16px rgba(44, 105, 117, 0.55); }
+
+/* Scroll-linked motion where the browser supports it: each pack swings into place and
+   its card slides in as the panel comes into view — no JavaScript, no scroll listeners */
+@supports (animation-timeline: view()) {
+  .sw-pack {
+    animation: sw-pack-in linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 38%;
+  }
+
+  .sw-panel--left .sw-pack {
+    animation-name: sw-pack-in-left;
+  }
+
+  .sw-card {
+    animation: sw-card-in linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 34%;
+  }
+
+  .sw-panel--left .sw-card {
+    animation-name: sw-card-in-left;
+  }
+
+  .sw-seal {
+    animation: sw-seal-in linear both;
+    animation-timeline: view();
+    animation-range: entry 10% cover 40%;
+  }
+
+  @keyframes sw-pack-in {
+    from { translate: -40px 70px; rotate: -10deg; opacity: 0.3; }
+    to { translate: 0 0; rotate: 0deg; opacity: 1; }
+  }
+
+  @keyframes sw-pack-in-left {
+    from { translate: 40px 70px; rotate: 10deg; opacity: 0.3; }
+    to { translate: 0 0; rotate: 0deg; opacity: 1; }
+  }
+
+  @keyframes sw-card-in {
+    from { translate: 60px 0; opacity: 0; }
+    to { translate: 0 0; opacity: 1; }
+  }
+
+  @keyframes sw-card-in-left {
+    from { translate: -60px 0; opacity: 0; }
+    to { translate: 0 0; opacity: 1; }
+  }
+
+  @keyframes sw-seal-in {
+    from { scale: 0.6; rotate: -40deg; }
+    to { scale: 1; rotate: 0deg; }
+  }
+}
+
+@media (max-width: 860px) {
+  .sw-panel + .sw-panel { margin-top: -44px; }
+  .sw-panel--right + .sw-panel--left { clip-path: polygon(0 0, 100% 44px, 100% 100%, 0 100%); }
+  .sw-panel--left + .sw-panel--right { clip-path: polygon(0 44px, 100% 0, 100% 100%, 0 100%); }
+  .sw-inner { padding: 60px 16px 44px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sw-pack, .sw-card, .sw-seal { animation: none; }
+  .sw-next span { animation: none; }
+}
+
+/* ---------- Brand mark, a little larger, with Wellness centred under JAYAM ---------- */
+.an-logo {
+  gap: 12px;
+}
+
+.an-logo-mark {
+  width: 52px;
+  height: 52px;
+}
+
+.an-logo img {
+  width: 48px;
+  height: 48px;
+}
+
+.an-wordmark {
+  justify-items: center;
+  text-align: center;
+}
+
+/* Letter-spacing adds space after the last letter; pad the start to match so both
+   words sit truly centred over each other */
+.an-wordmark b {
+  padding-left: 0.26em;
+  font-size: 24px;
+  letter-spacing: 0.26em;
+}
+
+.an-wordmark small {
+  margin-top: 5px;
+  padding-left: 0.5em;
+  font-size: 10.5px;
+  letter-spacing: 0.5em;
+}
+
+@media (max-width: 860px) {
+  .an-logo-mark { width: 44px; height: 44px; }
+  .an-logo img { width: 40px; height: 40px; }
+  .an-wordmark b { font-size: 20px; }
+  .an-wordmark small { font-size: 9px; letter-spacing: 0.44em; padding-left: 0.44em; }
+}

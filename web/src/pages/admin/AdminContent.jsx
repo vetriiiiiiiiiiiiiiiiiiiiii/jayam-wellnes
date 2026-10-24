@@ -20,7 +20,6 @@ const LABELS = {
   hero: 'Hero — top of the home page',
   showcase: 'Product showcase',
   items: 'Product cards',
-  why: 'Why Jayam — numbers',
   plant: 'From plant to pack',
   story: 'Our story teaser',
   final: 'Closing call to action',

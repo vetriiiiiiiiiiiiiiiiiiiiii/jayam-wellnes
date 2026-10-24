@@ -228,8 +228,7 @@
   transform: translateY(-4px);
 }
 
-.sh-strip-art .jayam-art,
-.sc-art .jayam-art {
+.sh-strip-art .jayam-art {
   aspect-ratio: 260 / 320;
   overflow: visible;
   padding: 0;
@@ -278,106 +277,8 @@
   gap: 16px;
 }
 
-/* Product card */
-.sc {
-  display: flex;
-  flex-direction: column;
-  border-radius: 28px;
-  background: var(--surface);
-  overflow: hidden;
-  transition: transform 400ms var(--ease-soft), box-shadow 400ms var(--ease-soft);
-}
-
-.sc:hover {
-  box-shadow: 0 24px 48px -28px rgba(44, 105, 117, 0.35);
-  transform: translateY(-4px);
-}
-
-.sc--skeleton {
-  min-height: 520px;
-  animation: sc-pulse 1.4s ease-in-out infinite alternate;
-}
-
 @keyframes sc-pulse {
   to { opacity: 0.55; }
-}
-
-.sc-art {
-  display: grid;
-  place-items: center;
-  padding: 40px 48px 8px;
-  perspective: 900px;
-}
-
-.sc-art > * {
-  width: min(100%, 220px);
-}
-
-.sc-art img {
-  border-radius: 18px;
-}
-
-.sc-art .jayam-pack {
-  transition: transform 800ms var(--ease-soft);
-}
-
-.sc:hover .sc-art .jayam-pack {
-  transform: translateY(-8px) rotateY(-12deg) rotateX(3deg);
-}
-
-.sc-body {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  align-items: center;
-  padding: 16px 28px 32px;
-  text-align: center;
-}
-
-.sc-kicker {
-  margin: 0 0 6px;
-  color: var(--cherry);
-  font: 600 12px var(--sans);
-}
-
-.sc h2 {
-  margin: 0;
-  font: 700 24px / 1.15 var(--display);
-  letter-spacing: -0.02em;
-}
-
-.sc h2 a {
-  color: var(--earth);
-  text-decoration: none;
-}
-
-.sc-tagline {
-  margin: 8px 0 0;
-  color: var(--muted);
-  font: 400 15px / 1.4 var(--sans);
-}
-
-.sc-price {
-  margin: 14px 0 0;
-  color: var(--earth);
-  font: 500 17px var(--sans);
-}
-
-.sc-ctas {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  margin-top: auto;
-  padding-top: 18px;
-}
-
-.sc-buy {
-  padding: 8px 20px;
-  font-size: 14px;
-}
-
-.sc-more {
-  font-size: 14px;
 }
 
 /* The Jayam difference */
@@ -1777,7 +1678,250 @@
 }
 
 /* Soft palette glow behind product stages */
-.pp-stage,
-.sc {
+.pp-stage {
   background: radial-gradient(circle at 50% 30%, #ffffff 0%, var(--surface) 70%);
+}
+
+/* ==========================================
+   APPLE-STYLE PRODUCT TILES
+   Name and calls to action centred at the top, the product large below,
+   on a tile tinted for each product. Two-up, with a full-width feature tile.
+   ========================================== */
+.sh-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.sh-grid--thirds {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.at {
+  position: relative;
+  display: flex;
+  min-height: 620px;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  border-radius: 28px;
+  padding: 52px 28px 0;
+  text-align: center;
+  isolation: isolate;
+}
+
+.at--feature {
+  grid-column: 1 / -1;
+  min-height: 680px;
+}
+
+.at--compact {
+  min-height: 520px;
+  padding-top: 40px;
+}
+
+.at--skeleton {
+  min-height: 560px;
+  background: var(--surface);
+  animation: sc-pulse 1.4s ease-in-out infinite alternate;
+}
+
+.at-copy {
+  position: relative;
+  z-index: 2;
+}
+
+.at-kicker {
+  margin: 0 0 8px;
+  font: 600 14px var(--sans);
+  opacity: 0.75;
+}
+
+.at h2 {
+  margin: 0;
+  font: 700 clamp(30px, 3.4vw, 44px) / 1.08 var(--display);
+  letter-spacing: -0.03em;
+}
+
+.at--feature h2 {
+  font-size: clamp(40px, 5.4vw, 64px);
+}
+
+.at--compact h2 {
+  font-size: clamp(24px, 2.4vw, 30px);
+}
+
+.at h2 a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.at-tagline {
+  margin: 8px 0 0;
+  font: 400 clamp(17px, 1.6vw, 21px) / 1.35 var(--sans);
+  opacity: 0.85;
+}
+
+.at--compact .at-tagline {
+  font-size: 16px;
+}
+
+.at-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.at-ctas .ap-pill {
+  padding: 10px 20px;
+  font-size: 15px;
+}
+
+.at--compact .at-ctas .ap-pill {
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+.at-price {
+  margin: 14px 0 0;
+  font: 400 14px var(--sans);
+  opacity: 0.75;
+}
+
+.at-art {
+  display: block;
+  width: min(62%, 300px);
+  margin-top: auto;
+  padding-top: 28px;
+  transform: translateY(14%);
+  perspective: 900px;
+}
+
+.at--feature .at-art {
+  width: min(36%, 340px);
+}
+
+.at--compact .at-art {
+  width: min(66%, 220px);
+}
+
+.at-art img {
+  border-radius: 20px;
+}
+
+.at-art .jayam-art {
+  aspect-ratio: 260 / 320;
+  overflow: visible;
+  padding: 0;
+  background: transparent;
+}
+
+.at-art .jayam-pack {
+  transition: transform 800ms var(--ease-soft);
+}
+
+.at:hover .at-art .jayam-pack {
+  transform: translateY(-14px) rotateY(-12deg) rotateX(3deg);
+}
+
+/* Soft halo behind the product */
+.at::after {
+  position: absolute;
+  z-index: -1;
+  bottom: -18%;
+  left: 50%;
+  width: 90%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 65%);
+  content: '';
+  transform: translateX(-50%);
+}
+
+/* Tints */
+.at--teal {
+  background: linear-gradient(180deg, var(--teal) 0%, #3d8580 100%);
+  color: var(--white);
+}
+
+.at--deep {
+  background: radial-gradient(circle at 50% 100%, rgba(104, 178, 160, 0.45) 0%, rgba(104, 178, 160, 0) 60%), #1d4750;
+  color: var(--white);
+}
+
+.at--teal::after,
+.at--deep::after {
+  background: radial-gradient(circle, rgba(104, 178, 160, 0.45) 0%, rgba(104, 178, 160, 0) 65%);
+}
+
+.at--sage {
+  background: linear-gradient(180deg, #f4f8f2 0%, var(--sage-tint) 100%);
+  color: var(--teal);
+}
+
+.at--sea {
+  background: linear-gradient(180deg, #e6f2ee 0%, #a9d4c4 100%);
+  color: #133a41;
+}
+
+.at--mist {
+  background: linear-gradient(180deg, #ffffff 0%, var(--mist) 100%);
+  box-shadow: inset 0 0 0 1px var(--mist);
+  color: var(--teal);
+}
+
+.at--teal .ap-pill,
+.at--deep .ap-pill {
+  border-color: var(--white);
+  background: var(--white);
+  color: var(--teal);
+}
+
+.at--teal .ap-pill--outline,
+.at--deep .ap-pill--outline {
+  background: transparent;
+  color: var(--white);
+}
+
+.at--teal .ap-pill:hover:not(:disabled),
+.at--deep .ap-pill:hover:not(:disabled) {
+  border-color: var(--white);
+  background: var(--mist);
+  color: var(--teal);
+}
+
+.at--sea .ap-pill {
+  border-color: #133a41;
+  background: #133a41;
+}
+
+.at--sea .ap-pill--outline {
+  background: transparent;
+  color: #133a41;
+}
+
+@media (max-width: 900px) {
+  .sh-grid--thirds { grid-template-columns: 1fr 1fr; }
+  .sh-grid--thirds .at:last-child:nth-child(odd) { grid-column: 1 / -1; }
+}
+
+@media (max-width: 640px) {
+  .sh-grid,
+  .sh-grid--thirds { grid-template-columns: 1fr; }
+  .at, .at--feature, .at--compact { min-height: 540px; padding-top: 44px; }
+  .at-art, .at--feature .at-art, .at--compact .at-art { width: min(64%, 260px); }
+}
+
+.at--feature {
+  min-height: 640px;
+}
+
+.at--feature .at-art {
+  width: min(32%, 320px);
+}
+
+@media (max-width: 640px) {
+  .at--feature { min-height: 540px; }
+  .at--feature .at-art { width: min(64%, 260px); }
 }

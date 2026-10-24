@@ -19,6 +19,7 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState('');
   const [cartOpen, setCartOpen] = useState(false);
   const searchRef = useRef(null);
+  const headerRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
   const { cartCount } = useCart();
@@ -39,6 +40,17 @@ export default function Navbar() {
     if (searchOpen) searchRef.current?.focus();
   }, [searchOpen]);
 
+  // Publish the header height so sticky bars (like the product sub-nav) sit right below it
+  useEffect(() => {
+    const header = headerRef.current;
+    if (!header || typeof ResizeObserver === 'undefined') return undefined;
+    const observer = new ResizeObserver(() => {
+      document.documentElement.style.setProperty('--header-h', `${header.offsetHeight}px`);
+    });
+    observer.observe(header);
+    return () => observer.disconnect();
+  }, []);
+
   useEffect(() => {
     document.body.style.overflow = menuOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
@@ -55,7 +67,7 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="an">
+      <header className="an" ref={headerRef}>
         <nav className="an-bar" aria-label="Main">
           <button type="button" className="an-icon an-menu-toggle" aria-label={menuOpen ? 'Close menu' : 'Open menu'} aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)}>
             {menuOpen ? <X size={20} strokeWidth={1.6} /> : <Menu size={20} strokeWidth={1.6} />}

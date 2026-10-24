@@ -392,3 +392,380 @@
   .ps-facts strong { min-width: 90px; font-size: 44px; }
   .ps-day, .ps-fit, .ps-promise { margin-top: 88px; }
 }
+
+/* ==========================================
+   REALME-STYLE PRODUCT PAGE
+   sticky product bar → opening screen → story → feature grid → specs → buy
+   ========================================== */
+.pp--story {
+  padding-top: var(--header-h, 106px);
+}
+
+/* Sticky product bar */
+.pn {
+  position: sticky;
+  z-index: 60;
+  top: var(--header-h, 106px);
+  border-bottom: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.97);
+}
+
+.pn-inner {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  max-width: 1120px;
+  height: 52px;
+  margin: 0 auto;
+  padding: 0 22px;
+}
+
+.pn-name {
+  margin: 0;
+  color: var(--teal);
+  font: 700 19px var(--display);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.pn-links {
+  display: flex;
+  flex: 1;
+  justify-content: flex-end;
+  gap: 22px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pn-links a {
+  position: relative;
+  color: var(--muted);
+  font: 500 13px var(--sans);
+  text-decoration: none;
+}
+
+.pn-links a.is-active,
+.pn-links a:hover {
+  color: var(--teal);
+}
+
+.pn-links a.is-active::after {
+  position: absolute;
+  right: 0;
+  bottom: -17px;
+  left: 0;
+  height: 2px;
+  background: var(--teal);
+  content: '';
+}
+
+.pn-buy {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--teal);
+  font: 500 14px var(--sans);
+}
+
+.pn-buy .ap-pill {
+  padding: 6px 16px;
+  font-size: 13px;
+}
+
+/* Opening screen */
+.kv {
+  position: relative;
+  display: grid;
+  min-height: calc(100vh - var(--header-h, 106px) - 52px);
+  align-content: start;
+  justify-items: center;
+  overflow: hidden;
+  background: linear-gradient(180deg, #ffffff 0%, #f3f8f2 55%, var(--mist) 100%);
+  padding: 64px 22px 40px;
+  text-align: center;
+}
+
+.kv-eyebrow {
+  margin: 0 0 12px;
+  color: var(--sea);
+  font: 700 14px var(--sans);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.kv h1 {
+  max-width: 1000px;
+  margin: 0;
+  background: linear-gradient(100deg, var(--teal) 20%, var(--sea) 120%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font: 800 clamp(44px, 7.4vw, 104px) / 1 var(--display);
+  letter-spacing: -0.045em;
+}
+
+.kv-name {
+  margin: 18px 0 0;
+  color: var(--muted);
+  font: 500 clamp(17px, 1.6vw, 21px) var(--sans);
+}
+
+.kv .ap-ctas {
+  justify-content: center;
+  margin-top: 26px;
+}
+
+.kv-stage {
+  position: relative;
+  width: min(82vw, 400px);
+  margin-top: 28px;
+  perspective: 1000px;
+}
+
+.kv-halo {
+  position: absolute;
+  top: 6%;
+  left: 50%;
+  width: 150%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(104, 178, 160, 0.38) 0%, rgba(104, 178, 160, 0.12) 40%, rgba(104, 178, 160, 0) 66%);
+  transform: translateX(-50%);
+}
+
+.kv-pack {
+  position: relative;
+  display: block;
+  width: 72%;
+  margin: 0 auto;
+}
+
+.kv-pack .jayam-art {
+  aspect-ratio: 260 / 320;
+  overflow: visible;
+  padding: 0;
+  background: transparent;
+}
+
+.kv-pack img {
+  border-radius: 24px;
+}
+
+.kv-seal {
+  position: absolute;
+  right: 4%;
+  bottom: 8%;
+  display: grid;
+  width: 30%;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--white);
+  box-shadow: 0 0 0 5px var(--white), 0 0 0 7px var(--sea), 0 22px 34px -14px rgba(44, 105, 117, 0.55);
+}
+
+.kv-seal img {
+  width: 86%;
+}
+
+.kv-floor {
+  position: absolute;
+  bottom: -2%;
+  left: 15%;
+  width: 70%;
+  height: 8%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(44, 105, 117, 0.3) 0%, rgba(44, 105, 117, 0) 70%);
+}
+
+.kv-points {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  width: min(100%, 860px);
+  margin: 40px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kv-points li {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.75);
+  padding: 18px 12px;
+  box-shadow: 0 16px 30px -24px rgba(44, 105, 117, 0.5);
+  color: var(--teal);
+  font: 600 14px var(--sans);
+}
+
+.kv-points svg {
+  color: var(--sea);
+}
+
+/* Scroll-linked motion: the pack rises into place on arrival and the headline eases
+   out as you move on — CSS only, so nothing runs on the main thread while scrolling */
+@supports (animation-timeline: view()) {
+  .kv-pack {
+    animation: kv-pack-in linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 50%;
+  }
+
+  .kv-copy {
+    animation: kv-copy-out linear both;
+    animation-timeline: view();
+    animation-range: exit 0% exit 60%;
+  }
+
+  .ps-life h2,
+  .ps-about h2,
+  .pg-section-title,
+  .ps-promise-line {
+    animation: kv-rise linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 30%;
+  }
+
+  @keyframes kv-pack-in {
+    from { translate: 0 60px; scale: 0.88; }
+    to { translate: 0 0; scale: 1; }
+  }
+
+  @keyframes kv-copy-out {
+    to { opacity: 0; translate: 0 -40px; }
+  }
+
+  @keyframes kv-rise {
+    from { opacity: 0; translate: 0 40px; }
+    to { opacity: 1; translate: 0 0; }
+  }
+}
+
+/* Story sections get more room, closer to full-screen chapters */
+.pp--story .ps {
+  margin-top: 0;
+}
+
+.pp--story .ps-life-inner,
+.pp--story .ps-about-inner {
+  min-height: 78vh;
+}
+
+/* What's inside: realme-style giant numbers in a row */
+.pp--story .ps-about-inner {
+  grid-template-columns: 1fr;
+  justify-items: center;
+  text-align: center;
+}
+
+.pp--story .ps-about-copy {
+  max-width: 760px;
+}
+
+.pp--story .ps-facts {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: min(100%, 980px);
+  gap: 0;
+}
+
+.pp--story .ps-facts li {
+  grid-template-columns: 1fr;
+  justify-items: center;
+  gap: 6px;
+  border-radius: 0;
+  background: none;
+  padding: 10px 18px;
+  box-shadow: none;
+}
+
+.pp--story .ps-facts li + li {
+  border-left: 1px solid rgba(44, 105, 117, 0.18);
+}
+
+.pp--story .ps-facts strong {
+  min-width: 0;
+  font-size: clamp(56px, 8vw, 104px);
+}
+
+.pp--story .ps-facts strong span {
+  font-size: clamp(18px, 2vw, 26px);
+}
+
+.pp--story .ps-facts p {
+  max-width: 220px;
+  font-size: 15px;
+}
+
+/* Feature grid: a bento of different sizes */
+.pp-bento .pp-highlight-grid {
+  grid-auto-rows: minmax(240px, auto);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.pp-bento .pp-highlight {
+  min-height: 0;
+}
+
+.pp-bento .pp-highlight:nth-child(7n + 1) {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+.pp-bento .pp-highlight:nth-child(7n + 1) h3 {
+  font-size: clamp(26px, 2.8vw, 36px);
+}
+
+.pp-bento .pp-highlight:nth-child(7n + 1) p {
+  font-size: 17px;
+}
+
+.pp-bento .pp-highlight:nth-child(7n + 2),
+.pp-bento .pp-highlight:nth-child(7n + 5),
+.pp-bento .pp-highlight:nth-child(7n + 6) {
+  grid-column: span 2;
+}
+
+.pp-bento .pp-highlight:nth-child(7n + 7) {
+  grid-column: 1 / -1;
+}
+
+/* Buy section */
+.pp-buyzone {
+  margin-top: 120px;
+  scroll-margin-top: calc(var(--header-h, 106px) + 52px);
+}
+
+.pp-buy-title {
+  margin: 0;
+  color: var(--teal);
+  font: 700 clamp(30px, 3.6vw, 44px) / 1.08 var(--display);
+  letter-spacing: -0.03em;
+}
+
+.pp--story .pp-stage {
+  top: calc(var(--header-h, 106px) + 72px);
+}
+
+.pp--story section[id],
+.pp--story #features {
+  scroll-margin-top: calc(var(--header-h, 106px) + 52px);
+}
+
+@media (max-width: 900px) {
+  .pn-links { display: none; }
+  .pn-inner { justify-content: space-between; height: 48px; }
+  .pn-name { font-size: 16px; }
+  .kv-points { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pp-bento .pp-highlight-grid { grid-template-columns: 1fr 1fr; }
+  .pp-bento .pp-highlight:nth-child(n) { grid-column: span 2; grid-row: auto; }
+  .pp--story .ps-facts { grid-template-columns: 1fr; }
+  .pp--story .ps-facts li + li { border-top: 1px solid rgba(44, 105, 117, 0.18); border-left: 0; }
+  .pp--story .ps-life-inner, .pp--story .ps-about-inner { min-height: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kv-pack, .kv-copy, .ps-life h2, .ps-about h2, .pg-section-title, .ps-promise-line { animation: none; }
+}

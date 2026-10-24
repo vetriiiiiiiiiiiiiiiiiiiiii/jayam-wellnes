@@ -6,7 +6,8 @@ import ProductGallery from '../components/storefront/ProductGallery';
 import ProductActions from '../components/storefront/ProductActions';
 import ProductCard from '../components/storefront/ProductCard';
 import ReviewSection from '../components/storefront/ReviewSection';
-import BuyBar from '../components/storefront/BuyBar';
+import ProductSubnav from '../components/storefront/ProductSubnav';
+import ProductHero from '../components/storefront/ProductHero';
 import ProductStory from '../components/storefront/ProductStory';
 import { useCart } from '../components/storefront/CartProvider';
 import { useSiteContent } from '../lib/content';
@@ -84,8 +85,83 @@ export default function ProductPage() {
     window.dispatchEvent(new Event('jayam:cart-open'));
   };
 
+  const shortTitle = product.name.replace(/^Organic\s+/i, '').split(' — ')[0];
+  const sections = [
+    { id: 'overview', label: 'Overview' },
+    { id: 'features', label: 'Features' },
+    { id: 'specs', label: 'Specs' },
+    { id: 'buy', label: 'Buy' },
+    { id: 'reviews', label: 'Reviews' },
+  ];
+
+  // realme-style product page: sticky product bar → big opening screen → the story →
+  // feature grid → specs → buy → reviews → more products
   return (
-    <main className="pg pp">
+    <main className="pg pp pp--story">
+      <ProductSubnav name={shortTitle} price={price} sections={sections} />
+      <ProductHero product={product} name={shortTitle} category={category} points={TRUST_POINTS[product.productType] || []} />
+
+      <div id="features" className="pp-features">
+      {stories[product.slug] ? (
+        <ProductStory product={product} story={stories[product.slug]} description={product.description} onBuy={buy} />
+      ) : product.description && (
+        <section className="pp-overview" data-reveal>
+          <p className="pg-eyebrow">Overview</p>
+          <h2>{product.tagline || product.name}</h2>
+          {product.description.split(/\n\s*\n/).map((paragraph, index) => <p key={index}>{paragraph}</p>)}
+        </section>
+      )}
+
+      {product.highlights?.length > 0 && (
+        <section className="pp-highlights pp-bento" aria-labelledby="pp-highlights-title">
+          <h2 id="pp-highlights-title" className="pg-section-title">The details <em>that matter.</em></h2>
+          <div className="pp-highlight-grid">
+            {product.highlights.map(({ title, body }, index) => (
+              <article key={title} className={`pp-highlight pp-highlight--${TONES[index % TONES.length]}`} data-reveal>
+                <span className="pp-highlight-number">{String(index + 1).padStart(2, '0')}</span>
+                <h3>{title}</h3>
+                <p>{body}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <section className="pp-details" id="specs" aria-label="Ingredients, use and specifications">
+        {product.ingredients && (
+          <article className="pg-tile" data-reveal>
+            <p className="pg-eyebrow">The formula</p>
+            <h2>Ingredients</h2>
+            <p>{product.ingredients}</p>
+          </article>
+        )}
+        {product.usageInstructions && (
+          <article className="pg-tile" data-reveal>
+            <p className="pg-eyebrow">Daily ritual</p>
+            <h2>How to use</h2>
+            <p>{product.usageInstructions}</p>
+          </article>
+        )}
+        {specs.length > 0 && (
+          <article className="pg-tile pp-specs" data-reveal>
+            <p className="pg-eyebrow">At a glance</p>
+            <h2>Specifications</h2>
+            <dl>
+              {specs.map((spec) => (
+                <div key={spec.name}>
+                  <dt>{spec.name}</dt>
+                  <dd>{spec.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </article>
+        )}
+      </section>
+
+      </div>
+
+      <section className="pp-buyzone" id="buy" aria-labelledby="pp-buyzone-title">
+        <h2 id="pp-buyzone-title" className="pg-section-title">Make it <em>yours.</em></h2>
       <section className="pp-top">
         <div className="pp-stage">
           <ProductGallery images={product.images} product={product} />
@@ -93,7 +169,7 @@ export default function ProductPage() {
 
         <div className="pp-buy">
           <p className="pg-eyebrow">{category}</p>
-          <h1>{product.name}</h1>
+          <h2 className="pp-buy-title">{product.name}</h2>
           {product.tagline && <p className="pp-tagline">{product.tagline}</p>}
           <p className="pp-price">
             {formatPrice(price)}
@@ -134,61 +210,6 @@ export default function ProductPage() {
           </ul>
         </div>
       </section>
-
-      {stories[product.slug] ? (
-        <ProductStory product={product} story={stories[product.slug]} description={product.description} onBuy={buy} />
-      ) : product.description && (
-        <section className="pp-overview" data-reveal>
-          <p className="pg-eyebrow">Overview</p>
-          <h2>{product.tagline || product.name}</h2>
-          {product.description.split(/\n\s*\n/).map((paragraph, index) => <p key={index}>{paragraph}</p>)}
-        </section>
-      )}
-
-      {product.highlights?.length > 0 && (
-        <section className="pp-highlights" aria-labelledby="pp-highlights-title">
-          <h2 id="pp-highlights-title" className="pg-section-title">The details <em>that matter.</em></h2>
-          <div className="pp-highlight-grid">
-            {product.highlights.map(({ title, body }, index) => (
-              <article key={title} className={`pp-highlight pp-highlight--${TONES[index % TONES.length]}`} data-reveal>
-                <span className="pp-highlight-number">{String(index + 1).padStart(2, '0')}</span>
-                <h3>{title}</h3>
-                <p>{body}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-      )}
-
-      <section className="pp-details" aria-label="Details">
-        {product.ingredients && (
-          <article className="pg-tile" data-reveal>
-            <p className="pg-eyebrow">The formula</p>
-            <h2>Ingredients</h2>
-            <p>{product.ingredients}</p>
-          </article>
-        )}
-        {product.usageInstructions && (
-          <article className="pg-tile" data-reveal>
-            <p className="pg-eyebrow">Daily ritual</p>
-            <h2>How to use</h2>
-            <p>{product.usageInstructions}</p>
-          </article>
-        )}
-        {specs.length > 0 && (
-          <article className="pg-tile pp-specs" data-reveal>
-            <p className="pg-eyebrow">At a glance</p>
-            <h2>Specifications</h2>
-            <dl>
-              {specs.map((spec) => (
-                <div key={spec.name}>
-                  <dt>{spec.name}</dt>
-                  <dd>{spec.value}</dd>
-                </div>
-              ))}
-            </dl>
-          </article>
-        )}
       </section>
 
       {(product.warnings || product.disclaimer || product.productType === 'SUPPLEMENT') && (
@@ -199,7 +220,7 @@ export default function ProductPage() {
         </section>
       )}
 
-      <section className="pp-reviews" aria-labelledby="pp-reviews-title">
+      <section className="pp-reviews" id="reviews" aria-labelledby="pp-reviews-title">
         <h2 id="pp-reviews-title" className="pg-section-title">What people <em>are saying.</em></h2>
         <ReviewSection key={product.id} productId={product.id} reviews={product.reviews || []} />
       </section>
@@ -207,13 +228,11 @@ export default function ProductPage() {
       {others.length > 0 && (
         <section className="pp-more" aria-labelledby="pp-more-title">
           <h2 id="pp-more-title" className="pg-section-title">Complete your <em>ritual.</em></h2>
-          <div className="sh-grid">
-            {others.map((item) => <ProductCard key={item.id} product={item} />)}
+          <div className="sh-grid sh-grid--thirds">
+            {others.map((item) => <ProductCard key={item.id} product={item} size="compact" />)}
           </div>
         </section>
       )}
-
-      <BuyBar product={product} selectedVariant={selectedVariant} />
     </main>
   );
 }

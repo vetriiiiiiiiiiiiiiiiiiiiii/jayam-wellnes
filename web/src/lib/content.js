@@ -56,17 +56,6 @@ export const HOME_DEFAULTS = {
       },
     },
   },
-  why: {
-    eyebrow: 'Why Jayam',
-    title: 'Simple enough to',
-    accent: 'take every day.',
-    facts: [
-      { value: '500', unit: 'mg', label: 'of pure botanical in every tablet and capsule' },
-      { value: '0', unit: '', label: 'fillers, binders, artificial colors or preservatives' },
-      { value: '2', unit: 'a day', label: 'one in the morning, one in the evening, with food' },
-      { value: '60', unit: 'days', label: 'in every pack — a full 2-month supply' },
-    ],
-  },
   plant: {
     eyebrow: 'From plant to pack',
     title: 'Nothing hidden.',

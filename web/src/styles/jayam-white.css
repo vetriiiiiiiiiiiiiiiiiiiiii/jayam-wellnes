@@ -295,68 +295,6 @@ nav.fixed {
   scroll-margin-top: 90px;
 }
 
-/* ---------- Why Jayam (numbers) ---------- */
-.jw {
-  padding: 0 3vw;
-}
-
-.jw-inner {
-  max-width: 1340px;
-  margin: 0 auto;
-  border-radius: 56px;
-  background: var(--fern);
-  padding: 90px 6vw 96px;
-  color: var(--hay);
-}
-
-.jw-head h2 {
-  color: var(--white);
-}
-
-.jw-head h2 em {
-  color: var(--sage-tint);
-}
-
-.jw-head .wl-kicker {
-  color: var(--sage-tint);
-}
-
-.jw-facts {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 30px;
-  margin: 64px 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.jw-facts li {
-  border-top: 1px solid rgba(248, 237, 217, 0.3);
-  padding-top: 22px;
-}
-
-.jw-facts strong {
-  display: block;
-  color: var(--sage-tint);
-  font: 750 clamp(64px, 7vw, 108px)/0.9 var(--display);
-  letter-spacing: -0.04em;
-}
-
-.jw-facts strong span {
-  margin-left: 6px;
-  font-size: 0.3em;
-  font-weight: 650;
-  letter-spacing: 0;
-}
-
-.jw-facts p {
-  max-width: 230px;
-  margin: 14px 0 0;
-  color: var(--hay);
-  font-size: 15px;
-  line-height: 1.55;
-}
-
 /* ---------- Plant to pack (tactile tiles) ---------- */
 .jp {
   max-width: 1340px;
@@ -510,9 +448,7 @@ nav.fixed {
 
 /* ---------- Responsive ---------- */
 @media (max-width: 1180px) {
-
-  .jp-tiles,
-  .jw-facts {
+  .jp-tiles {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -538,32 +474,13 @@ nav.fixed {
     padding: 70px 16px 90px;
   }
 
-  .jw,
   .js {
     padding-inline: 12px;
   }
 
-  .jw-inner,
   .js-inner,
-  .jf {
+.jf {
     border-radius: 34px;
-  }
-
-  .jw-inner {
-    padding: 60px 22px 64px;
-  }
-
-  .jw-facts {
-    gap: 26px 18px;
-    margin-top: 40px;
-  }
-
-  .jw-facts strong {
-    font-size: 58px;
-  }
-
-  .jw-facts p {
-    font-size: 13px;
   }
 
   .jp {
@@ -964,46 +881,6 @@ h2 {
   .jh-leaves { transform: scale(0.62); }
 }
 
-/* ---------- Highlights (numbers) on white ---------- */
-.jw {
-  padding: 0;
-}
-
-.jw-inner {
-  max-width: 1080px;
-  border-radius: 0;
-  background: var(--white);
-  padding: 130px 22px 110px;
-  color: var(--earth);
-  text-align: center;
-}
-
-.jw-head h2 {
-  color: var(--earth);
-}
-
-.jw-head h2 em {
-  color: var(--fern);
-}
-
-.jw-head .wl-kicker {
-  color: var(--cherry);
-}
-
-.jw-facts li {
-  border-top: 0;
-  padding-top: 0;
-}
-
-.jw-facts strong {
-  color: var(--fern);
-}
-
-.jw-facts p {
-  margin-inline: auto;
-  color: var(--muted);
-}
-
 /* ---------- From plant to pack: horizontal scroll ---------- */
 .jp {
   max-width: none;
@@ -1101,63 +978,6 @@ h2 {
   .jp-tile {
     min-height: 340px;
   }
-}
-
-/* Sticky buy bar on product pages */
-.ab {
-  position: fixed;
-  z-index: 90;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  border-top: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.97);
-  box-shadow: 0 -8px 24px rgba(44, 105, 117, 0.06);
-  transform: translateY(100%);
-  transition: transform 0.35s ease;
-}
-
-.ab.is-visible {
-  transform: none;
-}
-
-.ab-inner {
-  display: flex;
-  max-width: 1080px;
-  align-items: center;
-  gap: 18px;
-  margin: 0 auto;
-  padding: 12px 22px calc(12px + env(safe-area-inset-bottom));
-}
-
-.ab-name {
-  flex: 1;
-  margin: 0;
-  overflow: hidden;
-  color: var(--earth);
-  font: 600 17px var(--display);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.ab-price {
-  margin: 0;
-  color: var(--muted);
-  font: 500 15px var(--sans);
-}
-
-.ab-buy {
-  padding: 8px 20px;
-  font-size: 14px;
-}
-
-.ab-buy:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-@media (max-width: 560px) {
-  .ab-name { font-size: 15px; }
 }
 
 /* ==========================================

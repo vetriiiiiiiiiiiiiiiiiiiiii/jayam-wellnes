@@ -5,8 +5,41 @@ import ProductArt from './ProductArt';
 
 export const shortName = (product) => product.name.replace(/^Organic\s+/i, '').split(' — ')[0];
 
-// A product standing on a light tile: the pack first, then name, tagline, price, Buy.
-export default function ProductCard({ product }) {
+// Curated order for listings: the bestseller first, then her, him, the starter and skincare
+export const PRODUCT_ORDER = [
+  'moringa-leaf-amla-tablets',
+  'moringa-flower-tablets',
+  'moringa-seed-capsules',
+  'moringa-leaf-capsules',
+  'beauty-drops-moringa-facial-elixir',
+];
+
+export const curated = (products) => [...products].sort((a, b) => {
+  const rank = (product) => (PRODUCT_ORDER.indexOf(product.slug) + 1) || PRODUCT_ORDER.length + 1;
+  return rank(a) - rank(b);
+});
+
+// Each product's tile tint, from the palette
+const TINTS = {
+  'moringa-leaf-amla-tablets': 'teal',
+  'moringa-flower-tablets': 'sage',
+  'moringa-seed-capsules': 'deep',
+  'moringa-leaf-capsules': 'sea',
+  'beauty-drops-moringa-facial-elixir': 'mist',
+};
+
+const KICKERS = {
+  'moringa-leaf-amla-tablets': 'Bestseller',
+  'moringa-flower-tablets': 'For her',
+  'moringa-seed-capsules': 'For him',
+  'moringa-leaf-capsules': 'Start here',
+  'beauty-drops-moringa-facial-elixir': 'Skincare',
+};
+
+// A product tile in the apple.com manner: kicker, big name, one-line tagline,
+// "Learn more" and "Buy", the price, then the product large at the bottom.
+// size: "feature" (full width), "regular" (half width) or "compact" (thirds)
+export default function ProductCard({ product, size = 'regular' }) {
   const { addToCart } = useCart();
   const navigate = useNavigate();
   const image = product.images?.[0]?.url;
@@ -25,20 +58,20 @@ export default function ProductCard({ product }) {
   };
 
   return (
-    <article className="sc">
-      <Link to={`/products/${product.slug}`} className="sc-art" aria-label={`View ${product.name}`}>
-        {image ? <img src={image} alt={product.name} loading="lazy" /> : <ProductArt product={product} />}
-      </Link>
-      <div className="sc-body">
-        <p className="sc-kicker">{product.category || CATEGORY_LABELS[product.productType] || 'Wellness'}</p>
+    <article className={`at at--${size} at--${TINTS[product.slug] || 'mist'}`}>
+      <div className="at-copy">
+        <p className="at-kicker">{KICKERS[product.slug] || product.category || CATEGORY_LABELS[product.productType] || 'Wellness'}</p>
         <h2><Link to={`/products/${product.slug}`}>{shortName(product)}</Link></h2>
-        {product.tagline && <p className="sc-tagline">{product.tagline}</p>}
-        <p className="sc-price">{hasVariants ? 'From ' : ''}{formatPrice(price)}</p>
-        <div className="sc-ctas">
-          <button type="button" className="ap-pill sc-buy" onClick={buy}>{hasVariants ? 'Choose' : 'Buy'}</button>
-          <Link to={`/products/${product.slug}`} className="ap-link sc-more">Learn more ›</Link>
+        {product.tagline && <p className="at-tagline">{product.tagline}</p>}
+        <div className="at-ctas">
+          <Link to={`/products/${product.slug}`} className="ap-pill">Learn more</Link>
+          <button type="button" className="ap-pill ap-pill--outline" onClick={buy}>{hasVariants ? 'Choose' : 'Buy'}</button>
         </div>
+        <p className="at-price">{hasVariants ? 'From ' : ''}{formatPrice(price)}</p>
       </div>
+      <Link to={`/products/${product.slug}`} className="at-art" tabIndex={-1} aria-hidden="true">
+        {image ? <img src={image} alt="" loading="lazy" /> : <ProductArt product={product} />}
+      </Link>
     </article>
   );
 }

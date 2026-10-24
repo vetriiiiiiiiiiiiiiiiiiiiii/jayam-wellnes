@@ -15,8 +15,16 @@ const ORDER = [
   'beauty-drops-moringa-facial-elixir',
 ];
 
-// Background of each panel, from the palette: mist, sage, a soft sea green, mist, sage
-const TONES = ['#e0ecde', '#cde0c9', '#d3ebe3', '#e0ecde', '#cde0c9'];
+// Each product has its own colour story: the panel tint and a matching info card.
+// Panels overlap along a slanted edge so one product flows into the next, and the
+// next pack already peeks in below the current one.
+const THEMES = [
+  { name: 'teal', tone: '#dcebe8' },
+  { name: 'sage', tone: '#e3eee0' },
+  { name: 'deep', tone: '#d3e6e2' },
+  { name: 'sea', tone: '#e6f2ee' },
+  { name: 'mist', tone: '#eef5ec' },
+];
 
 const contents = (product) => product.specs?.find((spec) => spec.name === 'Contents')?.value.split('·')[0].trim();
 
@@ -46,15 +54,17 @@ export default function ProductShowcase({ products, content }) {
         const product = bySlug[slug];
         const copy = content.items?.[slug] || {};
         const detail = contents(product);
-        const tone = TONES[index % TONES.length];
-        const previous = index === 0 ? '#ffffff' : TONES[(index - 1) % TONES.length];
+        const theme = THEMES[index % THEMES.length];
+        const previous = index === 0 ? '#ffffff' : THEMES[(index - 1) % THEMES.length].tone;
         const side = index % 2 === 0 ? 'right' : 'left';
+        const next = slugs[index + 1] && bySlug[slugs[index + 1]];
 
         return (
           <article
             key={slug}
-            className={`sw-panel sw-panel--${side}`}
-            style={{ '--from': previous, '--to': tone }}
+            id={`sw-${slug}`}
+            className={`sw-panel sw-panel--${side} sw-theme--${theme.name}`}
+            style={{ '--from': previous, '--to': theme.tone }}
             aria-label={product.name}
           >
             <span className="sw-band" aria-hidden="true" />
@@ -66,7 +76,10 @@ export default function ProductShowcase({ products, content }) {
               </Link>
 
               <div className="sw-card" data-reveal>
-                {copy.badge && <span className="sw-badge">{copy.badge}</span>}
+                <div className="sw-card-top">
+                  {copy.badge && <span className="sw-badge">{copy.badge}</span>}
+                  <span className="sw-count">{String(index + 1).padStart(2, '0')} / {String(slugs.length).padStart(2, '0')}</span>
+                </div>
                 <h3>{copy.headline || product.tagline || product.name}</h3>
                 <p className="sw-subtitle">{copy.subtitle || product.name}</p>
                 {(copy.description || product.shortDescription) && <p className="sw-desc">{copy.description || product.shortDescription}</p>}
@@ -75,6 +88,11 @@ export default function ProductShowcase({ products, content }) {
                   <Link to={`/products/${slug}`} className="ap-pill">Learn more</Link>
                   <button type="button" className="ap-pill ap-pill--outline" onClick={() => buy(product)}>Buy</button>
                 </div>
+                {next && (
+                  <a href={`#sw-${next.slug}`} className="sw-next">
+                    Up next · {(content.items?.[next.slug]?.headline) || next.name} <span aria-hidden="true">↓</span>
+                  </a>
+                )}
               </div>
             </div>
           </article>
