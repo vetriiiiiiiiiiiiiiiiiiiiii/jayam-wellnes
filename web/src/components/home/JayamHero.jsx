@@ -45,7 +45,7 @@ export default function JayamHero({ products, content }) {
             </text>
           </svg>
           <div className="hs-face">
-            <img src="/jayam-logo.png" alt="Jayam — Bringing the best to your hands" width="430" height="430" />
+            <img src="/jayam-logo.png" alt="Jayam — Bringing the best to your hands" width="430" height="430" fetchPriority="high" decoding="async" />
           </div>
         </div>
 

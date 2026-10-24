@@ -990,3 +990,88 @@
 @media (max-width: 640px) {
   .od-cards { scroll-padding-inline: 16px; }
 }
+
+/* ---------- Hero on phones ----------
+   Everything — statement, buttons, the seal and two products — fits the first screen,
+   and the effects that cost the most on a phone GPU are dropped. */
+.hs-ring {
+  will-change: transform;
+}
+
+@media (max-width: 640px) {
+  .jh {
+    gap: 0;
+    padding: calc(var(--header-h, 97px) + 18px) 16px 28px;
+  }
+
+  /* The corner sprig crowds the headline on a narrow screen and costs three filters */
+  .jh-leaves {
+    display: none;
+  }
+
+  .jh-eyebrow {
+    margin-bottom: 8px;
+    font-size: 13px;
+    letter-spacing: 0.02em;
+  }
+
+  .jh h1 {
+    font-size: clamp(38px, 11.6vw, 46px);
+    line-height: 1.02;
+  }
+
+  .jh-sub {
+    margin: 10px auto 18px;
+    max-width: 300px;
+    font-size: 17px;
+    line-height: 1.35;
+  }
+
+  .jh .ap-pill {
+    padding: 11px 20px;
+    font-size: 16px;
+  }
+
+  .jh .ap-link {
+    font-size: 16px;
+  }
+
+  .hs {
+    height: clamp(300px, 86vw, 340px);
+    margin-top: 14px;
+  }
+
+  .hs-seal {
+    width: clamp(196px, 58vw, 226px);
+    box-shadow:
+      inset 0 2px 0 rgba(255, 255, 255, 0.35),
+      inset 0 -8px 18px rgba(0, 0, 0, 0.16),
+      0 26px 40px -24px rgba(44, 105, 117, 0.6);
+  }
+
+  .hs-ring text {
+    font-size: 10.4px;
+  }
+
+  .hs-item--inner-left { left: 1%; width: 30%; bottom: 2%; }
+  .hs-item--inner-right { right: -1%; width: 37%; bottom: 2%; }
+
+  /* One soft shadow instead of two stacked drop-shadow filters */
+  .hs-item .jayam-pack {
+    filter: drop-shadow(0 14px 12px rgba(44, 105, 117, 0.24));
+  }
+
+  .hs-item:hover {
+    transform: none;
+  }
+
+  .hs-floor {
+    bottom: 0;
+    height: 10%;
+  }
+}
+
+@media (max-width: 360px) {
+  .jh h1 { font-size: 36px; }
+  .hs-seal { width: 188px; }
+}
