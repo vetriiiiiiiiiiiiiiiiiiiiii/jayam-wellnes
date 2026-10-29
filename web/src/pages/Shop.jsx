@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { Leaf, MessageCircle, ShieldCheck, Truck } from 'lucide-react';
 import ProductCard, { curated, shortName } from '../components/storefront/ProductCard';
-import ProductArt from '../components/storefront/ProductArt';
+import ProductVisual from '../components/storefront/ProductVisual';
 import FilterSidebar from '../components/storefront/FilterSidebar';
 import PageHead from '../components/storefront/PageHead';
 import { CATEGORY_LABELS, FREE_SHIPPING_THRESHOLD } from '../lib/store';
@@ -79,7 +79,7 @@ export default function ShopPage() {
         <nav className="sh-strip" aria-label="Products">
           {lineup.map((product) => (
             <Link key={product.id} to={`/products/${product.slug}`} className="sh-strip-item">
-              <span className="sh-strip-art"><ProductArt product={product} /></span>
+              <span className="sh-strip-art"><ProductVisual product={product} /></span>
               <span>{shortName(product)}</span>
             </Link>
           ))}

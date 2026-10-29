@@ -1,5 +1,5 @@
 import { Check, Info, Moon, Sun, Sunrise } from 'lucide-react';
-import ProductArt from './ProductArt';
+import ProductVisual from './ProductVisual';
 
 // The product's story, told in five chapters that lead into each other:
 // who it is for → why you reach for it → what is inside → is it right for you → the promise.
@@ -28,7 +28,7 @@ export default function ProductStory({ product, story, description, onBuy }) {
               )}
             </div>
             <div className="ps-life-visual" aria-hidden="true" data-reveal>
-              <span className="ps-life-pack"><ProductArt product={product} /></span>
+              <span className="ps-life-pack"><ProductVisual product={product} /></span>
               <span className="ps-life-seal"><img src="/jayam-logo.png" alt="" loading="lazy" /></span>
             </div>
           </div>

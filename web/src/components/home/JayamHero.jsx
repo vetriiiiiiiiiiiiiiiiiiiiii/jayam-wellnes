@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import MoringaSprig from './MoringaSprig';
-import ProductArt from '../storefront/ProductArt';
+import ProductVisual from '../storefront/ProductVisual';
 
 // Hero in the apple.com manner: a short centred statement and two calls to action,
 // then the Jayam seal — the real brand emblem set in a teal medallion with a turning
@@ -14,7 +14,11 @@ const LINEUP = [
 
 export default function JayamHero({ products, content }) {
   const bySlug = Object.fromEntries(products.map((product) => [product.slug, product]));
-  const lineup = LINEUP.map((item) => ({ ...item, product: bySlug[item.slug] })).filter((item) => item.product);
+  const known = LINEUP.map((item) => ({ ...item, product: bySlug[item.slug] })).filter((item) => item.product);
+  // With different products in the shop, stand the first four around the seal instead
+  const lineup = known.length >= 2
+    ? known
+    : products.slice(0, LINEUP.length).map((product, index) => ({ product, position: LINEUP[index].position }));
 
   return (
     <section className="jh">
@@ -52,7 +56,7 @@ export default function JayamHero({ products, content }) {
         <div className="hs-lineup">
           {lineup.map(({ product, position }) => (
             <Link key={product.id} to={`/products/${product.slug}`} className={`hs-item hs-item--${position}`} aria-label={product.name}>
-              <ProductArt product={product} />
+              <ProductVisual product={product} eager />
             </Link>
           ))}
         </div>

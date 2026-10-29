@@ -1067,3 +1067,13 @@ a.ad-tile:hover {
     flex: 1;
   }
 }
+
+.ad-tip {
+  margin: 0;
+  border-radius: 10px;
+  background: #eef6f3;
+  padding: 10px 12px;
+  color: var(--ad-text);
+  font-size: 12.5px;
+  line-height: 1.5;
+}

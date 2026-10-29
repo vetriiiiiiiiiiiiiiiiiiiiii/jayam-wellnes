@@ -1128,3 +1128,29 @@
   color: var(--sea) !important;
   font-size: 22px !important;
 }
+
+/* ---------- Product photos from the admin panel ----------
+   Same frame as the illustrated pack, so photos drop into every layout */
+.pv {
+  display: grid;
+  width: 100%;
+  aspect-ratio: 260 / 320;
+  place-items: center;
+}
+
+.pv img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: var(--product-shadow);
+}
+
+.pv--hero {
+  aspect-ratio: 1 / 1.08;
+}
+
+/* Photos with their own background read better with rounded corners */
+.at-art .pv img,
+.sc-art .pv img {
+  border-radius: 18px;
+}

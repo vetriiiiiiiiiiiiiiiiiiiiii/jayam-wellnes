@@ -1,5 +1,5 @@
 import { BadgeCheck, Clock, Leaf, Package, ShieldCheck, Sparkles } from 'lucide-react';
-import ProductArt from './ProductArt';
+import ProductVisual from './ProductVisual';
 
 // The product's opening screen, realme style: a giant headline, the product large and
 // floating with the Jayam seal, and its key points in a row underneath.
@@ -11,8 +11,6 @@ const jump = (event, id) => {
 };
 
 export default function ProductHero({ product, name, category, points }) {
-  const image = product.images?.[0]?.url;
-
   return (
     <section className="kv" id="overview" aria-labelledby="kv-title">
       <div className="kv-copy">
@@ -27,7 +25,7 @@ export default function ProductHero({ product, name, category, points }) {
 
       <div className="kv-stage" aria-hidden="true">
         <span className="kv-halo" />
-        <span className="kv-pack">{image ? <img src={image} alt="" /> : <ProductArt product={product} size="hero" />}</span>
+        <span className="kv-pack"><ProductVisual product={product} size="hero" eager /></span>
         <span className="kv-seal"><img src="/jayam-logo.png" alt="" /></span>
         <span className="kv-floor" />
       </div>

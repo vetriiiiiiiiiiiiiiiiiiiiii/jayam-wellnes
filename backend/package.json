@@ -12,7 +12,8 @@
     "db:migrate": "prisma migrate dev && prisma generate",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "node scripts/seed.js",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "db:products": "node scripts/add-products.js"
   },
   "keywords": [],
   "author": "",

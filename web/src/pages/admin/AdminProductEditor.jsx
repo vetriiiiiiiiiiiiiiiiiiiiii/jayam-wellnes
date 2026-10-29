@@ -233,7 +233,8 @@ export default function AdminProductEditor() {
 
           <section className="ad-card">
             <h2>Photos</h2>
-            <p className="ad-muted ad-small">The first photo is the main one. Without photos, the shop shows the illustrated Jayam pack.</p>
+            <p className="ad-muted ad-small">The first photo is the main one — it appears on the home page, in the shop and on the product page. Without photos, the site shows the illustrated Jayam pack.</p>
+            <p className="ad-tip"><b>Tip:</b> for the home page, use a cut-out PNG of the pack with a transparent background, roughly portrait (about 4:5). It stands on the page with the same soft shadow as the illustrations.</p>
             <div className="ad-images">
               {images.map((image, index) => (
                 <figure key={image.id} className="ad-image">

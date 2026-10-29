@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from './CartProvider';
 import { CATEGORY_LABELS, formatPrice } from '../../lib/store';
-import ProductArt from './ProductArt';
+import ProductVisual from './ProductVisual';
 
 export const shortName = (product) => product.name.replace(/^Organic\s+/i, '').split(' — ')[0];
 
@@ -70,7 +70,7 @@ export default function ProductCard({ product, size = 'regular' }) {
         <p className="at-price">{hasVariants ? 'From ' : ''}{formatPrice(price)}</p>
       </div>
       <Link to={`/products/${product.slug}`} className="at-art" tabIndex={-1} aria-hidden="true">
-        {image ? <img src={image} alt="" loading="lazy" /> : <ProductArt product={product} />}
+        <ProductVisual product={product} />
       </Link>
     </article>
   );

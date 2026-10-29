@@ -12,6 +12,19 @@ const toProductData = ({ images = [], specs = [], variants = [], ...product }) =
 });
 
 async function seed() {
+  // This script deletes every user, order and product first. On a live site, use
+  // `npm run db:products` instead, which only adds missing products.
+  if (process.env.NODE_ENV === 'production' && !process.argv.includes('--wipe-everything')) {
+    console.error('Refusing to run: db:seed deletes ALL users, orders and products.');
+    console.error('To add the five Jayam products safely, run: npm run db:products');
+    process.exitCode = 1;
+    return;
+  }
+  if (process.env.NODE_ENV === 'production' && !process.env.SEED_ADMIN_PASSWORD) {
+    console.error('Set SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD in backend/.env before seeding production.');
+    process.exitCode = 1;
+    return;
+  }
   try {
     console.log('Connected to PostgreSQL for seeding');
 

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import ProductArt from '../storefront/ProductArt';
+import ProductVisual from '../storefront/ProductVisual';
 import { useCart } from '../storefront/CartProvider';
 import { formatPrice } from '../../lib/store';
 
@@ -70,7 +70,7 @@ export default function ProductShowcase({ products, content }) {
             <span className="sw-band" aria-hidden="true" />
             <div className="sw-inner">
               <Link to={`/products/${slug}`} className="sw-visual" tabIndex={-1} aria-hidden="true" data-reveal>
-                <span className="sw-pack"><ProductArt product={product} /></span>
+                <span className="sw-pack"><ProductVisual product={product} /></span>
                 <span className="sw-seal"><img src="/jayam-logo.png" alt="" loading="lazy" /></span>
                 <span className="sw-shadow" />
               </Link>
