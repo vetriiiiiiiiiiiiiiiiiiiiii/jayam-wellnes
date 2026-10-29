@@ -3,7 +3,7 @@ const { getStripe } = require('../config/stripe');
 const { CARRIERS } = require('../utils/orderLinks');
 const { sendShippingNotification, sendDeliveryNotification } = require('../services/orderEmails');
 const { releaseOrderStock } = require('../services/orderPayments');
-const { mediaQueue } = require('../services/queue');
+const { addProductImages, deleteStoredImage, removeQuietly, storeImage } = require('../services/mediaService');
 const { productInclude, serializeOrder, serializeProduct, serializeUser } = require('../utils/serialize');
 
 const ORDER_STATUSES = ['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
@@ -20,38 +20,60 @@ const uniqueSlug = async (name, excludeId) => {
   return `${slug}-${Math.random().toString(36).substring(2, 7)}`;
 };
 
-// Queue background image processing for uploaded product images
-const queueProductImages = async (productId, files) => {
-  for (const file of files || []) {
-    await mediaQueue.add('process-image', {
-      fileId: productId,
-      filePath: file.path,
-      mimeType: file.mimetype,
-      outputDir: 'uploads/products',
-      modelName: 'Product',
-      fieldName: 'images',
-      operation: 'push'
-    });
-  }
-};
-
 exports.getDashboardStats = async (req, res) => {
   try {
-    const [totalProducts, totalOrders, recentOrders, revenue] = await Promise.all([
+    const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const paid = { paymentStatus: 'PAID' };
+    // One query at a time: quick enough, and gentle on small database plans
+    const queries = [
+      prisma.order.aggregate({ where: paid, _sum: { total: true }, _count: true }),
+      prisma.order.aggregate({ where: { ...paid, paidAt: { gte: since } }, _sum: { total: true } }),
+      prisma.order.count({ where: { ...paid, paidAt: { gte: since } } }),
+      prisma.order.count({ where: { ...paid, status: 'PROCESSING' } }),
+      prisma.order.count({ where: { paymentStatus: 'PENDING', status: 'PENDING', createdAt: { gte: since } } }),
+      prisma.enquiry.count({ where: { status: 'NEW' } }),
+      prisma.user.count({ where: { role: 'user' } }),
       prisma.product.count(),
-      prisma.order.count(),
-      prisma.order.findMany({ include: { items: true }, orderBy: { createdAt: 'desc' }, take: 5 }),
-      prisma.order.aggregate({ _sum: { total: true } })
-    ]);
+      prisma.product.findMany({
+        where: { isPublished: true, stockQuantity: { lt: 10 } },
+        select: { id: true, name: true, slug: true, stockQuantity: true },
+        orderBy: { stockQuantity: 'asc' },
+        take: 6,
+      }),
+      prisma.order.findMany({ include: { items: true }, orderBy: { createdAt: 'desc' }, take: 6 }),
+      prisma.orderItem.groupBy({
+        by: ['name'],
+        where: { order: paid },
+        _sum: { quantity: true },
+        orderBy: { _sum: { quantity: 'desc' } },
+        take: 5,
+      }),
+    ];
+    // Prisma queries only run when awaited, so this runs them in turn
+    const answers = [];
+    for (const query of queries) answers.push(await query);
+    const [
+      revenueAll, revenue30, orders30, toShip, awaitingPayment, newEnquiries,
+      customers, totalProducts, lowStock, recentOrders, topItems,
+    ] = answers;
 
     res.json({
+      totalRevenue: revenueAll._sum.total || 0,
+      paidOrders: revenueAll._count || 0,
+      revenue30: revenue30._sum.total || 0,
+      orders30,
+      toShip,
+      awaitingPayment,
+      newEnquiries,
+      customers,
       totalProducts,
-      totalOrders,
-      totalRevenue: revenue._sum.total || 0,
-      recentOrders: recentOrders.map(serializeOrder)
+      lowStock,
+      topProducts: topItems.map((item) => ({ name: item.name, quantity: item._sum.quantity || 0 })),
+      recentOrders: recentOrders.map(serializeOrder),
     });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch dashboard data' });
+    console.error('[Admin] Dashboard failed:', error);
+    res.status(500).json({ message: 'Failed to load dashboard' });
   }
 };
 
@@ -178,8 +200,15 @@ exports.refundOrder = async (req, res) => {
 // ==========================================
 exports.getAllUsers = async (req, res) => {
   try {
-    const users = await prisma.user.findMany({ include: { addresses: true }, orderBy: { createdAt: 'desc' } });
-    res.json(users.map(serializeUser));
+    const users = await prisma.user.findMany({
+      include: { _count: { select: { orders: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+    res.json(users.map(({ _count, googleId, ...user }) => ({
+      ...serializeUser(user),
+      orderCount: _count.orders,
+      signIn: googleId ? (user.password ? 'Google + email' : 'Google') : 'Email',
+    })));
   } catch (err) {
     res.status(500).json({ message: 'Failed to fetch users' });
   }
@@ -199,6 +228,9 @@ exports.updateUserRole = async (req, res) => {
   try {
     const { role } = req.body;
     if (!ROLES.includes(role)) return res.status(400).json({ message: 'Invalid role' });
+    if (req.params.id === req.user.id && role !== 'admin') {
+      return res.status(400).json({ message: 'You can’t remove your own admin access' });
+    }
 
     const { count } = await prisma.user.updateMany({ where: { id: req.params.id }, data: { role } });
     if (count === 0) return res.status(404).json({ message: 'User not found' });
@@ -211,6 +243,7 @@ exports.updateUserRole = async (req, res) => {
 
 exports.deleteUser = async (req, res) => {
   try {
+    if (req.params.id === req.user.id) return res.status(400).json({ message: 'You can’t delete your own account here' });
     await prisma.user.deleteMany({ where: { id: req.params.id } });
     res.json({ success: true, message: 'User deleted successfully' });
   } catch (err) {
@@ -230,78 +263,171 @@ exports.getAllProducts = async (req, res) => {
   }
 };
 
-exports.createProduct = async (req, res) => {
+// ---------- Product editing ----------
+// The admin form sends multipart data: plain fields, JSON for lists
+// (highlights, specs, keepImageIds) and the new image files under "images".
+
+const TEXT_FIELDS = ['name', 'tagline', 'shortDescription', 'description', 'ingredients', 'usageInstructions', 'warnings', 'disclaimer', 'category', 'productType'];
+const PRODUCT_TYPES = ['SUPPLEMENT', 'SKINCARE', 'BUNDLE'];
+
+const parseJson = (value, fallback) => {
+  if (value === undefined || value === null || value === '') return fallback;
+  if (typeof value !== 'string') return value;
   try {
-    const { name, description, price, imageUrl, isPublished, stockQuantity, addToHomeScreen } = req.body;
-    if (!name || price === undefined || Number.isNaN(Number(price))) {
-      return res.status(400).json({ error: 'Name and a valid price are required' });
+    return JSON.parse(value);
+  } catch {
+    return fallback;
+  }
+};
+
+const cleanText = (value, max = 20000) => (typeof value === 'string' ? value.trim().slice(0, max) : value);
+
+// Turn the form body into Prisma data; returns { data, specs, error }
+const productDataFrom = (body, { creating }) => {
+  const data = {};
+  for (const field of TEXT_FIELDS) {
+    if (body[field] !== undefined) data[field] = cleanText(body[field]) || null;
+  }
+  if (creating && !data.name) return { error: 'Product name is required' };
+  if (data.name === null) return { error: 'Product name cannot be empty' };
+  if (data.productType && !PRODUCT_TYPES.includes(data.productType)) return { error: 'Choose a valid product type' };
+
+  if (body.price !== undefined || creating) {
+    const price = Number(body.price);
+    if (!Number.isFinite(price) || price < 0) return { error: 'Enter a valid price' };
+    data.price = Math.round(price * 100) / 100;
+  }
+  if (body.compareAtPrice !== undefined) {
+    const compare = body.compareAtPrice === '' ? null : Number(body.compareAtPrice);
+    if (compare !== null && (!Number.isFinite(compare) || compare < 0)) return { error: 'Enter a valid compare-at price' };
+    data.compareAtPrice = compare === null ? null : Math.round(compare * 100) / 100;
+  }
+  if (body.stockQuantity !== undefined) {
+    const stock = Number.parseInt(body.stockQuantity || '0', 10);
+    if (!Number.isFinite(stock) || stock < 0) return { error: 'Stock must be zero or more' };
+    data.stockQuantity = stock;
+  }
+  if (body.isPublished !== undefined) data.isPublished = toBool(body.isPublished);
+  if (body.addToHomeScreen !== undefined) data.addToHomeScreen = toBool(body.addToHomeScreen);
+
+  if (body.highlights !== undefined) {
+    const highlights = parseJson(body.highlights, []);
+    if (!Array.isArray(highlights)) return { error: 'Highlights must be a list' };
+    data.highlights = highlights
+      .map((item) => ({ title: cleanText(String(item?.title || ''), 200), body: cleanText(String(item?.body || ''), 2000) }))
+      .filter((item) => item.title || item.body);
+  }
+
+  let specs;
+  if (body.specs !== undefined) {
+    const list = parseJson(body.specs, []);
+    if (!Array.isArray(list)) return { error: 'Specifications must be a list' };
+    specs = list
+      .map((item, position) => ({ name: cleanText(String(item?.name || ''), 120), value: cleanText(String(item?.value || ''), 500), position }))
+      .filter((item) => item.name && item.value);
+  }
+  return { data, specs };
+};
+
+exports.createProduct = async (req, res) => {
+  const files = req.files || [];
+  try {
+    const { data, specs, error } = productDataFrom(req.body, { creating: true });
+    if (error) {
+      files.forEach((file) => removeQuietly(file.path));
+      return res.status(400).json({ message: error });
     }
 
-    const result = await prisma.product.create({
+    const product = await prisma.product.create({
       data: {
-        name,
-        slug: await uniqueSlug(name),
-        description,
-        price: Number(price),
-        isPublished: toBool(isPublished),
-        addToHomeScreen: toBool(addToHomeScreen),
-        stockQuantity: Number(stockQuantity || 0),
-        images: imageUrl ? { create: [{ url: imageUrl, position: 0 }] } : undefined
+        ...data,
+        slug: await uniqueSlug(data.name),
+        ...(specs?.length && { specs: { create: specs } }),
       },
-      include: productInclude
     });
+    await addProductImages(product.id, files);
 
-    // Add media queue jobs for each uploaded file
-    await queueProductImages(result.id, req.files);
-
-    res.status(201).json(serializeProduct(result));
+    const full = await prisma.product.findUnique({ where: { id: product.id }, include: productInclude });
+    res.status(201).json({ success: true, product: serializeProduct(full) });
   } catch (error) {
+    files.forEach((file) => removeQuietly(file.path));
     console.error('Create Product Error:', error);
-    res.status(500).json({ error: 'Failed to create product' });
+    res.status(500).json({ message: error.message?.startsWith('Please upload') || error.message?.startsWith('Images must') ? error.message : 'Failed to create product' });
   }
 };
 
 exports.updateProduct = async (req, res) => {
+  const files = req.files || [];
   try {
     const { id } = req.params;
-    const body = req.body;
-
-    const existing = await prisma.product.findUnique({ where: { id }, select: { id: true } });
-    if (!existing) return res.status(404).json({ message: 'Product not found' });
-
-    const data = {};
-    for (const field of ['name', 'description', 'shortDescription', 'ingredients', 'usageInstructions', 'productType']) {
-      if (body[field] !== undefined) data[field] = body[field];
-    }
-    if (body.name) data.slug = await uniqueSlug(body.name, id);
-    if (body.price !== undefined) data.price = Number(body.price);
-    if (body.compareAtPrice !== undefined) data.compareAtPrice = body.compareAtPrice === '' ? null : Number(body.compareAtPrice);
-    if (body.stockQuantity !== undefined) data.stockQuantity = Number(body.stockQuantity || 0);
-    if (body.isPublished !== undefined) data.isPublished = toBool(body.isPublished);
-    if (body.addToHomeScreen !== undefined) data.addToHomeScreen = toBool(body.addToHomeScreen);
-
-    // Handle image update simplistically for now
-    if (body.imageUrl) {
-      data.images = { deleteMany: {}, create: [{ url: body.imageUrl, position: 0 }] };
+    const existing = await prisma.product.findUnique({ where: { id }, include: { images: true } });
+    if (!existing) {
+      files.forEach((file) => removeQuietly(file.path));
+      return res.status(404).json({ message: 'Product not found' });
     }
 
-    const product = await prisma.product.update({ where: { id }, data, include: productInclude });
+    const { data, specs, error } = productDataFrom(req.body, { creating: false });
+    if (error) {
+      files.forEach((file) => removeQuietly(file.path));
+      return res.status(400).json({ message: error });
+    }
+    if (data.name && data.name !== existing.name) data.slug = await uniqueSlug(data.name, id);
 
-    // Add media queue jobs for each uploaded file
-    await queueProductImages(product.id, req.files);
+    // Images: keep the listed ones in the given order, delete the rest
+    const keepIds = parseJson(req.body.keepImageIds, null);
+    const removed = Array.isArray(keepIds) ? existing.images.filter((image) => !keepIds.includes(image.id)) : [];
 
+    await prisma.$transaction(async (tx) => {
+      await tx.product.update({ where: { id }, data });
+      if (specs) {
+        await tx.productSpec.deleteMany({ where: { productId: id } });
+        if (specs.length) await tx.productSpec.createMany({ data: specs.map((spec) => ({ ...spec, productId: id })) });
+      }
+      if (Array.isArray(keepIds)) {
+        if (removed.length) await tx.productImage.deleteMany({ where: { id: { in: removed.map((image) => image.id) } } });
+        for (const [position, imageId] of keepIds.entries()) {
+          await tx.productImage.updateMany({ where: { id: imageId, productId: id }, data: { position } });
+        }
+      }
+    });
+    removed.forEach((image) => deleteStoredImage(image.url));
+    await addProductImages(id, files);
+
+    const product = await prisma.product.findUnique({ where: { id }, include: productInclude });
     res.json({ success: true, product: serializeProduct(product) });
   } catch (err) {
+    files.forEach((file) => removeQuietly(file.path));
     console.error('Update Product Error:', err);
-    res.status(500).json({ message: 'Failed to update product' });
+    res.status(500).json({ message: err.message?.startsWith('Please upload') || err.message?.startsWith('Images must') ? err.message : 'Failed to update product' });
   }
 };
 
 exports.deleteProduct = async (req, res) => {
   try {
-    await prisma.product.deleteMany({ where: { id: req.params.id } });
+    const product = await prisma.product.findUnique({ where: { id: req.params.id }, include: { images: true, orderItems: { select: { id: true }, take: 1 } } });
+    if (!product) return res.status(404).json({ message: 'Product not found' });
+    // Products that appear in orders are unpublished instead, so order history stays intact
+    if (product.orderItems.length) {
+      await prisma.product.update({ where: { id: product.id }, data: { isPublished: false } });
+      return res.json({ success: true, archived: true, message: 'This product has orders, so it was unpublished instead of deleted' });
+    }
+    await prisma.product.delete({ where: { id: product.id } });
+    product.images.forEach((image) => deleteStoredImage(image.url));
     res.json({ success: true, message: 'Product deleted' });
   } catch (err) {
+    console.error('Delete Product Error:', err);
     res.status(500).json({ message: 'Failed to delete product' });
+  }
+};
+
+// One image for site content (e.g. the Our difference cards); returns its public URL
+exports.uploadContentImage = async (req, res) => {
+  if (!req.file) return res.status(400).json({ message: 'Choose an image to upload' });
+  try {
+    const url = await storeImage(req.file, 'content', 'site');
+    res.status(201).json({ success: true, url });
+  } catch (error) {
+    removeQuietly(req.file.path);
+    res.status(400).json({ message: error.message || 'Upload failed' });
   }
 };

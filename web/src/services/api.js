@@ -25,54 +25,9 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// 3. Response Interceptor (Global Error Handling)
-api.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  (error) => {
-    // ==============================================================
-    // 🛑 SILENT ROUTES: Don't show popups for these endpoints
-    // ==============================================================
-    const silentRoutes = ["/auth/me", "/gallery"];
-
-    // Check if the current request URL matches any silent route
-    if (
-      error.config &&
-      silentRoutes.some((route) => error.config.url.includes(route))
-    ) {
-      return Promise.reject(error);
-    }
-    // ==============================================================
-
-    // A. Network / Connection Errors
-    if (!error.response) {
-      if (window.location.pathname !== "/network-error") {
-        window.location.href = "/network-error";
-      }
-      return Promise.reject(error);
-    }
-
-    // B. Extract message
-    const { status, data } = error.response;
-    const backendMessage = data?.message || "An unexpected error occurred.";
-
-    // C. Handle specific status codes
-    if (status === 401) {
-      toast.error(backendMessage);
-    } else if (status === 403) {
-      toast.error(backendMessage);
-    } else if (status === 404) {
-      toast.error(backendMessage);
-    } else if (status >= 500) {
-      toast.error(backendMessage);
-    } else {
-      toast.error(backendMessage);
-    }
-
-    return Promise.reject(error);
-  }
-);
+// 3. Errors are returned to the calling page, which shows its own message
+// (no global pop-ups or redirects — a network blip must not interrupt checkout)
+api.interceptors.response.use((response) => response, (error) => Promise.reject(error));
 
 // 4. Login Function
 export async function loginUser(email, password) {

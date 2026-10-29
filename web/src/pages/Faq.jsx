@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import PageHead from '../components/storefront/PageHead';
 import { FREE_SHIPPING_THRESHOLD, SHIPPING_FEE, formatPrice } from '../lib/store';
+import usePageMeta from '../lib/usePageMeta';
 
 const sections = [
   {
@@ -106,7 +107,7 @@ const sections = [
     questions: [
       {
         q: 'Do I need an account to order?',
-        a: <p>No. You can check out as a guest, or create an account if you’d like to.</p>,
+        a: <p>No. You can check out as a guest. If you <Link to="/register">create an account</Link> — or sign in with Google — your orders, receipts and tracking stay together in <Link to="/account">your account</Link>.</p>,
       },
       {
         q: 'Will I receive an order confirmation and receipt?',
@@ -114,7 +115,7 @@ const sections = [
       },
       {
         q: 'What if I need help with a return?',
-        a: <p>Please <Link to="/contact?category=RETURNS">contact us</Link> and choose “Returns” — we’ll get back to you within 1 business day.</p>,
+        a: <p>We accept unopened products within 30 days of delivery, and we replace or refund anything that arrives damaged or incorrect. See our <Link to="/shipping-returns">Shipping &amp; Returns</Link> policy, then <Link to="/contact?category=RETURNS">contact us</Link> and choose “Returns” — we’ll reply within 1 business day.</p>,
       },
     ],
   },
@@ -131,6 +132,7 @@ const sections = [
 ];
 
 export default function FaqPage() {
+  usePageMeta({ title: 'FAQ', description: 'Answers about Jayam ingredients, how to take our supplements, shipping across the U.S., orders and returns.' });
   const { hash } = useLocation();
 
   useEffect(() => {

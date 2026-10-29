@@ -18,12 +18,11 @@ const escapeHtml = (value = '') =>
 
 const clean = (value, max) => (typeof value === 'string' ? value.trim().slice(0, max) : '');
 
-// Queue an email without holding up the response (the queue needs Redis)
-const queueEmail = (to, subject, html) => {
+// Send an email without holding up the response; failures are logged
+const queueEmail = (to, subject, html, replyTo) => {
   if (!to) return;
-  const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('mail queue timeout')), 3000));
-  Promise.race([sendEmail(to, subject, html), timeout]).catch((error) =>
-    console.error(`[Enquiry] Could not queue email to ${to}:`, error.message)
+  sendEmail(to, subject, html, { replyTo }).catch((error) =>
+    console.error(`[Enquiry] Could not send email to ${to}:`, error.message)
   );
 };
 
@@ -63,7 +62,8 @@ exports.createEnquiry = async (req, res) => {
       `<p>Hi ${escapeHtml(name)},</p>
        <p>Thank you for contacting ${escapeHtml(storeName)}. We've received your enquiry and will respond within 1 business day.</p>
        <p><strong>Subject:</strong> ${escapeHtml(subject)}<br><strong>Topic:</strong> ${escapeHtml(categoryLabel)}</p>
-       <p>Warm regards,<br>The Jayam team</p>`
+       <p>Warm regards,<br>The Jayam team</p>`,
+      process.env.SUPPORT_EMAIL || undefined
     );
 
     // 2. Notification to the Jayam support inbox
@@ -77,7 +77,8 @@ exports.createEnquiry = async (req, res) => {
        <strong>Category:</strong> ${escapeHtml(categoryLabel)}<br>
        ${orderNumber ? `<strong>Order number:</strong> ${escapeHtml(orderNumber)}<br>` : ''}
        <strong>Subject:</strong> ${escapeHtml(subject)}</p>
-       <p style="white-space:pre-wrap">${escapeHtml(message)}</p>`
+       <p style="white-space:pre-wrap">${escapeHtml(message)}</p>`,
+      email
     );
 
     res.status(201).json({

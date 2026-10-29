@@ -4,6 +4,7 @@ import axios from 'axios';
 import { Bean, Droplet, Eye, Feather, Flower2, House, Leaf, Sprout, Sunrise, Wind } from 'lucide-react';
 import StoryJourney from '../components/story/StoryJourney';
 import useScrollReveal from '../lib/useScrollReveal';
+import usePageMeta from '../lib/usePageMeta';
 
 const principles = [
   { icon: Feather, text: 'Simple, clean products' },
@@ -25,6 +26,7 @@ const plantParts = [
 ];
 
 export default function OurStoryPage() {
+  usePageMeta({ title: 'Our Story', description: 'Jayam began with a simple belief: the things we choose for our health should be chosen with care. Discover the moringa tree behind every Jayam product.' });
   const [products, setProducts] = useState([]);
 
   useEffect(() => {

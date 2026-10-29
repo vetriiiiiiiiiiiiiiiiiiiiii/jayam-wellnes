@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { MessageCircle, Truck } from 'lucide-react';
@@ -13,6 +13,7 @@ import { useCart } from '../components/storefront/CartProvider';
 import { useSiteContent } from '../lib/content';
 import { CATEGORY_LABELS, FREE_SHIPPING_THRESHOLD, formatPrice } from '../lib/store';
 import useScrollReveal from '../lib/useScrollReveal';
+import usePageMeta from '../lib/usePageMeta';
 
 // Quick-glance trust points, taken from the product information Jayam supplied
 const TRUST_POINTS = {
@@ -60,6 +61,40 @@ export default function ProductPage() {
   }, [slug]);
 
   useScrollReveal([product?.id, others.length, stories]);
+
+  // Search and share previews, with Product structured data (price and stock)
+  const meta = useMemo(() => {
+    if (!product) return { title: 'Product' };
+    const image = product.images?.[0]?.url;
+    return {
+      title: product.name.replace(/^Organic\s+/i, ''),
+      description: product.shortDescription || product.tagline || undefined,
+      image,
+      jsonLd: {
+        '@context': 'https://schema.org',
+        '@type': 'Product',
+        name: product.name,
+        description: product.shortDescription || product.description?.slice(0, 300),
+        ...(image && { image }),
+        brand: { '@type': 'Brand', name: 'Jayam Wellness' },
+        offers: {
+          '@type': 'Offer',
+          priceCurrency: 'USD',
+          price: product.price,
+          availability: product.stockQuantity > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+          url: window.location.href.split('#')[0],
+        },
+        ...(product.reviews?.length > 0 && {
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: (product.reviews.reduce((sum, review) => sum + review.rating, 0) / product.reviews.length).toFixed(1),
+            reviewCount: product.reviews.length,
+          },
+        }),
+      },
+    };
+  }, [product]);
+  usePageMeta(meta);
 
   if (loading) {
     return <main className="pg pp-loading" aria-busy="true"><p className="pg-note">Loading…</p></main>;

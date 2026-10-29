@@ -13,8 +13,9 @@ const PRODUCTS = [
 
 const HELP = [
   { label: 'FAQ', to: '/faq' },
-  { label: 'Shipping & delivery', to: '/faq#shipping' },
+  { label: 'Shipping & returns', to: '/shipping-returns' },
   { label: 'Track your order', to: '/track-order' },
+  { label: 'Your account', to: '/account' },
   { label: 'Contact us', to: '/contact' },
 ];
 
@@ -57,7 +58,12 @@ export default function Footer() {
 
         <div className="af-bottom">
           <span>Copyright © {currentYear} Jayam Wellness. All rights reserved.</span>
-          <span>United States</span>
+          <span className="af-legal">
+            <Link to="/privacy">Privacy Policy</Link>
+            <Link to="/terms">Terms of Sale</Link>
+            <Link to="/shipping-returns">Shipping &amp; Returns</Link>
+            <span>United States</span>
+          </span>
         </div>
       </div>
     </footer>

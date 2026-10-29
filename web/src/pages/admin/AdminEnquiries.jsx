@@ -1,118 +1,111 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { getAdminEnquiries, updateAdminEnquiryStatus } from '../../services/api';
+import { useCallback, useEffect, useState } from 'react';
+import { Reply } from 'lucide-react';
+import { adminApi, formatDateTime } from '../../lib/adminApi';
 import { ENQUIRY_CATEGORIES } from '../../lib/store';
+import { Drawer, useNotice } from './adminBits';
 
 const categoryLabel = (value) => ENQUIRY_CATEGORIES.find((category) => category.value === value)?.label || value;
-const STATUSES = ['NEW', 'RESPONDED', 'CLOSED'];
+const STATUSES = [
+  { value: '', label: 'All' },
+  { value: 'NEW', label: 'New' },
+  { value: 'RESPONDED', label: 'Replied' },
+  { value: 'CLOSED', label: 'Closed' },
+];
+const TONES = { NEW: 'amber', RESPONDED: 'blue', CLOSED: 'grey' };
 
 export default function AdminEnquiries() {
-  const [enquiries, setEnquiries] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('');
-  const [selected, setSelected] = useState(null);
+  const [filter, setFilter] = useState('NEW');
+  const [enquiries, setEnquiries] = useState(null);
+  const [error, setError] = useState('');
+  const [open, setOpen] = useState(null);
+  const [notice, notify] = useNotice();
 
-  const fetchEnquiries = async () => {
-    setLoading(true);
-    const res = await getAdminEnquiries(filter);
-    if (res.success) setEnquiries(res.data);
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    fetchEnquiries();
+  const load = useCallback(() => {
+    adminApi.enquiries(filter).then((result) => (result.ok ? setEnquiries(result.data.data) : setError(result.message)));
   }, [filter]);
+  useEffect(load, [load]);
 
-  const changeStatus = async (id, status) => {
-    const res = await updateAdminEnquiryStatus(id, status);
-    if (res.success) {
-      setSelected((current) => (current?.id === id ? { ...current, status } : current));
-      fetchEnquiries();
-    }
+  const setStatus = async (enquiry, status) => {
+    const result = await adminApi.updateEnquiry(enquiry.id, status);
+    if (!result.ok) return notify(result.message, 'error');
+    notify('Enquiry updated');
+    setOpen((current) => (current?.id === enquiry.id ? { ...current, status } : current));
+    load();
   };
+
+  if (error) return <p className="ad-error">{error}</p>;
 
   return (
-    <div className="p-8 max-w-7xl mx-auto pt-32 min-h-screen flex gap-8">
-      <div className="w-64 flex-shrink-0 border-r border-gray-200 pr-8">
-        <h2 className="text-2xl font-serif text-brand-forest-700 mb-8">Admin</h2>
-        <nav className="space-y-4">
-          <Link to="/admin" className="block text-gray-500 hover:text-brand-dark transition-colors">Dashboard</Link>
-          <Link to="/admin/orders" className="block text-gray-500 hover:text-brand-dark transition-colors">Orders</Link>
-          <Link to="/admin/products" className="block text-gray-500 hover:text-brand-dark transition-colors">Products</Link>
-          <Link to="/admin/users" className="block text-gray-500 hover:text-brand-dark transition-colors">Users</Link>
-          <Link to="/admin/reviews" className="block text-gray-500 hover:text-brand-dark transition-colors">Reviews</Link>
-          <Link to="/admin/enquiries" className="block text-brand-dark font-bold transition-colors">Enquiries</Link>
-          <Link to="/admin/content" className="block text-gray-500 hover:text-brand-dark transition-colors">Site content</Link>
-        </nav>
+    <div className="ad-page">
+      {notice}
+      <div className="ad-head">
+        <div>
+          <h1>Enquiries</h1>
+          <p className="ad-muted">Messages from the contact form. Customers are promised a reply within 1 business day.</p>
+        </div>
       </div>
 
-      <div className="flex-1">
-        <div className="mb-8 flex items-center justify-between">
-          <h1 className="text-3xl font-serif text-gray-900">Customer Enquiries</h1>
-          <select value={filter} onChange={(e) => setFilter(e.target.value)} className="border rounded-lg px-3 py-2 text-sm">
-            <option value="">All</option>
-            {STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}
-          </select>
+      <div className="ad-toolbar">
+        <div className="ad-tabs">
+          {STATUSES.map(({ value, label }) => (
+            <button key={label} type="button" className={filter === value ? 'is-active' : ''} onClick={() => setFilter(value)}>{label}</button>
+          ))}
         </div>
+      </div>
 
-        {loading ? (
-          <p>Loading...</p>
+      <section className="ad-card ad-card--flush">
+        {!enquiries ? (
+          <p className="ad-muted ad-pad">Loading enquiries…</p>
         ) : enquiries.length === 0 ? (
-          <p className="text-gray-500">No enquiries yet.</p>
+          <p className="ad-muted ad-pad">Nothing here{filter === 'NEW' ? ' — you’re all caught up' : ''}.</p>
         ) : (
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
-                <thead className="bg-gray-50/50 border-b border-gray-100">
-                  <tr>
-                    <th className="px-6 py-4 font-medium text-gray-500">Received</th>
-                    <th className="px-6 py-4 font-medium text-gray-500">From</th>
-                    <th className="px-6 py-4 font-medium text-gray-500">Topic</th>
-                    <th className="px-6 py-4 font-medium text-gray-500">Subject</th>
-                    <th className="px-6 py-4 font-medium text-gray-500">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {enquiries.map((enquiry) => (
-                    <tr key={enquiry.id} onClick={() => setSelected(enquiry)} className="hover:bg-gray-50/50 transition-colors cursor-pointer">
-                      <td className="px-6 py-4 text-gray-500 whitespace-nowrap">{new Date(enquiry.createdAt).toLocaleString()}</td>
-                      <td className="px-6 py-4 text-gray-900">{enquiry.name}<div className="text-xs text-gray-500">{enquiry.email}</div></td>
-                      <td className="px-6 py-4 text-gray-500">{categoryLabel(enquiry.category)}</td>
-                      <td className="px-6 py-4 text-gray-900">{enquiry.subject}</td>
-                      <td className="px-6 py-4">
-                        <span className={`px-2 py-1 rounded text-xs font-semibold ${enquiry.status === 'NEW' ? 'bg-amber-100 text-amber-800' : enquiry.status === 'RESPONDED' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>{enquiry.status}</span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {selected && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[200]" onClick={() => setSelected(null)}>
-          <div className="bg-white rounded-lg p-8 max-w-2xl w-full max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <p className="text-xs uppercase tracking-wider text-gray-500 mb-2">{categoryLabel(selected.category)} · {new Date(selected.createdAt).toLocaleString()}</p>
-            <h2 className="text-2xl font-serif mb-4">{selected.subject}</h2>
-            <dl className="grid grid-cols-[120px_1fr] gap-y-2 text-sm mb-6">
-              <dt className="text-gray-500">Name</dt><dd>{selected.name}</dd>
-              <dt className="text-gray-500">Email</dt><dd><a className="underline" href={`mailto:${selected.email}?subject=${encodeURIComponent(`Re: ${selected.subject}`)}`}>{selected.email}</a></dd>
-              {selected.phone && <><dt className="text-gray-500">Phone</dt><dd>{selected.phone}</dd></>}
-              {selected.orderNumber && <><dt className="text-gray-500">Order</dt><dd>{selected.orderNumber}</dd></>}
-            </dl>
-            <p className="whitespace-pre-wrap text-gray-800 leading-relaxed border-t pt-4 mb-6">{selected.message}</p>
-            <div className="flex flex-wrap gap-3">
-              {STATUSES.map((status) => (
-                <button key={status} type="button" disabled={selected.status === status} onClick={() => changeStatus(selected.id, status)} className="px-4 py-2 border rounded text-xs uppercase tracking-wider disabled:bg-gray-900 disabled:text-white">
-                  {status === 'NEW' ? 'Mark new' : status === 'RESPONDED' ? 'Mark responded' : 'Close'}
-                </button>
+          <table className="ad-table ad-table--click">
+            <thead><tr><th>From</th><th>Subject</th><th>Topic</th><th>Status</th><th>Received</th></tr></thead>
+            <tbody>
+              {enquiries.map((enquiry) => (
+                <tr key={enquiry.id} onClick={() => setOpen(enquiry)} tabIndex={0} onKeyDown={(event) => event.key === 'Enter' && setOpen(enquiry)}>
+                  <td><b>{enquiry.name}</b><small>{enquiry.email}</small></td>
+                  <td>{enquiry.subject}</td>
+                  <td>{categoryLabel(enquiry.category)}</td>
+                  <td><span className={`ad-badge ad-badge--${TONES[enquiry.status]}`}>{STATUSES.find((s) => s.value === enquiry.status)?.label}</span></td>
+                  <td>{formatDateTime(enquiry.createdAt)}</td>
+                </tr>
               ))}
-              <button type="button" onClick={() => setSelected(null)} className="ml-auto px-4 py-2 text-xs uppercase tracking-wider text-gray-500">Done</button>
+            </tbody>
+          </table>
+        )}
+      </section>
+
+      {open && (
+        <Drawer title={open.subject} onClose={() => setOpen(null)}>
+          <div className="ad-detail">
+            <div className="ad-row">
+              <span className={`ad-badge ad-badge--${TONES[open.status]}`}>{STATUSES.find((s) => s.value === open.status)?.label}</span>
+              <span className="ad-muted">{categoryLabel(open.category)} · {formatDateTime(open.createdAt)}</span>
+            </div>
+            <section>
+              <h3>From</h3>
+              <p><b>{open.name}</b><br /><a href={`mailto:${open.email}`}>{open.email}</a>{open.phone ? <><br />{open.phone}</> : null}</p>
+              {open.orderNumber && <p className="ad-muted">Order number: <b>{open.orderNumber}</b></p>}
+            </section>
+            <section>
+              <h3>Message</h3>
+              <p className="ad-message">{open.message}</p>
+            </section>
+            <div className="ad-row">
+              <a
+                className="ad-btn"
+                href={`mailto:${open.email}?subject=${encodeURIComponent(`Re: ${open.subject}`)}`}
+                onClick={() => open.status === 'NEW' && setStatus(open, 'RESPONDED')}
+              >
+                <Reply size={16} aria-hidden="true" /> Reply by email
+              </a>
+              {open.status !== 'RESPONDED' && <button type="button" className="ad-btn ad-btn--ghost" onClick={() => setStatus(open, 'RESPONDED')}>Mark replied</button>}
+              {open.status !== 'CLOSED' && <button type="button" className="ad-btn ad-btn--ghost" onClick={() => setStatus(open, 'CLOSED')}>Close</button>}
+              {open.status !== 'NEW' && <button type="button" className="ad-btn ad-btn--ghost" onClick={() => setStatus(open, 'NEW')}>Reopen</button>}
             </div>
           </div>
-        </div>
+        </Drawer>
       )}
     </div>
   );

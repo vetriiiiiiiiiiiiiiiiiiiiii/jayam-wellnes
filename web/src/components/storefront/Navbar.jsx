@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, Search, ShoppingBag, X } from 'lucide-react';
+import { Menu, Search, ShoppingBag, User, X } from 'lucide-react';
 import CartDrawer from './CartDrawer';
 import { useCart } from './CartProvider';
+import { useAuth } from '../../lib/auth';
 
 const LINKS = [
   { label: 'Shop', to: '/shop' },
@@ -23,6 +24,7 @@ export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { cartCount } = useCart();
+  const { user } = useAuth();
 
   useEffect(() => {
     const openCart = () => setCartOpen(true);
@@ -91,6 +93,11 @@ export default function Navbar() {
             <button type="button" className="an-icon" aria-label="Search products" aria-expanded={searchOpen} onClick={() => setSearchOpen((open) => !open)}>
               <Search size={18} strokeWidth={1.7} />
             </button>
+            <Link to={user ? (user.role === 'admin' ? '/admin' : '/account') : '/login'} className="an-icon an-account" aria-label={user ? 'Your account' : 'Sign in'}>
+              {user?.profilePicture
+                ? <img src={user.profilePicture} alt="" className="an-avatar" referrerPolicy="no-referrer" />
+                : <User size={18} strokeWidth={1.7} />}
+            </Link>
             <button type="button" className="an-icon an-bag" aria-label={`Open bag, ${cartCount} items`} onClick={() => setCartOpen(true)}>
               <ShoppingBag size={18} strokeWidth={1.7} />
               {cartCount > 0 && <span className="an-bag-count">{cartCount}</span>}
@@ -123,6 +130,9 @@ export default function Navbar() {
             {LINKS.map(({ label, to }) => (
               <li key={to}><Link to={to}>{label}</Link></li>
             ))}
+            <li className="an-sheet-account">
+              <Link to={user ? (user.role === 'admin' ? '/admin' : '/account') : '/login'}>{user ? (user.role === 'admin' ? 'Store dashboard' : 'Your account') : 'Sign in'}</Link>
+            </li>
           </ul>
         </div>
       )}

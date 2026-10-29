@@ -1921,3 +1921,254 @@
   .at--feature { min-height: 540px; }
   .at--feature .at-art { width: min(64%, 260px); }
 }
+
+/* ---------- Route loading ---------- */
+.route-loading {
+  min-height: 70vh;
+}
+
+/* ---------- Sign in, create account, password ---------- */
+.au {
+  display: grid;
+  place-items: start center;
+  padding-bottom: 100px;
+  background: radial-gradient(circle at 50% 0%, var(--mist) 0%, rgba(224, 236, 222, 0) 55%), var(--white);
+}
+
+.au-card {
+  display: grid;
+  gap: 14px;
+  width: min(100% - 32px, 460px);
+  border-radius: 28px;
+  background: var(--white);
+  padding: 36px 32px 28px;
+  box-shadow: 0 0 0 1px var(--mist), 0 40px 80px -50px rgba(44, 105, 117, 0.55);
+  text-align: center;
+}
+
+.au-seal {
+  display: grid;
+  width: 72px;
+  height: 72px;
+  place-items: center;
+  margin: 0 auto 4px;
+  border-radius: 50%;
+  background: var(--white);
+  box-shadow: 0 0 0 1px var(--mist), 0 12px 24px -14px rgba(44, 105, 117, 0.6);
+}
+
+.au-seal img {
+  width: 64px;
+  height: 64px;
+}
+
+.au-card h1 {
+  margin: 0;
+  color: var(--teal);
+  font: 750 30px / 1.1 var(--display);
+  letter-spacing: -0.03em;
+}
+
+.au-sub {
+  margin: -4px 0 6px;
+  color: var(--muted);
+  font: 400 15px / 1.5 var(--sans);
+}
+
+.au-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px solid #cde0c9;
+  border-radius: 980px;
+  background: var(--white);
+  padding: 12px 18px;
+  color: var(--teal);
+  font: 600 15px var(--sans);
+  text-decoration: none;
+  transition: background 150ms ease, border-color 150ms ease;
+}
+
+.au-google:hover {
+  border-color: var(--sea);
+  background: #f6faf5;
+}
+
+.au-or {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 2px 0;
+  color: var(--muted);
+  font: 500 12px var(--sans);
+}
+
+.au-or::before,
+.au-or::after {
+  flex: 1;
+  height: 1px;
+  background: var(--mist);
+  content: '';
+}
+
+.au-form {
+  display: grid;
+  gap: 14px;
+  text-align: left;
+}
+
+.au-label-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.au-label-row a,
+.au-foot a,
+.au-note a {
+  color: var(--teal);
+  font-weight: 600;
+}
+
+.au-note {
+  margin: 0;
+  color: var(--muted);
+  font: 400 13px / 1.5 var(--sans);
+}
+
+.au-note--left {
+  margin-top: -6px;
+  text-align: left;
+}
+
+.au-foot {
+  border-top: 1px solid var(--mist);
+  padding-top: 16px;
+  color: var(--muted);
+  font: 400 14px var(--sans);
+}
+
+.au-done {
+  margin: 0;
+  border-radius: 14px;
+  background: var(--mist);
+  padding: 16px;
+  color: var(--teal);
+  font: 500 15px / 1.5 var(--sans);
+}
+
+/* ---------- Account ---------- */
+.ac {
+  padding-bottom: 110px;
+}
+
+.ac .ap-pill {
+  gap: 8px;
+}
+
+.ac-orders {
+  max-width: 860px;
+  margin: 72px auto 0;
+  padding: 0 22px;
+}
+
+.ac-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ac-order {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: 18px;
+  border-radius: 20px;
+  background: var(--surface);
+  padding: 18px 22px;
+}
+
+.ac-number {
+  margin: 0;
+  color: var(--teal);
+  font: 700 16px var(--display);
+}
+
+.ac-status {
+  border-radius: 980px;
+  background: var(--white);
+  padding: 4px 12px;
+  color: var(--teal);
+  font: 600 12.5px var(--sans);
+}
+
+.ac-status--delivered { background: var(--teal); color: var(--white); }
+.ac-status--cancelled { background: #fbe5e1; color: #a33a2a; }
+
+@media (max-width: 640px) {
+  .au-card { padding: 28px 22px 22px; }
+  .ac-order { grid-template-columns: 1fr auto; row-gap: 8px; }
+}
+
+/* ---------- Legal and policy pages ---------- */
+.lg {
+  padding-bottom: 100px;
+}
+
+.lg-body {
+  max-width: 760px;
+  margin: 56px auto 0;
+  padding: 0 22px;
+}
+
+.lg-body section {
+  border-top: 1px solid var(--mist);
+  padding: 26px 0;
+}
+
+.lg-body h2 {
+  margin: 0 0 10px;
+  color: var(--teal);
+  font: 700 22px / 1.25 var(--display);
+  letter-spacing: -0.015em;
+}
+
+.lg-body p,
+.lg-body li {
+  color: var(--muted);
+  font: 400 16px / 1.65 var(--sans);
+}
+
+.lg-body p {
+  margin: 0 0 10px;
+}
+
+.lg-body ul {
+  margin: 0 0 10px;
+  padding-left: 20px;
+}
+
+.lg-body b {
+  color: var(--teal);
+}
+
+.lg-body a {
+  color: var(--teal);
+  font-weight: 600;
+}
+
+.lg-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 22px;
+  margin-top: 24px;
+}
+
+.lg-nav a {
+  color: var(--teal);
+  font: 600 14px var(--sans);
+}

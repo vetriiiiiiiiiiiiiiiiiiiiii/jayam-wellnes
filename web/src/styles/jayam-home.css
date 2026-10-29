@@ -1105,3 +1105,26 @@
 .od-card--sage:has(.od-scene--photo) { --od-bg: #e3ecd9; background: #e3ecd9; }
 .od-card--teal:has(.od-scene--photo) { --od-bg: #24494a; background: #24494a; }
 .od-card--cream:has(.od-scene--photo) { --od-bg: #f3ece2; background: #f3ece2; }
+
+.an-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* Phones: the account link moves into the menu sheet so the centred logo has room */
+@media (max-width: 860px) {
+  .an-account { display: none; }
+}
+
+.an-sheet-account {
+  margin-top: 12px;
+  border-top: 1px solid var(--mist);
+  padding-top: 12px;
+}
+
+.an-sheet-account a {
+  color: var(--sea) !important;
+  font-size: 22px !important;
+}

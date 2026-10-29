@@ -71,16 +71,14 @@ const deliveredEmail = (order) => ({
     <p>${button(trackOrderUrl(order), 'View your order')}${button(receiptUrl(order), 'View receipt')}</p>`),
 });
 
-// Queue an email without holding up the caller: BullMQ needs Redis, and without it
-// queue.add() waits indefinitely, so give up after a few seconds and log it.
-const queueOrderEmail = async (kind, { subject, html }, order) => {
-  const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('mail queue timeout (is Redis running?)')), 3000));
+// Send an order email; a failure is logged and never blocks the order itself
+const sendOrderEmail = async (kind, { subject, html }, order) => {
   try {
-    await Promise.race([sendEmail(order.email, subject, html), timeout]);
-    console.log(`[OrderEmail] Queued ${kind} email for ${order.orderNumber}`);
-    return true;
+    const result = await sendEmail(order.email, subject, html, { replyTo: process.env.SUPPORT_EMAIL || undefined });
+    console.log(`[OrderEmail] Sent ${kind} email for ${order.orderNumber} via ${result.provider}`);
+    return result.provider !== 'log';
   } catch (error) {
-    console.error(`[OrderEmail] Could not queue ${kind} email for ${order.orderNumber}:`, error.message);
+    console.error(`[OrderEmail] Could not send ${kind} email for ${order.orderNumber}:`, error.message);
     return false;
   }
 };
@@ -88,7 +86,7 @@ const queueOrderEmail = async (kind, { subject, html }, order) => {
 module.exports = {
   escapeHtml,
   money,
-  sendOrderConfirmation: (order) => queueOrderEmail('confirmation', confirmationEmail(order), order),
-  sendShippingNotification: (order) => queueOrderEmail('shipping', shippedEmail(order), order),
-  sendDeliveryNotification: (order) => queueOrderEmail('delivery', deliveredEmail(order), order),
+  sendOrderConfirmation: (order) => sendOrderEmail('confirmation', confirmationEmail(order), order),
+  sendShippingNotification: (order) => sendOrderEmail('shipping', shippedEmail(order), order),
+  sendDeliveryNotification: (order) => sendOrderEmail('delivery', deliveredEmail(order), order),
 };

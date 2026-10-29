@@ -7,10 +7,12 @@ import StoryTeaser from '../components/home/StoryTeaser';
 import FinalCta from '../components/home/FinalCta';
 import useScrollReveal from '../lib/useScrollReveal';
 import { useSiteContent } from '../lib/content';
+import usePageMeta from '../lib/usePageMeta';
 
 // Home flow: hero with the Jayam seal → product showcase → plant to pack → our story → call to action.
 // All text comes from Admin → Site content, falling back to the defaults in lib/content.js.
 function Home() {
+  usePageMeta();
   const [products, setProducts] = useState([]);
   const content = useSiteContent('home');
 

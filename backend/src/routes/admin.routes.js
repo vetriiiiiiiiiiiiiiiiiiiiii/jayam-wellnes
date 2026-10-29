@@ -3,7 +3,12 @@ const multer = require('multer');
 const { protect } = require('../middleware/authMiddleware');
 const adminController = require('../controllers/adminController');
 
-const upload = multer({ dest: 'uploads/temp/' });
+// Uploads land in a temp folder, then are resized to WebP by services/mediaService
+const upload = multer({
+  dest: 'uploads/temp/',
+  limits: { fileSize: 8 * 1024 * 1024, files: 10 },
+  fileFilter: (req, file, cb) => cb(null, /^image\/(jpeg|png|webp|avif|gif)$/.test(file.mimetype)),
+});
 
 const router = express.Router();
 
@@ -21,8 +26,8 @@ router.post('/orders/:id/refund', adminController.refundOrder);
 
 // Product Management
 router.get('/products', adminController.getAllProducts);
-router.post('/products', upload.array('images', 5), adminController.createProduct);
-router.put('/products/:id', upload.array('images', 5), adminController.updateProduct);
+router.post('/products', upload.array('images', 10), adminController.createProduct);
+router.put('/products/:id', upload.array('images', 10), adminController.updateProduct);
 router.delete('/products/:id', adminController.deleteProduct);
 
 // User Management
@@ -45,5 +50,6 @@ router.put('/enquiries/:id', enquiryController.updateEnquiryStatus);
 // Editable storefront text
 const contentController = require('../controllers/contentController');
 router.put('/content/:key', contentController.updateContent);
+router.post('/uploads', upload.single('image'), adminController.uploadContentImage);
 
 module.exports = router;

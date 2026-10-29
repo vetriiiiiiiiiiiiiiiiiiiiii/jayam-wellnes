@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { ImagePlus } from 'lucide-react';
 import { HOME_DEFAULTS, STORY_DEFAULTS, forgetContent, loadContent, mergeContent } from '../../lib/content';
-import { saveSiteContent } from '../../services/api';
+import { adminApi, mediaUrl } from '../../lib/adminApi';
 
 // Admin → Site content: edit the storefront text without touching code.
 // The form is built from the shape of the default content, so every text block
@@ -120,6 +119,7 @@ function Field({ name, template, value, onChange, depth }) {
   }
 
   const text = typeof value === 'string' ? value : '';
+  if (name === 'image') return <ImageField value={text} onChange={onChange} />;
   const long = LONG_FIELDS.includes(name) || String(template).length > 80;
   return (
     <label className="block text-xs font-medium text-gray-600">
@@ -131,29 +131,56 @@ function Field({ name, template, value, onChange, depth }) {
   );
 }
 
+// A photo field: upload a new image or paste an address; shows a preview
+function ImageField({ value, onChange }) {
+  const input = useRef(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+
+  const upload = async (event) => {
+    const file = event.target.files[0];
+    event.target.value = '';
+    if (!file) return;
+    setBusy(true);
+    setError('');
+    const result = await adminApi.uploadImage(file);
+    setBusy(false);
+    if (result.ok) onChange(result.data.url);
+    else setError(result.message);
+  };
+
+  return (
+    <div className="ad-field">
+      <span>Photo <small>— leave empty to show the illustration</small></span>
+      <div className="ad-photo-field">
+        <span className="ad-photo-preview">{value ? <img src={mediaUrl(value)} alt="" /> : <small>No photo</small>}</span>
+        <div className="ad-stack">
+          <input className={inputClass} value={value} placeholder="/difference/photo.jpg or https://…" onChange={(event) => onChange(event.target.value)} />
+          <div className="ad-row">
+            <button type="button" className="ad-btn ad-btn--ghost ad-btn--small" disabled={busy} onClick={() => input.current?.click()}>
+              <ImagePlus size={14} aria-hidden="true" /> {busy ? 'Uploading…' : 'Upload photo'}
+            </button>
+            {value && <button type="button" className="ad-link-text" onClick={() => onChange('')}>Remove</button>}
+          </div>
+          {error && <p className="ad-error ad-small">{error}</p>}
+        </div>
+      </div>
+      <input ref={input} type="file" accept="image/jpeg,image/png,image/webp,image/avif" hidden onChange={upload} />
+    </div>
+  );
+}
+
 const TABS = [
   { key: 'home', label: 'Home page', defaults: HOME_DEFAULTS },
   { key: 'product-stories', label: 'Product stories', defaults: STORY_DEFAULTS },
 ];
 
 export default function AdminContent() {
-  const navigate = useNavigate();
   const [tab, setTab] = useState('home');
   const [values, setValues] = useState({});
   const [section, setSection] = useState('hero');
   const [status, setStatus] = useState('');
   const [saving, setSaving] = useState(false);
-  const [allowed, setAllowed] = useState(null);
-
-  // Same access check as the rest of the dashboard
-  useEffect(() => {
-    axios.get(`${import.meta.env.VITE_API_URL}/api/admin/dashboard`, { withCredentials: true })
-      .then(() => setAllowed(true))
-      .catch((error) => {
-        if ([401, 403].includes(error.response?.status)) navigate('/account');
-        else setAllowed(true);
-      });
-  }, [navigate]);
 
   useEffect(() => {
     TABS.forEach(({ key, defaults }) => {
@@ -184,34 +211,20 @@ export default function AdminContent() {
 
   const save = async () => {
     setSaving(true);
-    const result = await saveSiteContent(tab, value);
+    const result = await adminApi.saveContent(tab, value);
     setSaving(false);
-    if (result.success) {
+    if (result.ok) {
       forgetContent(tab);
-      setStatus(`Saved ${new Date(result.updatedAt).toLocaleTimeString()}`);
+      setStatus(`Saved ${new Date(result.data.updatedAt).toLocaleTimeString()}`);
     } else {
       setStatus(result.message);
     }
   };
 
-  if (!allowed || !value) return <div className="min-h-screen p-8 pt-32 text-center">Loading content…</div>;
+  if (!value) return <p className="ad-muted">Loading content…</p>;
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-7xl gap-8 p-8 pt-32">
-      <div className="w-64 flex-shrink-0 border-r border-gray-200 pr-8">
-        <h2 className="mb-8 text-2xl font-serif text-brand-forest-700">Admin</h2>
-        <nav className="space-y-4">
-          <Link to="/admin" className="block text-gray-500 transition-colors hover:text-brand-dark">Dashboard</Link>
-          <Link to="/admin/orders" className="block text-gray-500 transition-colors hover:text-brand-dark">Orders</Link>
-          <Link to="/admin/products" className="block text-gray-500 transition-colors hover:text-brand-dark">Products</Link>
-          <Link to="/admin/users" className="block text-gray-500 transition-colors hover:text-brand-dark">Users</Link>
-          <Link to="/admin/reviews" className="block text-gray-500 transition-colors hover:text-brand-dark">Reviews</Link>
-          <Link to="/admin/enquiries" className="block text-gray-500 transition-colors hover:text-brand-dark">Enquiries</Link>
-          <Link to="/admin/content" className="block font-bold text-brand-dark transition-colors">Site content</Link>
-        </nav>
-      </div>
-
-      <div className="flex-1">
+    <div className="ad-page">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-serif text-gray-900">Site content</h1>
@@ -272,7 +285,6 @@ export default function AdminContent() {
             </p>
           </div>
         </div>
-      </div>
     </div>
   );
 }

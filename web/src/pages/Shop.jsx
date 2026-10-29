@@ -7,6 +7,7 @@ import ProductArt from '../components/storefront/ProductArt';
 import FilterSidebar from '../components/storefront/FilterSidebar';
 import PageHead from '../components/storefront/PageHead';
 import { CATEGORY_LABELS, FREE_SHIPPING_THRESHOLD } from '../lib/store';
+import usePageMeta from '../lib/usePageMeta';
 
 const DIFFERENCE = [
   { icon: Truck, tone: 'fern', title: 'Free U.S. shipping', body: `On every order of $${FREE_SHIPPING_THRESHOLD} and above. Delivered in 2–7 business days.` },
@@ -16,6 +17,7 @@ const DIFFERENCE = [
 ];
 
 export default function ShopPage() {
+  usePageMeta({ title: 'Shop', description: 'Shop organic Moringa leaf, flower and seed supplements and Beauty Drops facial oil. Vegan, Non-GMO, third-party tested. Free U.S. shipping on orders $49+.' });
   const [products, setProducts] = useState([]);
   const [lineup, setLineup] = useState([]);
   const [loading, setLoading] = useState(true);

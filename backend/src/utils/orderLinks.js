@@ -1,4 +1,5 @@
 // Customer-facing links for an order (tracking page, carrier tracking, receipt)
+const { mediaUrl } = require('./serialize');
 
 const CARRIERS = {
   USPS: { name: 'USPS', trackingUrl: (number) => `https://tools.usps.com/go/TrackConfirmAction?tLabels=${encodeURIComponent(number)}` },
@@ -31,7 +32,7 @@ const publicOrder = (order) => ({
   trackingNumber: order.trackingNumber,
   trackingUrl: carrierTrackingUrl(order.carrier, order.trackingNumber),
   address: order.address,
-  items: (order.items || []).map(({ name, variantName, image, quantity, price }) => ({ name, variantName, image, quantity, price })),
+  items: (order.items || []).map(({ name, variantName, image, quantity, price }) => ({ name, variantName, image: mediaUrl(image), quantity, price })),
   subtotal: order.subtotal,
   shippingFee: order.shippingFee,
   total: order.total,

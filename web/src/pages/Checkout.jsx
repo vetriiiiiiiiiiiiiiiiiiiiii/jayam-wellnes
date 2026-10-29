@@ -5,8 +5,10 @@ import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-
 import { useCart } from '../components/storefront/CartProvider';
 import PageHead from '../components/storefront/PageHead';
 import ItemThumb from '../components/storefront/ItemThumb';
+import { useAuth } from '../lib/auth';
 import { createOrder } from '../services/api';
 import { FREE_SHIPPING_THRESHOLD, US_STATES, formatPrice, shippingFor } from '../lib/store';
+import usePageMeta from '../lib/usePageMeta';
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
 const stripePromise = publishableKey ? loadStripe(publishableKey) : null;
@@ -96,7 +98,9 @@ function PaymentStep({ order, total, details, onEdit }) {
 }
 
 export default function CheckoutPage() {
+  usePageMeta({ title: 'Checkout', noindex: true });
   const { cart, cartTotal, cartCount } = useCart();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [details, setDetails] = useState(null);
@@ -164,7 +168,8 @@ export default function CheckoutPage() {
     );
   }
 
-  const value = (name) => details?.[name] ?? '';
+  // Signed-in customers start with their name and email filled in
+  const value = (name) => details?.[name] ?? ({ email: user?.email, name: user?.fullname }[name] || '');
   const addressValue = (name) => details?.address?.[name] ?? '';
 
   return (

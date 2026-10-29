@@ -1,63 +1,52 @@
 const express = require("express");
-const router = express.Router();
 const passport = require("passport");
 const generateTokenAndSetCookie = require("../utils/generateToken");
 const { protect } = require("../middleware/authMiddleware");
+const { googleConfigured } = require("../config/passport");
 const {
   Login,
   Signup,
   Logout,
   Me,
+  Providers,
+  forgotPassword,
   resetPassword,
-  GoogleOneTap
+  GoogleOneTap,
 } = require("../controllers/authControllers");
 
-// ==============================================
-// 1. MANUAL AUTH ROUTES
-// ==============================================
+const router = express.Router();
+const frontendUrl = () => (process.env.FRONTEND_URL || process.env.CLIENT_URL || "http://localhost:5173").replace(/\/$/, "");
+
+// Email and password
 router.post("/signup", Signup);
 router.post("/login", Login);
 router.get("/logout", Logout);
+router.post("/logout", Logout);
 router.get("/me", protect(), Me);
+router.get("/providers", Providers);
+router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
 
-// ==============================================
-// 2. GOOGLE OAUTH ROUTES (Standard Redirect)
-// ==============================================
+// "Continue with Google" — redirect flow
+router.get("/google", (req, res, next) => {
+  if (!googleConfigured()) return res.redirect(`${frontendUrl()}/login?error=google-unavailable`);
+  passport.authenticate("google", { session: false, scope: ["profile", "email"], prompt: "select_account" })(req, res, next);
+});
 
-// A. Trigger Route
-router.get(
-  "/google",
-  passport.authenticate("google", {
-    session: false,
-    scope: ["profile", "email"],
-  })
-);
-
-// B. Callback Route
 router.get(
   "/google/callback",
-  passport.authenticate("google", {
-    session: false,
-    failureRedirect: `${process.env.FRONTEND_URL || process.env.CLIENT_URL || 'http://localhost:5173'}/login`,
-  }),
+  (req, res, next) => {
+    if (!googleConfigured()) return res.redirect(`${frontendUrl()}/login?error=google-unavailable`);
+    passport.authenticate("google", { session: false, failureRedirect: `${frontendUrl()}/login?error=google` })(req, res, next);
+  },
   (req, res) => {
-    // req.user is populated by Passport strategy
-    console.log("[Auth Backend] Google authentication successful for user:", req.user.email);
-
-    // 1. Use Utility to Set Cookie
     generateTokenAndSetCookie(res, req.user.id);
-    console.log("[Auth Backend] Cookie set for user. Redirecting to frontend.");
-
-    // 2. Redirect to Frontend (Dashboard/Home)
-    const clientUrl = process.env.FRONTEND_URL || process.env.CLIENT_URL || "http://localhost:5173";
-    res.redirect(clientUrl);
+    // Admins land on the dashboard, customers on their account
+    res.redirect(`${frontendUrl()}${req.user.role === "admin" ? "/admin" : "/account"}`);
   }
 );
 
-// ==============================================
-// 3. GOOGLE ONE TAP ROUTE (Popup/No-Redirect)
-// ==============================================
+// Google One Tap
 router.post("/google/onetap", GoogleOneTap);
 
 module.exports = router;

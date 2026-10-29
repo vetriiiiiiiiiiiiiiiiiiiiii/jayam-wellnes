@@ -1,290 +1,210 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
-import { adminUpdateOrderStatus } from '../../services/api';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { ExternalLink, Search } from 'lucide-react';
+import { adminApi, formatDateTime } from '../../lib/adminApi';
 import { formatPrice } from '../../lib/store';
+import { Drawer, OrderBadge, PaymentBadge, useNotice } from './adminBits';
 
-export default function AdminOrders() {
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedOrder, setSelectedOrder] = useState(null);
-  const [savingShipment, setSavingShipment] = useState(false);
-  const navigate = useNavigate();
+const base = (import.meta.env.VITE_API_URL || '').replace(/\/api\/?$/, '').replace(/\/$/, '');
+const receiptUrl = (order) => `${base}/api/orders/${encodeURIComponent(order.orderNumber)}/receipt?token=${encodeURIComponent(order.accessToken)}`;
 
-  const fetchOrders = async () => {
-    try {
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/orders/all`, {
-        withCredentials: true
-      });
-      if (res.data.success) {
-        setOrders(res.data.data);
-      }
-    } catch (err) {
-      if (err.response?.status === 403 || err.response?.status === 401) {
-        navigate('/account');
-      }
-    } finally {
-      setLoading(false);
-    }
+const VIEWS = [
+  { id: 'all', label: 'All', test: () => true },
+  { id: 'to-ship', label: 'To ship', test: (o) => o.paymentStatus === 'PAID' && o.status === 'PROCESSING' },
+  { id: 'shipped', label: 'Shipped', test: (o) => o.status === 'SHIPPED' },
+  { id: 'delivered', label: 'Delivered', test: (o) => o.status === 'DELIVERED' },
+  { id: 'unpaid', label: 'Unpaid', test: (o) => o.paymentStatus === 'PENDING' && o.status === 'PENDING' },
+  { id: 'cancelled', label: 'Cancelled', test: (o) => o.status === 'CANCELLED' },
+];
+
+function OrderDetail({ order, onChanged, notify }) {
+  const [busy, setBusy] = useState(false);
+  const address = order.address || {};
+  const paid = order.paymentStatus === 'PAID';
+
+  const update = async (body, message) => {
+    setBusy(true);
+    const result = await adminApi.updateOrder(order.id, body);
+    setBusy(false);
+    if (!result.ok) return notify(result.message, 'error');
+    notify(result.data.emailQueued ? `${message} — the customer has been emailed` : message);
+    onChanged(result.data.order);
   };
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
-  const handleStatusUpdate = async (orderId, newStatus) => {
-    try {
-      const res = await adminUpdateOrderStatus(orderId, newStatus);
-      if (res.success) {
-        fetchOrders();
-        if (selectedOrder?.id === orderId) {
-          setSelectedOrder(res.order);
-        }
-      } else {
-        alert(res.message || 'Failed to update status');
-      }
-    } catch (error) {
-      alert('Failed to update status');
-    }
-  };
-
-  const handleShipment = async (event) => {
+  const saveTracking = (event) => {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    const shipment = { carrier: form.get('carrier'), trackingNumber: String(form.get('trackingNumber') || '').trim() };
-    if (!shipment.carrier || !shipment.trackingNumber) return;
-    setSavingShipment(true);
-    const res = await adminUpdateOrderStatus(selectedOrder.id, null, shipment);
-    setSavingShipment(false);
-    if (res.success) {
-      setSelectedOrder(res.order);
-      fetchOrders();
-    } else {
-      alert(res.message || 'Failed to save tracking details');
-    }
+    update({ carrier: form.get('carrier'), trackingNumber: String(form.get('trackingNumber')).trim() }, 'Tracking saved and order marked as shipped');
   };
 
-  const handleRefund = async (orderId) => {
-    if (!window.confirm("Are you sure you want to cancel and refund this order?")) return;
-    try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/admin/orders/${orderId}/refund`, {}, {
-        withCredentials: true
-      });
-      if (res.data.success) {
-        alert('Order refunded successfully');
-        fetchOrders();
-        setSelectedOrder(null);
-      }
-    } catch (error) {
-      alert(error.response?.data?.message || 'Failed to refund order');
-    }
+  const cancel = async () => {
+    const question = paid
+      ? `Cancel ${order.orderNumber} and refund ${formatPrice(order.total)} to the customer?`
+      : `Cancel ${order.orderNumber}?`;
+    if (!window.confirm(question)) return;
+    setBusy(true);
+    const result = await adminApi.refundOrder(order.id);
+    setBusy(false);
+    if (!result.ok) return notify(result.message, 'error');
+    notify(result.data.message);
+    onChanged({ ...order, status: 'CANCELLED', paymentStatus: paid ? 'REFUNDED' : order.paymentStatus });
   };
-
-  if (loading) return <div className="p-8 text-center pt-32 min-h-screen">Loading orders...</div>;
 
   return (
-    <div className="p-8 max-w-7xl mx-auto pt-32 min-h-screen flex gap-8">
-      
-      {/* Sidebar for navigation */}
-      <div className="w-64 flex-shrink-0 border-r border-gray-200 pr-8">
-         <h2 className="text-2xl font-serif text-brand-forest-700 mb-8">Admin</h2>
-         <nav className="space-y-4">
-            <Link to="/admin" className="block text-gray-500 hover:text-brand-dark transition-colors">Dashboard</Link>
-            <Link to="/admin/orders" className="block text-brand-dark font-bold transition-colors">Orders</Link>
-            <Link to="/admin/products" className="block text-gray-500 hover:text-brand-dark transition-colors">Products</Link>
-            <Link to="/admin/users" className="block text-gray-500 hover:text-brand-dark transition-colors">Users</Link>
-            <Link to="/admin/reviews" className="block text-gray-500 hover:text-brand-dark transition-colors">Reviews</Link>
-            <Link to="/admin/enquiries" className="block text-gray-500 hover:text-brand-dark transition-colors">Enquiries</Link>
-            <Link to="/admin/content" className="block text-gray-500 hover:text-brand-dark transition-colors">Site content</Link>
-         </nav>
+    <div className="ad-detail">
+      <div className="ad-row">
+        <OrderBadge status={order.status} />
+        <PaymentBadge status={order.paymentStatus} />
+        <span className="ad-muted">Placed {formatDateTime(order.createdAt)}</span>
       </div>
 
-      <div className="flex-1">
-        <h1 className="text-3xl font-serif text-gray-900 mb-8">Manage Orders</h1>
+      <section>
+        <h3>Customer</h3>
+        <p><b>{order.name}</b><br /><a href={`mailto:${order.email}`}>{order.email}</a>{order.phone ? <><br />{order.phone}</> : null}</p>
+        <p className="ad-muted">
+          {address.street}{address.street2 ? `, ${address.street2}` : ''}<br />
+          {address.city}, {address.state} {address.zipCode}<br />
+          {address.country || 'United States'}
+        </p>
+      </section>
 
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden mb-8">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="bg-gray-50/50 border-b border-gray-100">
-                <tr>
-                  <th className="px-6 py-4 font-medium text-gray-500">Order ID</th>
-                  <th className="px-6 py-4 font-medium text-gray-500">Date</th>
-                  <th className="px-6 py-4 font-medium text-gray-500">Customer</th>
-                  <th className="px-6 py-4 font-medium text-gray-500">Total</th>
-                  <th className="px-6 py-4 font-medium text-gray-500">Status</th>
-                  <th className="px-6 py-4 font-medium text-gray-500">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {orders.map((order) => (
-                  <tr key={order.id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-4 font-mono text-gray-600">#{order.orderNumber}</td>
-                    <td className="px-6 py-4 text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</td>
-                    <td className="px-6 py-4 text-gray-900 font-medium">
-                      {order.name}<br/>
-                      <span className="text-xs text-gray-500 font-normal">{order.email}</span>
-                    </td>
-                    <td className="px-6 py-4 text-gray-900 font-medium">{formatPrice(order.total)}</td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
-                        order.status === "PENDING" ? "bg-yellow-50 text-yellow-700 border border-yellow-200" :
-                        order.status === "DELIVERED" ? "bg-green-50 text-green-700 border border-green-200" :
-                        order.status === "CANCELLED" ? "bg-red-50 text-red-700 border border-red-200" :
-                        "bg-blue-50 text-blue-700 border border-blue-200"
-                      }`}>{order.status}</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <button onClick={() => setSelectedOrder(order)} className="text-brand-green-600 font-semibold text-xs uppercase tracking-wider hover:underline">
-                        View Details
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+      <section>
+        <h3>Items</h3>
+        <ul className="ad-lines">
+          {order.items.map((item, index) => (
+            <li key={index}>
+              <span>{item.name}{item.variantName ? ` · ${item.variantName}` : ''} <small>× {item.quantity}</small></span>
+              <b>{formatPrice(item.price * item.quantity)}</b>
+            </li>
+          ))}
+          <li className="ad-lines-sub"><span>Subtotal</span><span>{formatPrice(order.subtotal)}</span></li>
+          <li className="ad-lines-sub"><span>Shipping</span><span>{order.shippingFee ? formatPrice(order.shippingFee) : 'Free'}</span></li>
+          <li className="ad-lines-total"><span>Total</span><b>{formatPrice(order.total)}</b></li>
+        </ul>
+        {(paid || order.paymentStatus === 'REFUNDED') && (
+          <a href={receiptUrl(order)} target="_blank" rel="noreferrer" className="ad-link-text">View receipt <ExternalLink size={13} aria-hidden="true" /></a>
+        )}
+      </section>
 
-      {/* Order Detail Modal */}
-      {selectedOrder && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-8 relative">
-            <button 
-              onClick={() => setSelectedOrder(null)}
-              className="absolute top-6 right-6 text-gray-400 hover:text-gray-900 transition-colors"
-            >
-              ✕
-            </button>
-            <h2 className="text-2xl font-serif mb-6">Order #{selectedOrder.orderNumber}</h2>
-            
-            <div className="grid grid-cols-2 gap-8 mb-8">
-              <div>
-                <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 mb-2">Customer Details</h3>
-                <p className="text-gray-900 font-medium">{selectedOrder.name}</p>
-                <p className="text-gray-500 text-sm">{selectedOrder.email}</p>
-              </div>
-              <div>
-                <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 mb-2">Shipping Address</h3>
-                <p className="text-gray-600 text-sm">
-                  {selectedOrder.address.street}<br/>
-                  {selectedOrder.address.city}, {selectedOrder.address.state} {selectedOrder.address.zipCode}<br/>
-                  {selectedOrder.address.country}
-                </p>
-              </div>
-            </div>
-
-            <div className="mb-8">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 mb-2">Transaction History</h3>
-              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 flex flex-col gap-2">
-                 <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-500 font-medium">Payment Method:</span>
-                    <span className="text-gray-900 font-mono">{selectedOrder.paymentMethod || 'STRIPE'}</span>
-                 </div>
-                 <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-500 font-medium">Payment Status:</span>
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
-                      selectedOrder.paymentStatus === 'PAID' ? 'bg-green-100 text-green-700' :
-                      selectedOrder.paymentStatus === 'FAILED' || selectedOrder.paymentStatus === 'REFUNDED' ? 'bg-red-100 text-red-700' :
-                      'bg-yellow-100 text-yellow-700'
-                    }`}>
-                      {selectedOrder.paymentStatus || 'PENDING'}
-                    </span>
-                 </div>
-                 {selectedOrder.stripePaymentIntentId && (
-                   <div className="flex justify-between items-center text-sm">
-                      <span className="text-gray-500 font-medium">Stripe Payment:</span>
-                      <span className="text-gray-900 font-mono text-xs">{selectedOrder.stripePaymentIntentId}</span>
-                   </div>
-                 )}
-              </div>
-            </div>
-
-            <div className="mb-8">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 mb-2">Shipment</h3>
-              {selectedOrder.paymentStatus !== 'PAID' ? (
-                <p className="text-sm text-gray-500">Tracking can be added once the order is paid.</p>
-              ) : (
-                <form key={`${selectedOrder.id}-${selectedOrder.trackingNumber || ''}`} onSubmit={handleShipment} className="bg-gray-50 p-4 rounded-xl border border-gray-100 flex flex-wrap gap-3 items-end">
-                  <label className="text-xs text-gray-500 flex flex-col gap-1">
-                    Carrier
-                    <select name="carrier" defaultValue={selectedOrder.carrier || 'USPS'} className="border border-gray-200 rounded px-2 py-2 text-sm text-gray-900 bg-white">
-                      <option value="USPS">USPS</option>
-                      <option value="UPS">UPS</option>
-                    </select>
-                  </label>
-                  <label className="text-xs text-gray-500 flex flex-col gap-1 flex-1 min-w-[200px]">
-                    Tracking number
-                    <input name="trackingNumber" defaultValue={selectedOrder.trackingNumber || ''} required className="border border-gray-200 rounded px-2 py-2 text-sm text-gray-900 font-mono bg-white" />
-                  </label>
-                  <button type="submit" disabled={savingShipment} className="px-4 py-2 bg-brand-dark text-white rounded text-xs font-bold uppercase tracking-wider disabled:opacity-50">
-                    {savingShipment ? 'Saving…' : selectedOrder.trackingNumber ? 'Update & notify' : 'Mark shipped & email customer'}
-                  </button>
-                  {selectedOrder.trackingNumber && (
-                    <p className="w-full text-xs text-gray-500">Shipped {selectedOrder.shippedAt ? new Date(selectedOrder.shippedAt).toLocaleDateString() : ''} with {selectedOrder.carrier} · {selectedOrder.trackingNumber}</p>
-                  )}
-                </form>
-              )}
-            </div>
-
-            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 mb-4">Items</h3>
-            <div className="space-y-4 mb-8">
-              {selectedOrder.items.map((item, idx) => (
-                <div key={idx} className="flex justify-between items-center bg-gray-50 p-4 rounded-xl border border-gray-100">
-                  <div className="flex items-center gap-4">
-                     {item.productId && item.productId.images && item.productId.images.length > 0 ? (
-                       <img src={item.productId.images[0]} alt={item.productName || item.productId.name} className="w-12 h-12 rounded object-cover" />
-                     ) : item.image ? (
-                       <img src={item.image} alt={item.productName} className="w-12 h-12 rounded object-cover" />
-                     ) : (
-                       <div className="w-12 h-12 rounded bg-gray-200" />
-                     )}
-                     <div>
-                       <p className="font-medium text-gray-900">{item.name || item.productName}{item.variantName ? ` · ${item.variantName}` : ''}</p>
-                       <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
-                     </div>
-                  </div>
-                  <p className="font-mono text-gray-900">{formatPrice(((item.price || (item.productId && item.productId.price) || 0) * item.quantity))}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 pt-6 border-t border-gray-100">
-              <div className="flex flex-wrap gap-2 items-center">
-                 <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 mr-2 self-center">Update Status:</h3>
-                 {['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED'].map(status => (
-                   <button
-                     key={status}
-                     onClick={() => handleStatusUpdate(selectedOrder.id, status)}
-                     disabled={selectedOrder.status === status || selectedOrder.status === 'CANCELLED'}
-                     className={`px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider border transition-colors ${
-                       selectedOrder.status === status ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white border-brand-green-100 text-brand-forest-700 hover:bg-brand-green-50'
-                     }`}
-                   >
-                     {status}
-                   </button>
-                 ))}
-              </div>
-              
-              <div className="flex items-center gap-4 self-end lg:self-auto flex-wrap">
-                 {selectedOrder.status !== 'CANCELLED' && (
-                    <button 
-                      onClick={() => handleRefund(selectedOrder.id)}
-                      className="px-4 py-2 bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 rounded text-xs font-bold uppercase tracking-wider transition-colors"
-                    >
-                      {selectedOrder.paymentStatus === 'PAID' ? 'Cancel & Refund' : 'Cancel Order'}
-                    </button>
-                 )}
-                 <p className="text-xl font-serif font-bold text-brand-forest-700 ml-0 lg:ml-4 whitespace-nowrap">
-                   Total: {formatPrice(selectedOrder.total)}
-                 </p>
-              </div>
-            </div>
-
-          </div>
-        </div>
+      {paid && order.status !== 'CANCELLED' && (
+        <section>
+          <h3>Shipping</h3>
+          {order.trackingNumber && (
+            <p className="ad-muted">Current tracking: <b>{order.carrier} {order.trackingNumber}</b>{order.shippedAt ? ` · shipped ${formatDateTime(order.shippedAt)}` : ''}</p>
+          )}
+          <form className="ad-inline-form" onSubmit={saveTracking}>
+            <select name="carrier" defaultValue={order.carrier || 'USPS'} aria-label="Carrier">
+              <option value="USPS">USPS</option>
+              <option value="UPS">UPS</option>
+            </select>
+            <input name="trackingNumber" placeholder="Tracking number" defaultValue={order.trackingNumber || ''} required aria-label="Tracking number" />
+            <button type="submit" className="ad-btn" disabled={busy}>{order.trackingNumber ? 'Update tracking' : 'Save & mark shipped'}</button>
+          </form>
+          <p className="ad-muted ad-small">Saving tracking emails the customer a shipping notice with the tracking link.</p>
+          {order.status === 'SHIPPED' && (
+            <button type="button" className="ad-btn ad-btn--ghost" disabled={busy} onClick={() => update({ status: 'DELIVERED' }, 'Marked as delivered')}>Mark as delivered</button>
+          )}
+        </section>
       )}
 
+      {order.status !== 'CANCELLED' && (
+        <section className="ad-danger-zone">
+          <h3>Cancel order</h3>
+          <p className="ad-muted ad-small">{paid ? 'Cancelling refunds the full amount through Stripe and returns the items to stock.' : 'The order has not been paid; cancelling releases the reserved stock.'}</p>
+          <button type="button" className="ad-btn ad-btn--danger" disabled={busy} onClick={cancel}>{paid ? 'Cancel and refund' : 'Cancel order'}</button>
+        </section>
+      )}
+    </div>
+  );
+}
+
+export default function AdminOrders() {
+  const [params, setParams] = useSearchParams();
+  const [orders, setOrders] = useState(null);
+  const [error, setError] = useState('');
+  const [query, setQuery] = useState('');
+  const [notice, notify] = useNotice();
+  const view = params.get('view') || 'all';
+  const openId = params.get('open');
+
+  const load = useCallback(() => {
+    adminApi.orders().then((result) => (result.ok ? setOrders(result.data.data) : setError(result.message)));
+  }, []);
+  useEffect(load, [load]);
+
+  const filtered = useMemo(() => {
+    if (!orders) return [];
+    const test = VIEWS.find((item) => item.id === view)?.test || (() => true);
+    const q = query.trim().toLowerCase();
+    return orders.filter(test).filter((order) => !q || [order.orderNumber, order.name, order.email].some((field) => field?.toLowerCase().includes(q)));
+  }, [orders, view, query]);
+
+  const counts = useMemo(() => Object.fromEntries(VIEWS.map(({ id, test }) => [id, (orders || []).filter(test).length])), [orders]);
+  const open = orders?.find((order) => order.id === openId);
+
+  const setParam = (key, value) => {
+    const next = new URLSearchParams(params);
+    if (value) next.set(key, value);
+    else next.delete(key);
+    setParams(next, { replace: true });
+  };
+
+  const changed = (updated) => setOrders((current) => current.map((order) => (order.id === updated.id ? { ...order, ...updated } : order)));
+
+  if (error) return <p className="ad-error">{error}</p>;
+
+  return (
+    <div className="ad-page">
+      {notice}
+      <div className="ad-head">
+        <div>
+          <h1>Orders</h1>
+          <p className="ad-muted">Add tracking to ship an order — the customer is emailed automatically.</p>
+        </div>
+      </div>
+
+      <div className="ad-toolbar">
+        <div className="ad-tabs">
+          {VIEWS.map(({ id, label }) => (
+            <button key={id} type="button" className={view === id ? 'is-active' : ''} onClick={() => setParam('view', id === 'all' ? null : id)}>
+              {label} <span>{counts[id]}</span>
+            </button>
+          ))}
+        </div>
+        <label className="ad-search">
+          <Search size={16} aria-hidden="true" />
+          <input type="search" placeholder="Order number, name or email" value={query} onChange={(event) => setQuery(event.target.value)} aria-label="Search orders" />
+        </label>
+      </div>
+
+      <section className="ad-card ad-card--flush">
+        {!orders ? (
+          <p className="ad-muted ad-pad">Loading orders…</p>
+        ) : filtered.length === 0 ? (
+          <p className="ad-muted ad-pad">{orders.length === 0 ? 'No orders yet.' : 'No orders match this view.'}</p>
+        ) : (
+          <table className="ad-table ad-table--click">
+            <thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Status</th><th className="ad-num">Total</th></tr></thead>
+            <tbody>
+              {filtered.map((order) => (
+                <tr key={order.id} onClick={() => setParam('open', order.id)} tabIndex={0} onKeyDown={(event) => event.key === 'Enter' && setParam('open', order.id)}>
+                  <td><b>{order.orderNumber}</b><small>{formatDateTime(order.createdAt)}</small></td>
+                  <td>{order.name}<small>{order.email}</small></td>
+                  <td>{order.items.reduce((sum, item) => sum + item.quantity, 0)}</td>
+                  <td><OrderBadge status={order.status} /> <PaymentBadge status={order.paymentStatus} /></td>
+                  <td className="ad-num">{formatPrice(order.total)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </section>
+
+      {open && (
+        <Drawer title={`Order ${open.orderNumber}`} onClose={() => setParam('open', null)}>
+          <OrderDetail order={open} onChanged={changed} notify={notify} />
+        </Drawer>
+      )}
     </div>
   );
 }

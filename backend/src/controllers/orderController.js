@@ -10,14 +10,12 @@ const { escapeHtml, money } = require('../services/orderEmails');
 
 class StockError extends Error {}
 
-// Put reserved variant stock back (used when an order cannot be completed)
-const releaseStock = (reservedVariants) =>
-  prisma.$transaction(reservedVariants.map(({ productId, sku, quantity }) =>
-    prisma.productVariant.updateMany({
-      where: { productId, sku },
-      data: { stock: { increment: quantity } }
-    })
-  ));
+// Put reserved stock back (used when an order cannot be completed).
+// Entries with a sku are variant stock; the rest are product-level stock.
+const releaseStock = (reserved) =>
+  prisma.$transaction(reserved.map(({ productId, sku, quantity }) => (sku
+    ? prisma.productVariant.updateMany({ where: { productId, sku }, data: { stock: { increment: quantity } } })
+    : prisma.product.updateMany({ where: { id: productId }, data: { stockQuantity: { increment: quantity } } }))));
 
 exports.getAllOrders = async (req, res) => {
   try {
@@ -172,6 +170,9 @@ exports.createOrder = async (req, res) => {
         }
         requestedVariants.push({ productId: product.id, sku: item.variantSku, quantity, name: product.name });
         price = variant.price ?? product.price;
+      } else {
+        // Products without options keep one stock count
+        requestedVariants.push({ productId: product.id, sku: null, quantity, name: product.name });
       }
 
       orderItems.push({
@@ -192,15 +193,20 @@ exports.createOrder = async (req, res) => {
     // Reserve stock and create the order atomically
     savedOrder = await prisma.$transaction(async (tx) => {
       for (const requested of requestedVariants) {
-        const { count } = await tx.productVariant.updateMany({
-          where: {
-            productId: requested.productId,
-            sku: requested.sku,
-            stock: { gte: requested.quantity },
-            product: { isPublished: true }
-          },
-          data: { stock: { decrement: requested.quantity } }
-        });
+        const { count } = requested.sku
+          ? await tx.productVariant.updateMany({
+            where: {
+              productId: requested.productId,
+              sku: requested.sku,
+              stock: { gte: requested.quantity },
+              product: { isPublished: true }
+            },
+            data: { stock: { decrement: requested.quantity } }
+          })
+          : await tx.product.updateMany({
+            where: { id: requested.productId, isPublished: true, stockQuantity: { gte: requested.quantity } },
+            data: { stockQuantity: { decrement: requested.quantity } }
+          });
         if (count === 0) {
           throw new StockError(`${requested.name} does not have enough stock for that quantity.`);
         }

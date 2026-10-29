@@ -14,20 +14,33 @@ const passport = require('passport');
 dotenv.config();
 
 const app = express();
+const isProduction = process.env.NODE_ENV === 'production';
 
-app.use(cors({ 
+// Behind a host's proxy: real client IPs (sign-in rate limits) and HTTPS-only cookies work
+app.set('trust proxy', 1);
+app.disable('x-powered-by');
+
+// Basic security headers
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  if (isProduction) res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  next();
+});
+
+app.use(cors({
   origin: [
-    process.env.FRONTEND_URL, 
-    process.env.CLIENT_URL, 
-    'http://localhost:5173', 
-    'http://127.0.0.1:5173'
-  ].filter(Boolean), 
+    process.env.FRONTEND_URL,
+    process.env.CLIENT_URL,
+    ...(isProduction ? [] : ['http://localhost:5173', 'http://127.0.0.1:5173']),
+  ].filter(Boolean),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
 }));
 // Stripe webhooks are signed over the raw body, so this route comes before express.json()
 app.post('/api/payments/stripe/webhook', express.raw({ type: 'application/json' }), require('./controllers/paymentController').stripeWebhook);
-app.use(express.json());
+app.use(express.json({ limit: '300kb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(passport.initialize());

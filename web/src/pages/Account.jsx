@@ -1,83 +1,80 @@
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useApp } from '../context/Appcontext';
-import { logout } from '../services/api';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, LogOut } from 'lucide-react';
+import PageHead from '../components/storefront/PageHead';
+import { authApi, useAuth } from '../lib/auth';
 import { formatPrice } from '../lib/store';
+import usePageMeta from '../lib/usePageMeta';
+
+const STATUS_LABELS = {
+  PENDING: 'Awaiting payment',
+  PROCESSING: 'Preparing',
+  SHIPPED: 'On its way',
+  DELIVERED: 'Delivered',
+  CANCELLED: 'Cancelled',
+};
+
+const formatDate = (value) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
 export default function AccountPage() {
-  const { user, orders, setUser, setOrders, setCart, isValidating } = useApp();
+  usePageMeta({ title: 'Your account', noindex: true });
+  const { user, loading, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
+  const [orders, setOrders] = useState(null);
 
   useEffect(() => {
-    // Wait until validation finishes before checking auth
-    if (!isValidating && !user) {
-      navigate('/login');
-    }
-  }, [user, navigate, isValidating]);
+    if (!loading && !user) navigate('/login?next=/account', { replace: true });
+  }, [loading, user, navigate]);
 
-  const handleSignOut = async () => {
-    console.log("Signing out user...");
-    await logout();
-    setUser(null);
-    setCart(null);
-    setOrders([]);
-    navigate('/');
+  useEffect(() => {
+    if (!user) return;
+    authApi.get('orders/my-orders')
+      .then(({ data }) => setOrders(data.orders || []))
+      .catch(() => setOrders([]));
+  }, [user]);
+
+  if (loading || !user) return <main className="pg"><p className="pg-note" style={{ textAlign: 'center' }}>Loading…</p></main>;
+
+  const leave = async () => {
+    await signOut();
+    navigate('/', { replace: true });
   };
 
-  if (isValidating || !user) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-
   return (
-    <div className="min-h-screen bg-brand-pearl pt-32 pb-24">
-      <div className="max-w-5xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-12">
-        <div className="lg:col-span-2">
-          <h1 className="text-4xl font-serif text-brand-forest-700 mb-8">My Orders</h1>
-          {orders.length === 0 ? (
-            <div className="text-center py-16 border-2 border-dashed border-brand-green-100 rounded-3xl">
-              <p className="text-xl font-serif text-brand-dark mb-2">No orders yet.</p>
-              <p className="text-brand-dark/60 mb-6">Explore our collection to get started.</p>
-              <a href="/shop" className="px-6 py-3 bg-brand-dark text-white rounded-full text-sm">Shop Now</a>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {orders.map(order => (
-                <div key={order.id} className="border border-gray-200 p-6 rounded-2xl bg-white shadow-sm">
-                  <div className="flex flex-col md:flex-row justify-between md:items-center border-b border-gray-100 pb-4 mb-4 gap-2">
-                    <div>
-                      <span className="font-mono text-sm font-bold block">{order.orderNumber}</span>
-                      <span className="text-xs text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</span>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <span className="font-mono font-medium">{formatPrice(order.total)}</span>
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                        order.status === 'DELIVERED' ? 'bg-green-100 text-green-800' :
-                        order.status === 'SHIPPED' ? 'bg-blue-100 text-blue-800' :
-                        'bg-yellow-100 text-yellow-800'
-                      }`}>{order.status}</span>
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    {order.items?.map(item => (
-                      <div key={item.id} className="flex justify-between items-center text-sm">
-                        <span className="text-gray-600">{item.quantity}x {item.productName}</span>
-                        <span className="font-mono text-gray-500">{formatPrice(item.unitPrice)}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+    <main className="pg ac">
+      <PageHead eyebrow="Account" title={`Hello, ${(user.fullname || 'there').split(' ')[0]}.`} sub={user.email}>
+        <div className="ap-ctas" style={{ justifyContent: 'center', marginTop: 24 }}>
+          {isAdmin && <Link to="/admin" className="ap-pill"><LayoutDashboard size={16} aria-hidden="true" /> Store dashboard</Link>}
+          <button type="button" className="ap-pill ap-pill--outline" onClick={leave}><LogOut size={16} aria-hidden="true" /> Sign out</button>
         </div>
+      </PageHead>
 
-        <div className="h-fit border border-gray-200 p-6 rounded-2xl bg-white shadow-sm">
-          <h3 className="font-bold text-xl mb-4 text-brand-forest-700 font-serif">Account Info</h3>
-          <div className="space-y-2 mb-6">
-            <p className="text-gray-800 font-medium">{user.name}</p>
-            <p className="text-gray-500 text-sm">{user.email}</p>
+      <section className="ac-orders" aria-labelledby="ac-orders-title">
+        <h2 id="ac-orders-title" className="pg-section-title">Your <em>orders.</em></h2>
+        {orders === null ? (
+          <p className="pg-note" style={{ textAlign: 'center' }}>Loading your orders…</p>
+        ) : orders.length === 0 ? (
+          <div className="pg-empty">
+            <h2>No orders yet.</h2>
+            <p>Orders placed while signed in{user.hasGoogle ? ', or with your Google email,' : ''} show up here.</p>
+            <Link to="/shop" className="ap-pill">Shop the collection</Link>
           </div>
-          <button onClick={handleSignOut} className="text-sm text-red-600 underline">Sign out</button>
-        </div>
-      </div>
-    </div>
+        ) : (
+          <ul className="ac-list">
+            {orders.map((order) => (
+              <li key={order.id} className="ac-order">
+                <div>
+                  <p className="ac-number">{order.orderNumber}</p>
+                  <p className="pg-note">{formatDate(order.createdAt)} · {order.items.length} {order.items.length === 1 ? 'item' : 'items'}</p>
+                </div>
+                <span className={`ac-status ac-status--${order.status.toLowerCase()}`}>{STATUS_LABELS[order.status] || order.status}</span>
+                <b>{formatPrice(order.total)}</b>
+                <Link to={`/track-order?order=${encodeURIComponent(order.orderNumber)}`} className="ap-link">Details ›</Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </main>
   );
 }

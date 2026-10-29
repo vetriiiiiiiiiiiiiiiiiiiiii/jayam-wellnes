@@ -1,118 +1,110 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { AlertTriangle, Mail, Package, ShoppingBag, Truck, Users } from 'lucide-react';
+import { adminApi, formatDateTime } from '../../lib/adminApi';
 import { formatPrice } from '../../lib/store';
+import { OrderBadge, PaymentBadge } from './adminBits';
 
 export default function AdminDashboard() {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const [stats, setStats] = useState(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchDashboard = async () => {
-      try {
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/dashboard`, {
-          withCredentials: true
-        });
-        setData(res.data);
-      } catch (err) {
-        if (err.response?.status === 403 || err.response?.status === 401) {
-          navigate('/account'); // Not authorized as admin
-        }
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchDashboard();
-  }, [navigate]);
+    adminApi.dashboard().then((result) => (result.ok ? setStats(result.data) : setError(result.message)));
+  }, []);
 
-  if (loading) return <div className="p-8 text-center pt-32 min-h-screen">Loading dashboard...</div>;
-  if (!data) return null;
+  if (error) return <p className="ad-error">{error}</p>;
+  if (!stats) return <p className="ad-muted">Loading the dashboard…</p>;
+
+  const tiles = [
+    { label: 'Revenue, last 30 days', value: formatPrice(stats.revenue30), note: `${stats.orders30} paid orders`, icon: ShoppingBag },
+    { label: 'Ready to ship', value: stats.toShip, note: 'Paid and waiting for tracking', icon: Truck, to: '/admin/orders?view=to-ship', alert: stats.toShip > 0 },
+    { label: 'New enquiries', value: stats.newEnquiries, note: 'Waiting for a reply', icon: Mail, to: '/admin/enquiries', alert: stats.newEnquiries > 0 },
+    { label: 'Customers', value: stats.customers, note: `${formatPrice(stats.totalRevenue)} all-time revenue`, icon: Users, to: '/admin/users' },
+  ];
 
   return (
-    <div className="p-8 max-w-7xl mx-auto pt-32 min-h-screen flex gap-8">
-      <div className="w-64 flex-shrink-0 border-r border-gray-200 pr-8">
-         <h2 className="text-2xl font-serif text-brand-forest-700 mb-8">Admin</h2>
-         <nav className="space-y-4">
-            <Link to="/admin" className="block text-brand-dark font-bold transition-colors">Dashboard</Link>
-            <Link to="/admin/orders" className="block text-gray-500 hover:text-brand-dark transition-colors">Orders</Link>
-            <Link to="/admin/products" className="block text-gray-500 hover:text-brand-dark transition-colors">Products</Link>
-            <Link to="/admin/users" className="block text-gray-500 hover:text-brand-dark transition-colors">Users</Link>
-            <Link to="/admin/reviews" className="block text-gray-500 hover:text-brand-dark transition-colors">Reviews</Link>
-            <Link to="/admin/enquiries" className="block text-gray-500 hover:text-brand-dark transition-colors">Enquiries</Link>
-            <Link to="/admin/content" className="block text-gray-500 hover:text-brand-dark transition-colors">Site content</Link>
-         </nav>
+    <div className="ad-page">
+      <div className="ad-head">
+        <div>
+          <h1>Good to see you.</h1>
+          <p className="ad-muted">Here’s how the store is doing.</p>
+        </div>
+        <Link to="/admin/products/new" className="ad-btn"><Package size={16} aria-hidden="true" /> Add a product</Link>
       </div>
 
-      <div className="flex-1">
-        <div className="mb-8">
-          <h1 className="text-3xl font-serif text-gray-900">Dashboard Overview</h1>
-          <p className="text-gray-500 mt-1">Welcome back. Here's what's happening today.</p>
-        </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
-          <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">Total Revenue</p>
-          <h3 className="text-3xl font-serif text-gray-900 mt-2">{formatPrice(data.totalRevenue)}</h3>
-        </div>
-        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
-          <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">Average Order</p>
-          <h3 className="text-3xl font-serif text-gray-900 mt-2">{formatPrice((data.totalOrders > 0 ? data.totalRevenue / data.totalOrders : 0))}</h3>
-        </div>
-        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
-          <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">Total Orders</p>
-          <h3 className="text-3xl font-serif text-gray-900 mt-2">{data.totalOrders}</h3>
-          <Link to="/admin/orders" className="text-sm text-brand-green-600 hover:underline mt-2 inline-block">Manage orders →</Link>
-        </div>
-        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
-          <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">Products</p>
-          <h3 className="text-3xl font-serif text-gray-900 mt-2">{data.totalProducts}</h3>
-          <Link to="/admin/products" className="text-sm text-brand-green-600 hover:underline mt-2 inline-block">Manage catalog →</Link>
-        </div>
+      <div className="ad-tiles">
+        {tiles.map(({ label, value, note, icon: Icon, to, alert }) => {
+          const body = (
+            <>
+              <span className="ad-tile-icon"><Icon size={18} aria-hidden="true" /></span>
+              <p className="ad-tile-label">{label}</p>
+              <p className="ad-tile-value">{value}</p>
+              <p className="ad-muted">{note}</p>
+            </>
+          );
+          return to
+            ? <Link key={label} to={to} className={`ad-tile${alert ? ' ad-tile--alert' : ''}`}>{body}</Link>
+            : <div key={label} className="ad-tile">{body}</div>;
+        })}
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center">
-          <h2 className="text-xl font-serif text-gray-900">Recent Orders</h2>
-          <Link to="/admin/orders" className="text-sm font-medium text-brand-green-600 hover:text-brand-green-700">View All</Link>
-        </div>
-        {data.recentOrders.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">No recent orders.</div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="bg-gray-50/50">
-                <tr>
-                  <th className="px-6 py-4 font-medium text-gray-500">Order ID</th>
-                  <th className="px-6 py-4 font-medium text-gray-500">Customer</th>
-                  <th className="px-6 py-4 font-medium text-gray-500">Date</th>
-                  <th className="px-6 py-4 font-medium text-gray-500">Total</th>
-                  <th className="px-6 py-4 font-medium text-gray-500">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {data.recentOrders.map((order) => (
-                  <tr key={order.id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-4 font-mono text-gray-600">#{order.orderNumber}</td>
-                    <td className="px-6 py-4 text-gray-900 font-medium">{order.name || "Guest"}</td>
-                    <td className="px-6 py-4 text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</td>
-                    <td className="px-6 py-4 text-gray-900">{formatPrice(order.total)}</td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
-                        order.status === "PENDING" ? "bg-yellow-50 text-yellow-700 border border-yellow-200" :
-                        order.status === "COMPLETED" ? "bg-green-50 text-green-700 border border-green-200" :
-                        "bg-gray-50 text-gray-700 border border-gray-200"
-                      }`}>{order.status}</span>
-                    </td>
+      <div className="ad-grid-2">
+        <section className="ad-card">
+          <div className="ad-card-head">
+            <h2>Recent orders</h2>
+            <Link to="/admin/orders" className="ad-link-text">All orders ›</Link>
+          </div>
+          {stats.recentOrders.length === 0 ? (
+            <p className="ad-muted">No orders yet. They’ll appear here as soon as customers check out.</p>
+          ) : (
+            <table className="ad-table">
+              <thead><tr><th>Order</th><th>Customer</th><th>Status</th><th className="ad-num">Total</th></tr></thead>
+              <tbody>
+                {stats.recentOrders.map((order) => (
+                  <tr key={order.id}>
+                    <td><Link to={`/admin/orders?open=${order.id}`} className="ad-link-text">{order.orderNumber}</Link><small>{formatDateTime(order.createdAt)}</small></td>
+                    <td>{order.name}<small>{order.email}</small></td>
+                    <td><OrderBadge status={order.status} /> <PaymentBadge status={order.paymentStatus} /></td>
+                    <td className="ad-num">{formatPrice(order.total)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
-        )}
+          )}
+        </section>
+
+        <div className="ad-stack">
+          <section className="ad-card">
+            <div className="ad-card-head"><h2>Low stock</h2></div>
+            {stats.lowStock.length === 0 ? (
+              <p className="ad-muted">Every published product has 10 or more in stock.</p>
+            ) : (
+              <ul className="ad-list">
+                {stats.lowStock.map((product) => (
+                  <li key={product.id}>
+                    <Link to={`/admin/products/${product.id}`} className="ad-link-text">{product.name}</Link>
+                    <span className={`ad-badge ${product.stockQuantity === 0 ? 'ad-badge--red' : 'ad-badge--amber'}`}>
+                      <AlertTriangle size={12} aria-hidden="true" /> {product.stockQuantity} left
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <section className="ad-card">
+            <div className="ad-card-head"><h2>Best sellers</h2></div>
+            {stats.topProducts.length === 0 ? (
+              <p className="ad-muted">Best sellers show up after the first paid orders.</p>
+            ) : (
+              <ul className="ad-list">
+                {stats.topProducts.map((item) => <li key={item.name}><span>{item.name}</span><b>{item.quantity} sold</b></li>)}
+              </ul>
+            )}
+          </section>
+        </div>
       </div>
-    </div>
     </div>
   );
 }

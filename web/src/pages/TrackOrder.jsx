@@ -3,8 +3,10 @@ import { Link, useSearchParams } from 'react-router-dom';
 import OrderStatus from '../components/storefront/OrderStatus';
 import PageHead from '../components/storefront/PageHead';
 import { trackOrder } from '../services/api';
+import usePageMeta from '../lib/usePageMeta';
 
 export default function TrackOrder() {
+  usePageMeta({ title: 'Track your order', noindex: true });
   const [params] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');

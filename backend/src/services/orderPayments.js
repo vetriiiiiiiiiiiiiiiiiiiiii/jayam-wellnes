@@ -4,16 +4,13 @@ const { sendOrderConfirmation } = require('./orderEmails');
 
 const toCents = (amount) => Math.round(amount * 100);
 
-// Put reserved variant stock back for an order that will never be paid
+// Put reserved stock back for an order that will never be paid (variant or product level)
 const releaseOrderStock = async (orderId) => {
-  const items = await prisma.orderItem.findMany({ where: { orderId, variantSku: { not: null } } });
+  const items = await prisma.orderItem.findMany({ where: { orderId, productId: { not: null } } });
   if (items.length === 0) return;
-  await prisma.$transaction(items.map(({ productId, variantSku, quantity }) =>
-    prisma.productVariant.updateMany({
-      where: { productId, sku: variantSku },
-      data: { stock: { increment: quantity } }
-    })
-  ));
+  await prisma.$transaction(items.map(({ productId, variantSku, quantity }) => (variantSku
+    ? prisma.productVariant.updateMany({ where: { productId, sku: variantSku }, data: { stock: { increment: quantity } } })
+    : prisma.product.updateMany({ where: { id: productId }, data: { stockQuantity: { increment: quantity } } }))));
 };
 
 // Mark the order for a succeeded PaymentIntent as PAID. Safe to call more than once

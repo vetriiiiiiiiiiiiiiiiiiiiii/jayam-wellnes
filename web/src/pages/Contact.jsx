@@ -4,10 +4,12 @@ import axios from 'axios';
 import { AtSign, Check, Clock, HelpCircle, Mail, MessageCircle } from 'lucide-react';
 import PageHead from '../components/storefront/PageHead';
 import { CONTACT, ENQUIRY_CATEGORIES } from '../lib/store';
+import usePageMeta from '../lib/usePageMeta';
 
 const ORDER_CATEGORIES = ['ORDER_SUPPORT', 'SHIPPING', 'RETURNS'];
 
 export default function ContactPage() {
+  usePageMeta({ title: 'Contact us', description: 'Questions about an ingredient, an order, shipping or returns? Send Jayam a message — we reply within 1 business day.' });
   const [searchParams] = useSearchParams();
   const initialCategory = ENQUIRY_CATEGORIES.some(({ value }) => value === searchParams.get('category'))
     ? searchParams.get('category')

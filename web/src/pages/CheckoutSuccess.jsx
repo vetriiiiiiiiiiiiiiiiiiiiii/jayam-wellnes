@@ -5,8 +5,10 @@ import { useCart } from '../components/storefront/CartProvider';
 import OrderStatus from '../components/storefront/OrderStatus';
 import PageHead from '../components/storefront/PageHead';
 import { confirmOrderPayment } from '../services/api';
+import usePageMeta from '../lib/usePageMeta';
 
 export default function CheckoutSuccess() {
+  usePageMeta({ title: 'Order confirmed', noindex: true });
   const [params] = useSearchParams();
   const orderNumber = params.get('order');
   const paymentIntentId = params.get('payment_intent');
