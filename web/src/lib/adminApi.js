@@ -21,6 +21,7 @@ export const adminApi = {
   createProduct: (form) => call(() => authApi.post('admin/products', form), 'Could not create the product'),
   updateProduct: (id, form) => call(() => authApi.put(`admin/products/${id}`, form), 'Could not save the product'),
   deleteProduct: (id) => call(() => authApi.delete(`admin/products/${id}`), 'Could not delete the product'),
+  addDefaultProducts: () => call(() => authApi.post('admin/products/add-defaults'), 'Could not add the Jayam products'),
 
   uploadImage: (file) => {
     const form = new FormData();

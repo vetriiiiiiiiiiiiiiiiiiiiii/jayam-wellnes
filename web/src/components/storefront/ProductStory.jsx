@@ -7,9 +7,27 @@ import ProductVisual from './ProductVisual';
 // Text is editable in Admin → Site content → Product stories.
 const MOMENT_ICONS = [Sunrise, Sun, Moon];
 
+const filled = (value) => typeof value === 'string' && value.trim().length > 0;
+
+// Only the chapters that have something in them are shown
+export const storyChapters = (story) => {
+  if (!story || typeof story !== 'object') return {};
+  const lifestyle = filled(story.lifestyle?.title) ? story.lifestyle : null;
+  const items = (story.moments?.items || []).filter((item) => filled(item?.title) || filled(item?.body));
+  const moments = items.length ? { ...story.moments, items } : null;
+  const about = filled(story.about?.title) ? { ...story.about, facts: (story.about.facts || []).filter((fact) => filled(fact?.value)) } : null;
+  const forYou = (story.fit?.forYou || []).filter(filled);
+  const goodToKnow = (story.fit?.goodToKnow || []).filter(filled);
+  const fit = forYou.length || goodToKnow.length ? { ...story.fit, forYou, goodToKnow } : null;
+  const promise = filled(story.promise) ? story.promise : null;
+  return { lifestyle, moments, about, fit, promise };
+};
+
+export const hasStory = (story) => Object.values(storyChapters(story)).some(Boolean);
+
 export default function ProductStory({ product, story, description, onBuy }) {
-  if (!story) return null;
-  const { lifestyle, moments, about, fit, promise } = story;
+  if (!hasStory(story)) return null;
+  const { lifestyle, moments, about, fit, promise } = storyChapters(story);
 
   return (
     <div className="ps">
@@ -21,9 +39,9 @@ export default function ProductStory({ product, story, description, onBuy }) {
               {lifestyle.label && <p className="ps-chip">{lifestyle.label}</p>}
               <h2 id="ps-life-title">{lifestyle.title}</h2>
               <p>{lifestyle.body}</p>
-              {lifestyle.tags?.length > 0 && (
+              {lifestyle.tags?.filter(filled).length > 0 && (
                 <ul className="ps-tags" aria-label="Fits into">
-                  {lifestyle.tags.map((tag) => <li key={tag}>{tag}</li>)}
+                  {lifestyle.tags.filter(filled).map((tag) => <li key={tag}>{tag}</li>)}
                 </ul>
               )}
             </div>

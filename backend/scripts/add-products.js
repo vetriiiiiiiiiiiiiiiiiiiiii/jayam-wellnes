@@ -1,41 +1,22 @@
 // Adds the five Jayam products to the database — safe on a live site.
-// Products are matched by slug: missing ones are created (published, 100 in stock),
-// existing ones are left exactly as they are. Nothing else is touched or deleted.
+// Missing products are created (published, 100 in stock, with their story); existing
+// ones are left as they are. Nothing else is touched or deleted.
+// The same action is the "Add the Jayam products" button in Admin → Products.
 //
 //   npm run db:products
 require('dotenv').config({ path: require('path').join(__dirname, '../.env'), quiet: true });
 const prisma = require('../src/config/prisma');
-const products = require('./data/products');
+const { addMissingProducts } = require('../src/services/defaultProducts');
 
-async function addProducts() {
-  let created = 0;
-  try {
-    for (const { images = [], specs = [], variants = [], ...product } of products) {
-      const existing = await prisma.product.findUnique({ where: { slug: product.slug }, select: { id: true, name: true } });
-      if (existing) {
-        console.log(`• Already in the shop: ${existing.name}`);
-        continue;
-      }
-      await prisma.product.create({
-        data: {
-          ...product,
-          isPublished: true,
-          stockQuantity: 100,
-          images: { create: images },
-          specs: { create: specs.map((spec, position) => ({ ...spec, position })) },
-          variants: { create: variants.map((variant, position) => ({ ...variant, position })) },
-        },
-      });
-      created += 1;
-      console.log(`✓ Added: ${product.name}`);
-    }
-    console.log(created ? `\nDone — added ${created} product${created === 1 ? '' : 's'}.` : '\nNothing to add — all five products are already in the shop.');
-  } catch (error) {
+addMissingProducts()
+  .then(({ added, existing, storiesAdded }) => {
+    existing.forEach((name) => console.log(`• Already in the shop: ${name}`));
+    storiesAdded.forEach((name) => console.log(`✓ Added the product story to: ${name}`));
+    added.forEach((name) => console.log(`✓ Added: ${name}`));
+    console.log(added.length ? `\nDone — added ${added.length} product${added.length === 1 ? '' : 's'}.` : '\nNothing to add — all five products are already in the shop.');
+  })
+  .catch((error) => {
     console.error('Adding products failed:', error.message);
     process.exitCode = 1;
-  } finally {
-    await prisma.$disconnect();
-  }
-}
-
-addProducts();
+  })
+  .finally(() => prisma.$disconnect());

@@ -26,6 +26,7 @@ router.post('/orders/:id/refund', adminController.refundOrder);
 
 // Product Management
 router.get('/products', adminController.getAllProducts);
+router.post('/products/add-defaults', adminController.addDefaultProducts);
 router.post('/products', upload.array('images', 10), adminController.createProduct);
 router.put('/products/:id', upload.array('images', 10), adminController.updateProduct);
 router.delete('/products/:id', adminController.deleteProduct);

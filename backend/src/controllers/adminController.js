@@ -4,6 +4,7 @@ const { CARRIERS } = require('../utils/orderLinks');
 const { sendShippingNotification, sendDeliveryNotification } = require('../services/orderEmails');
 const { releaseOrderStock } = require('../services/orderPayments');
 const { addProductImages, deleteStoredImage, removeQuietly, storeImage } = require('../services/mediaService');
+const { addMissingProducts } = require('../services/defaultProducts');
 const { productInclude, serializeOrder, serializeProduct, serializeUser } = require('../utils/serialize');
 
 const ORDER_STATUSES = ['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
@@ -280,6 +281,9 @@ const parseJson = (value, fallback) => {
   }
 };
 
+// A story counts once any chapter has a title, body, line or list entry
+const hasStory = (story) => JSON.stringify(story).replace(/"[a-zA-Z]+":/g, '').replace(/[\[\]{}",\s]/g, '').length > 0;
+
 const cleanText = (value, max = 20000) => (typeof value === 'string' ? value.trim().slice(0, max) : value);
 
 // Turn the form body into Prisma data; returns { data, specs, error }
@@ -316,6 +320,13 @@ const productDataFrom = (body, { creating }) => {
     data.highlights = highlights
       .map((item) => ({ title: cleanText(String(item?.title || ''), 200), body: cleanText(String(item?.body || ''), 2000) }))
       .filter((item) => item.title || item.body);
+  }
+
+  if (body.story !== undefined) {
+    const story = parseJson(body.story, null);
+    if (story !== null && (typeof story !== 'object' || Array.isArray(story))) return { error: 'The product story is not valid' };
+    if (story && Buffer.byteLength(JSON.stringify(story)) > 60 * 1024) return { error: 'The product story is too long' };
+    data.story = story && hasStory(story) ? story : null;
   }
 
   let specs;
@@ -417,6 +428,17 @@ exports.deleteProduct = async (req, res) => {
   } catch (err) {
     console.error('Delete Product Error:', err);
     res.status(500).json({ message: 'Failed to delete product' });
+  }
+};
+
+// Add any of the five Jayam products that are missing (never deletes anything)
+exports.addDefaultProducts = async (req, res) => {
+  try {
+    const result = await addMissingProducts();
+    res.json({ success: true, ...result });
+  } catch (error) {
+    console.error('[Admin] Adding default products failed:', error);
+    res.status(500).json({ message: 'Could not add the Jayam products' });
   }
 };
 

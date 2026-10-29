@@ -121,6 +121,8 @@ model Product {
   category          String? // display category, e.g. "Herbal Supplements"
   tagline           String?
   highlights        Json? // [{ title, body }] key benefit bullets
+  // Product page story: { lifestyle, moments, about, fit, promise } — edited in Admin → Products
+  story             Json?
   warnings          String?
   disclaimer        String?
   stockQuantity     Int              @default(0)

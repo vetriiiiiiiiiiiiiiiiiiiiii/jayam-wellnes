@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ImagePlus } from 'lucide-react';
-import { HOME_DEFAULTS, STORY_DEFAULTS, forgetContent, loadContent, mergeContent } from '../../lib/content';
+import { HOME_DEFAULTS, forgetContent, loadContent, mergeContent } from '../../lib/content';
 import { adminApi, mediaUrl } from '../../lib/adminApi';
 
 // Admin → Site content: edit the storefront text without touching code.
@@ -172,7 +172,6 @@ function ImageField({ value, onChange }) {
 
 const TABS = [
   { key: 'home', label: 'Home page', defaults: HOME_DEFAULTS },
-  { key: 'product-stories', label: 'Product stories', defaults: STORY_DEFAULTS },
 ];
 
 export default function AdminContent() {
@@ -228,7 +227,7 @@ export default function AdminContent() {
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-serif text-gray-900">Site content</h1>
-            <p className="mt-1 text-sm text-gray-500">Edit the words on the storefront. Changes go live as soon as you save.</p>
+            <p className="mt-1 text-sm text-gray-500">Edit the words on the home page. Changes go live as soon as you save. Product stories are edited with each product, under Products.</p>
           </div>
           <div className="flex items-center gap-3">
             {status && <span className="text-sm text-gray-500" role="status">{status}</span>}

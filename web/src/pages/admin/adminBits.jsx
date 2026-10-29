@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { X } from 'lucide-react';
+import { ArrowDown, ArrowUp, Plus, Trash2, X } from 'lucide-react';
 
 // Small building blocks shared by the admin pages
 
@@ -51,4 +51,51 @@ export function useNotice() {
   }, [notice]);
   const element = notice ? <div className={`ad-notice ad-notice--${notice.tone || 'ok'}`} role="status">{notice.text}</div> : null;
   return [element, (text, tone) => setNotice({ text, tone })];
+}
+
+// Editable list of rows (each row has the given fields), with reorder and remove
+export function ListEditor({ label, items, onChange, fields, addLabel }) {
+  const update = (index, key, value) => onChange(items.map((item, i) => (i === index ? { ...item, [key]: value } : item)));
+  const move = (index, delta) => {
+    const next = [...items];
+    const [item] = next.splice(index, 1);
+    next.splice(index + delta, 0, item);
+    onChange(next);
+  };
+  return (
+    <fieldset className="ad-fieldset">
+      <legend>{label}</legend>
+      {items.length === 0 && <p className="ad-muted ad-small">None yet.</p>}
+      {items.map((item, index) => (
+        <div key={index} className="ad-list-row">
+          <div className="ad-list-fields">
+            {fields.map(({ key, placeholder, long }) => (long
+              ? <textarea key={key} rows={2} placeholder={placeholder} value={item[key] || ''} onChange={(event) => update(index, key, event.target.value)} />
+              : <input key={key} placeholder={placeholder} value={item[key] || ''} onChange={(event) => update(index, key, event.target.value)} />))}
+          </div>
+          <div className="ad-list-actions">
+            <button type="button" className="ad-icon-btn" disabled={index === 0} onClick={() => move(index, -1)} aria-label="Move up"><ArrowUp size={16} /></button>
+            <button type="button" className="ad-icon-btn" disabled={index === items.length - 1} onClick={() => move(index, 1)} aria-label="Move down"><ArrowDown size={16} /></button>
+            <button type="button" className="ad-icon-btn ad-icon-btn--danger" onClick={() => onChange(items.filter((_, i) => i !== index))} aria-label="Remove"><Trash2 size={16} /></button>
+          </div>
+        </div>
+      ))}
+      <button type="button" className="ad-btn ad-btn--ghost ad-btn--small" onClick={() => onChange([...items, Object.fromEntries(fields.map(({ key }) => [key, '']))])}>
+        <Plus size={14} aria-hidden="true" /> {addLabel}
+      </button>
+    </fieldset>
+  );
+}
+
+// Editable list of single lines (e.g. lifestyle tags), stored as an array of strings
+export function StringList({ label, items, onChange, placeholder, addLabel }) {
+  return (
+    <ListEditor
+      label={label}
+      items={(items || []).map((text) => ({ text }))}
+      onChange={(rows) => onChange(rows.map((row) => row.text))}
+      fields={[{ key: 'text', placeholder }]}
+      addLabel={addLabel}
+    />
+  );
 }

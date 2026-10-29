@@ -1,28 +1,49 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus } from 'lucide-react';
+import { PackagePlus, Plus } from 'lucide-react';
 import ProductArt from '../../components/storefront/ProductArt';
 import { adminApi, mediaUrl } from '../../lib/adminApi';
 import { formatPrice } from '../../lib/store';
+import { useNotice } from './adminBits';
 
 export default function AdminProducts() {
   const [products, setProducts] = useState(null);
   const [error, setError] = useState('');
+  const [adding, setAdding] = useState(false);
+  const [notice, notify] = useNotice();
 
-  useEffect(() => {
+  const load = useCallback(() => {
     adminApi.products().then((result) => (result.ok ? setProducts(result.data) : setError(result.message)));
   }, []);
+  useEffect(load, [load]);
+
+  // Adds any of the five Jayam products that are missing; never changes or deletes others
+  const addDefaults = async () => {
+    setAdding(true);
+    const result = await adminApi.addDefaultProducts();
+    setAdding(false);
+    if (!result.ok) return notify(result.message, 'error');
+    const { added } = result.data;
+    notify(added.length ? `Added ${added.length} Jayam product${added.length === 1 ? '' : 's'}` : 'All five Jayam products are already in the shop');
+    load();
+  };
 
   if (error) return <p className="ad-error">{error}</p>;
 
   return (
     <div className="ad-page">
+      {notice}
       <div className="ad-head">
         <div>
           <h1>Products</h1>
           <p className="ad-muted">Everything shown in the shop. Unpublished products are hidden from customers.</p>
         </div>
-        <Link to="/admin/products/new" className="ad-btn"><Plus size={16} aria-hidden="true" /> New product</Link>
+        <div className="ad-row">
+          <button type="button" className="ad-btn ad-btn--ghost" onClick={addDefaults} disabled={adding} title="Adds any of the five Jayam products that are missing">
+            <PackagePlus size={16} aria-hidden="true" /> {adding ? 'Adding…' : 'Add the Jayam products'}
+          </button>
+          <Link to="/admin/products/new" className="ad-btn"><Plus size={16} aria-hidden="true" /> New product</Link>
+        </div>
       </div>
 
       <section className="ad-card ad-card--flush">

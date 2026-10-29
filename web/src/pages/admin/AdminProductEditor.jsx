@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowDown, ArrowLeft, ArrowUp, ExternalLink, ImagePlus, Plus, Trash2 } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowUp, ExternalLink, ImagePlus, Trash2 } from 'lucide-react';
 import { adminApi, mediaUrl } from '../../lib/adminApi';
-import { useNotice } from './adminBits';
+import { ListEditor, useNotice } from './adminBits';
+import ProductStoryEditor, { storyForEditing } from './ProductStoryEditor';
 
 const EMPTY = {
   name: '', tagline: '', category: 'Herbal Supplements', productType: 'SUPPLEMENT',
   price: '', compareAtPrice: '', stockQuantity: '0', isPublished: false,
   shortDescription: '', description: '', ingredients: '', usageInstructions: '', warnings: '', disclaimer: '',
   highlights: [], specs: [],
+  story: storyForEditing(null),
 };
 
 const fromProduct = (product) => ({
@@ -19,40 +21,8 @@ const fromProduct = (product) => ({
   stockQuantity: String(product.stockQuantity ?? 0),
   highlights: Array.isArray(product.highlights) ? product.highlights : [],
   specs: (product.specs || []).map(({ name, value }) => ({ name, value })),
+  story: storyForEditing(product),
 });
-
-function ListEditor({ label, items, onChange, fields, addLabel }) {
-  const update = (index, key, value) => onChange(items.map((item, i) => (i === index ? { ...item, [key]: value } : item)));
-  const move = (index, delta) => {
-    const next = [...items];
-    const [item] = next.splice(index, 1);
-    next.splice(index + delta, 0, item);
-    onChange(next);
-  };
-  return (
-    <fieldset className="ad-fieldset">
-      <legend>{label}</legend>
-      {items.length === 0 && <p className="ad-muted ad-small">None yet.</p>}
-      {items.map((item, index) => (
-        <div key={index} className="ad-list-row">
-          <div className="ad-list-fields">
-            {fields.map(({ key, placeholder, long }) => (long
-              ? <textarea key={key} rows={2} placeholder={placeholder} value={item[key] || ''} onChange={(event) => update(index, key, event.target.value)} />
-              : <input key={key} placeholder={placeholder} value={item[key] || ''} onChange={(event) => update(index, key, event.target.value)} />))}
-          </div>
-          <div className="ad-list-actions">
-            <button type="button" className="ad-icon-btn" disabled={index === 0} onClick={() => move(index, -1)} aria-label="Move up"><ArrowUp size={16} /></button>
-            <button type="button" className="ad-icon-btn" disabled={index === items.length - 1} onClick={() => move(index, 1)} aria-label="Move down"><ArrowDown size={16} /></button>
-            <button type="button" className="ad-icon-btn ad-icon-btn--danger" onClick={() => onChange(items.filter((_, i) => i !== index))} aria-label="Remove"><Trash2 size={16} /></button>
-          </div>
-        </div>
-      ))}
-      <button type="button" className="ad-btn ad-btn--ghost ad-btn--small" onClick={() => onChange([...items, Object.fromEntries(fields.map(({ key }) => [key, '']))])}>
-        <Plus size={14} aria-hidden="true" /> {addLabel}
-      </button>
-    </fieldset>
-  );
-}
 
 export default function AdminProductEditor() {
   const { id } = useParams();
@@ -108,7 +78,7 @@ export default function AdminProductEditor() {
     setError('');
     const form = new FormData();
     Object.entries(values).forEach(([key, value]) => {
-      if (key === 'highlights' || key === 'specs') form.append(key, JSON.stringify(value));
+      if (key === 'highlights' || key === 'specs' || key === 'story') form.append(key, JSON.stringify(value));
       else form.append(key, typeof value === 'boolean' ? String(value) : value);
     });
     if (!creating) form.append('keepImageIds', JSON.stringify(images.map((image) => image.id)));
@@ -191,6 +161,8 @@ export default function AdminProductEditor() {
               addLabel="Add a specification"
             />
           </section>
+
+          <ProductStoryEditor story={values.story} onChange={(story) => setValues((current) => ({ ...current, story }))} />
 
           <section className="ad-card">
             <h2>Ingredients, use and safety</h2>

@@ -8,7 +8,7 @@ import ProductCard from '../components/storefront/ProductCard';
 import ReviewSection from '../components/storefront/ReviewSection';
 import ProductSubnav from '../components/storefront/ProductSubnav';
 import ProductHero from '../components/storefront/ProductHero';
-import ProductStory from '../components/storefront/ProductStory';
+import ProductStory, { hasStory } from '../components/storefront/ProductStory';
 import { useCart } from '../components/storefront/CartProvider';
 import { useSiteContent } from '../lib/content';
 import { CATEGORY_LABELS, FREE_SHIPPING_THRESHOLD, formatPrice } from '../lib/store';
@@ -106,6 +106,8 @@ export default function ProductPage() {
   const compareAt = selectedVariant ? selectedVariant.compareAtPrice : product.compareAtPrice;
   const category = product.category || CATEGORY_LABELS[product.productType] || 'Wellness';
   const specs = product.specs || [];
+  // The story edited on the product (Admin → Products); older text from Site content as a fallback
+  const story = hasStory(product.story) ? product.story : hasStory(stories[product.slug]) ? stories[product.slug] : null;
 
   const buy = () => {
     addToCart({
@@ -137,8 +139,8 @@ export default function ProductPage() {
       <ProductHero product={product} name={shortTitle} category={category} points={TRUST_POINTS[product.productType] || []} />
 
       <div id="features" className="pp-features">
-      {stories[product.slug] ? (
-        <ProductStory product={product} story={stories[product.slug]} description={product.description} onBuy={buy} />
+      {story ? (
+        <ProductStory product={product} story={story} description={product.description} onBuy={buy} />
       ) : product.description && (
         <section className="pp-overview" data-reveal>
           <p className="pg-eyebrow">Overview</p>
