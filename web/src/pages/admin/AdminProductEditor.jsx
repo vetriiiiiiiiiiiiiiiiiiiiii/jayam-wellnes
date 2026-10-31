@@ -150,7 +150,7 @@ export default function AdminProductEditor() {
               label="Highlights — the feature tiles on the product page"
               items={values.highlights}
               onChange={setList('highlights')}
-              fields={[{ key: 'title', placeholder: 'Title' }, { key: 'body', placeholder: 'Text — keep the * on benefit claims', long: true }]}
+              fields={[{ key: 'title', placeholder: 'Title' }, { key: 'body', placeholder: 'Text — keep the * on benefit claims', long: true }, { key: 'image', placeholder: 'Photo in the box', photo: true }]}
               addLabel="Add a highlight"
             />
             <ListEditor

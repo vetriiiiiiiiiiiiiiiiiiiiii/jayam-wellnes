@@ -318,8 +318,12 @@ const productDataFrom = (body, { creating }) => {
     const highlights = parseJson(body.highlights, []);
     if (!Array.isArray(highlights)) return { error: 'Highlights must be a list' };
     data.highlights = highlights
-      .map((item) => ({ title: cleanText(String(item?.title || ''), 200), body: cleanText(String(item?.body || ''), 2000) }))
-      .filter((item) => item.title || item.body);
+      .map((item) => ({
+        title: cleanText(String(item?.title || ''), 200),
+        body: cleanText(String(item?.body || ''), 2000),
+        image: cleanText(String(item?.image || ''), 500),
+      }))
+      .filter((item) => item.title || item.body || item.image);
   }
 
   if (body.story !== undefined) {

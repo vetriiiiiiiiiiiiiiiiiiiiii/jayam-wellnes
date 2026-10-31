@@ -42,9 +42,7 @@ export const adminApi = {
   saveContent: (key, data) => call(() => authApi.put(`admin/content/${key}`, { data }), 'Could not save the content'),
 };
 
-// Product images and uploads are stored on the API server; show them from there
-const base = (import.meta.env.VITE_API_URL || '').replace(/\/api\/?$/, '').replace(/\/$/, '');
-export const mediaUrl = (url) => (url && url.startsWith('/uploads/') ? `${base}${url}` : url);
+export { mediaUrl } from './media';
 
 export const formatDateTime = (value) =>
   value ? new Date(value).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—';

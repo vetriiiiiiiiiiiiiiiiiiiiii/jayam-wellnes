@@ -32,7 +32,7 @@ function Home() {
 
   return (
     <div className="jhome">
-      <JayamHero products={products} content={content.hero} />
+      <JayamHero content={content.hero} />
       <ProductShowcase products={products} content={content.showcase} />
       <PlantToPack content={content.plant} />
       <StoryTeaser content={content.story} />

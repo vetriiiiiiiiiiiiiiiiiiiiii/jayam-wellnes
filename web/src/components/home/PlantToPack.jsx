@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, FlaskConical, PackageOpen, Sprout, Wind } from 'lucide-react';
 import { SCENES } from './DifferenceScenes';
+import { mediaUrl } from '../../lib/media';
 
 // "Our difference": four tall cards from plant to pack. Each has an icon disc and
 // number on top, a scene in the middle (an illustration, or a photo set in
@@ -31,7 +32,7 @@ export default function PlantToPack({ content }) {
           return (
             <li key={`${index}-${title}`} className={`od-card od-card--${tone}`} data-reveal style={{ transitionDelay: `${index * 80}ms` }}>
               <div className={`od-scene${image ? ' od-scene--photo' : ''}`}>
-                {image ? <img src={image} alt="" loading="lazy" decoding="async" /> : <Scene />}
+                {image ? <img src={mediaUrl(image)} alt="" loading="lazy" decoding="async" /> : <Scene />}
               </div>
               <div className="od-top">
                 <span className="od-icon"><Icon size={22} strokeWidth={1.7} aria-hidden="true" /></span>

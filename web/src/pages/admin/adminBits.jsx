@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
-import { ArrowDown, ArrowUp, Plus, Trash2, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { ArrowDown, ArrowUp, ImagePlus, Plus, Trash2, X } from 'lucide-react';
+import { adminApi, mediaUrl } from '../../lib/adminApi';
 
 // Small building blocks shared by the admin pages
 
@@ -69,7 +70,9 @@ export function ListEditor({ label, items, onChange, fields, addLabel }) {
       {items.map((item, index) => (
         <div key={index} className="ad-list-row">
           <div className="ad-list-fields">
-            {fields.map(({ key, placeholder, long }) => (long
+            {fields.map(({ key, placeholder, long, photo }) => (photo
+              ? <PhotoField key={key} label={placeholder} value={item[key] || ''} onChange={(value) => update(index, key, value)} />
+              : long
               ? <textarea key={key} rows={2} placeholder={placeholder} value={item[key] || ''} onChange={(event) => update(index, key, event.target.value)} />
               : <input key={key} placeholder={placeholder} value={item[key] || ''} onChange={(event) => update(index, key, event.target.value)} />))}
           </div>
@@ -97,5 +100,43 @@ export function StringList({ label, items, onChange, placeholder, addLabel }) {
       fields={[{ key: 'text', placeholder }]}
       addLabel={addLabel}
     />
+  );
+}
+
+// One photo: upload it or paste an address, with a preview
+export function PhotoField({ label = 'Photo', hint, value, onChange }) {
+  const input = useRef(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+
+  const upload = async (event) => {
+    const file = event.target.files[0];
+    event.target.value = '';
+    if (!file) return;
+    setBusy(true);
+    setError('');
+    const result = await adminApi.uploadImage(file);
+    setBusy(false);
+    if (result.ok) onChange(result.data.url);
+    else setError(result.message);
+  };
+
+  return (
+    <div className="ad-field">
+      <span>{label}{hint && <small> — {hint}</small>}</span>
+      <div className="ad-photo-field">
+        <span className="ad-photo-preview">{value ? <img src={mediaUrl(value)} alt="" /> : <small>No photo</small>}</span>
+        <div className="ad-stack">
+          <div className="ad-row">
+            <button type="button" className="ad-btn ad-btn--ghost ad-btn--small" disabled={busy} onClick={() => input.current?.click()}>
+              <ImagePlus size={14} aria-hidden="true" /> {busy ? 'Uploading…' : value ? 'Replace photo' : 'Upload photo'}
+            </button>
+            {value && <button type="button" className="ad-link-text" onClick={() => onChange('')}>Remove</button>}
+          </div>
+          {error && <p className="ad-error ad-small">{error}</p>}
+        </div>
+      </div>
+      <input ref={input} type="file" accept="image/jpeg,image/png,image/webp,image/avif" hidden onChange={upload} />
+    </div>
   );
 }

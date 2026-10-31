@@ -1,8 +1,8 @@
 import { BadgeCheck, Clock, Leaf, Package, ShieldCheck, Sparkles } from 'lucide-react';
-import ProductVisual from './ProductVisual';
+import { mediaUrl } from '../../lib/media';
 
-// The product's opening screen, realme style: a giant headline, the product large and
-// floating with the Jayam seal, and its key points in a row underneath.
+// The product's opening screen, realme style: a giant headline, three lifestyle photos
+// set diagonally with the Jayam seal (Admin → Products), and its key points underneath.
 const ICONS = [Leaf, ShieldCheck, BadgeCheck, Sparkles, Package, Clock];
 
 const jump = (event, id) => {
@@ -10,7 +10,7 @@ const jump = (event, id) => {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
 
-export default function ProductHero({ product, name, category, points }) {
+export default function ProductHero({ product, name, category, points, images }) {
   return (
     <section className="kv" id="overview" aria-labelledby="kv-title">
       <div className="kv-copy">
@@ -23,11 +23,13 @@ export default function ProductHero({ product, name, category, points }) {
         </div>
       </div>
 
-      <div className="kv-stage" aria-hidden="true">
-        <span className="kv-halo" />
-        <span className="kv-pack"><ProductVisual product={product} size="hero" eager /></span>
+      <div className={`kv-collage kv-collage--${images.length}`} aria-hidden="true">
+        {images.map((image, index) => (
+          <figure key={`${index}-${image}`} className={`kv-shot kv-shot--${index + 1}`}>
+            <img src={mediaUrl(image)} alt="" decoding="async" fetchPriority={index === 0 ? 'high' : undefined} />
+          </figure>
+        ))}
         <span className="kv-seal"><img src="/jayam-logo.png" alt="" /></span>
-        <span className="kv-floor" />
       </div>
 
       {points.length > 0 && (

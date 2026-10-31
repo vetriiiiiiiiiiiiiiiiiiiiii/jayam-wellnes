@@ -14,6 +14,8 @@ import { useSiteContent } from '../lib/content';
 import { CATEGORY_LABELS, FREE_SHIPPING_THRESHOLD, formatPrice } from '../lib/store';
 import useScrollReveal from '../lib/useScrollReveal';
 import usePageMeta from '../lib/usePageMeta';
+import { PLACEHOLDER_PHOTOS } from '../lib/placeholderPhotos';
+import { mediaUrl } from '../lib/media';
 
 // Quick-glance trust points, taken from the product information Jayam supplied
 const TRUST_POINTS = {
@@ -23,6 +25,16 @@ const TRUST_POINTS = {
 
 // Required alongside structure/function statements on U.S. dietary supplements
 const FDA_STATEMENT = '*These statements have not been evaluated by the Food and Drug Administration. This product is not intended to diagnose, treat, cure, or prevent any disease.';
+
+// Quality badges in one row above the buy-section photo
+const BADGES = [
+  { file: 'organic', label: '100% organic' },
+  { file: 'vegan', label: '100% vegan' },
+  { file: 'gmp', label: 'GMP certified' },
+  { file: 'premium', label: 'Premium quality' },
+  { file: 'gmo-free', label: 'GMO free' },
+  { file: 'gluten-free', label: 'Gluten free' },
+];
 
 // Highlight tiles cycle through the client palette
 const TONES = ['fern', 'wheat', 'earth', 'cherry', 'hay', 'surface'];
@@ -106,6 +118,9 @@ export default function ProductPage() {
   const compareAt = selectedVariant ? selectedVariant.compareAtPrice : product.compareAtPrice;
   const category = product.category || CATEGORY_LABELS[product.productType] || 'Wellness';
   const specs = product.specs || [];
+  // Photos set in Admin → Products; stand-ins until they are uploaded
+  const savedHero = (product.story?.heroImages || []).filter(Boolean);
+  const heroImages = savedHero.length ? savedHero : PLACEHOLDER_PHOTOS.slice(0, 3);
   // The story edited on the product (Admin → Products); older text from Site content as a fallback
   const story = hasStory(product.story) ? product.story : hasStory(stories[product.slug]) ? stories[product.slug] : null;
 
@@ -136,11 +151,11 @@ export default function ProductPage() {
   return (
     <main className="pg pp pp--story">
       <ProductSubnav name={shortTitle} price={price} sections={sections} />
-      <ProductHero product={product} name={shortTitle} category={category} points={TRUST_POINTS[product.productType] || []} />
+      <ProductHero product={product} name={shortTitle} category={category} points={TRUST_POINTS[product.productType] || []} images={heroImages} />
 
       <div id="features" className="pp-features">
       {story ? (
-        <ProductStory product={product} story={story} description={product.description} onBuy={buy} />
+        <ProductStory story={story} description={product.description} onBuy={buy} />
       ) : product.description && (
         <section className="pp-overview" data-reveal>
           <p className="pg-eyebrow">Overview</p>
@@ -153,8 +168,9 @@ export default function ProductPage() {
         <section className="pp-highlights pp-bento" aria-labelledby="pp-highlights-title">
           <h2 id="pp-highlights-title" className="pg-section-title">The details <em>that matter.</em></h2>
           <div className="pp-highlight-grid">
-            {product.highlights.map(({ title, body }, index) => (
-              <article key={title} className={`pp-highlight pp-highlight--${TONES[index % TONES.length]}`} data-reveal>
+            {product.highlights.map(({ title, body, image }, index) => (
+              <article key={title} className={`pp-highlight pp-highlight--photo pp-highlight--${TONES[index % TONES.length]}`} data-reveal>
+                <img className="pp-highlight-photo" src={mediaUrl(image || PLACEHOLDER_PHOTOS[index % PLACEHOLDER_PHOTOS.length])} alt="" loading="lazy" decoding="async" />
                 <span className="pp-highlight-number">{String(index + 1).padStart(2, '0')}</span>
                 <h3>{title}</h3>
                 <p>{body}</p>
@@ -199,6 +215,11 @@ export default function ProductPage() {
 
       <section className="pp-buyzone" id="buy" aria-labelledby="pp-buyzone-title">
         <h2 id="pp-buyzone-title" className="pg-section-title">Make it <em>yours.</em></h2>
+        <ul className="pp-badges" aria-label="Product certifications and qualities">
+          {BADGES.map(({ file, label }) => (
+            <li key={file}><img src={`/badges/${file}.webp`} alt={label} loading="lazy" decoding="async" /></li>
+          ))}
+        </ul>
       <section className="pp-top">
         <div className="pp-stage">
           <ProductGallery images={product.images} product={product} />

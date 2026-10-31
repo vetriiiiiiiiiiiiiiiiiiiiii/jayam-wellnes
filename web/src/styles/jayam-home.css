@@ -1154,3 +1154,37 @@
 .sc-art .pv img {
   border-radius: 18px;
 }
+
+/* ---------- Hero: the seal alone ---------- */
+.hs {
+  display: grid;
+  height: auto;
+  place-items: center;
+  margin-top: 36px;
+  padding-bottom: 56px;
+}
+
+.hs-seal {
+  position: relative;
+  top: auto;
+  left: auto;
+  width: clamp(290px, 34vw, 430px);
+  transform: none;
+}
+
+@media (max-width: 640px) {
+  .hs {
+    height: auto;
+    margin-top: 24px;
+    padding-bottom: 32px;
+  }
+
+  .hs-seal {
+    width: min(78vw, 300px);
+  }
+}
+
+/* Solid bars, so the page never ghosts through them while scrolling */
+.an::before {
+  background: var(--white);
+}

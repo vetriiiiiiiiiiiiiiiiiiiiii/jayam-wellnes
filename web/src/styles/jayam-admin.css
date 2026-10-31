@@ -1101,3 +1101,8 @@ a.ad-tile:hover {
   border-bottom: 1px solid var(--ad-line);
   margin-bottom: 2px;
 }
+
+/* Rows stay as tall as their fields, not their reorder buttons */
+.ad-list-fields {
+  align-content: start;
+}

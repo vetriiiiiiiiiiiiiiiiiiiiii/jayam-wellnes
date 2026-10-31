@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { ImagePlus } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import { HOME_DEFAULTS, forgetContent, loadContent, mergeContent } from '../../lib/content';
-import { adminApi, mediaUrl } from '../../lib/adminApi';
+import { adminApi } from '../../lib/adminApi';
+import { PhotoField } from './adminBits';
 
 // Admin → Site content: edit the storefront text without touching code.
 // The form is built from the shape of the default content, so every text block
@@ -119,7 +119,7 @@ function Field({ name, template, value, onChange, depth }) {
   }
 
   const text = typeof value === 'string' ? value : '';
-  if (name === 'image') return <ImageField value={text} onChange={onChange} />;
+  if (name === 'image') return <PhotoField hint="leave empty to show the illustration" value={text} onChange={onChange} />;
   const long = LONG_FIELDS.includes(name) || String(template).length > 80;
   return (
     <label className="block text-xs font-medium text-gray-600">
@@ -128,45 +128,6 @@ function Field({ name, template, value, onChange, depth }) {
         ? <textarea className={`${inputClass} mt-1`} rows={3} value={text} onChange={(event) => onChange(event.target.value)} />
         : <input className={`${inputClass} mt-1`} value={text} onChange={(event) => onChange(event.target.value)} />}
     </label>
-  );
-}
-
-// A photo field: upload a new image or paste an address; shows a preview
-function ImageField({ value, onChange }) {
-  const input = useRef(null);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
-
-  const upload = async (event) => {
-    const file = event.target.files[0];
-    event.target.value = '';
-    if (!file) return;
-    setBusy(true);
-    setError('');
-    const result = await adminApi.uploadImage(file);
-    setBusy(false);
-    if (result.ok) onChange(result.data.url);
-    else setError(result.message);
-  };
-
-  return (
-    <div className="ad-field">
-      <span>Photo <small>— leave empty to show the illustration</small></span>
-      <div className="ad-photo-field">
-        <span className="ad-photo-preview">{value ? <img src={mediaUrl(value)} alt="" /> : <small>No photo</small>}</span>
-        <div className="ad-stack">
-          <input className={inputClass} value={value} placeholder="/difference/photo.jpg or https://…" onChange={(event) => onChange(event.target.value)} />
-          <div className="ad-row">
-            <button type="button" className="ad-btn ad-btn--ghost ad-btn--small" disabled={busy} onClick={() => input.current?.click()}>
-              <ImagePlus size={14} aria-hidden="true" /> {busy ? 'Uploading…' : 'Upload photo'}
-            </button>
-            {value && <button type="button" className="ad-link-text" onClick={() => onChange('')}>Remove</button>}
-          </div>
-          {error && <p className="ad-error ad-small">{error}</p>}
-        </div>
-      </div>
-      <input ref={input} type="file" accept="image/jpeg,image/png,image/webp,image/avif" hidden onChange={upload} />
-    </div>
   );
 }
 

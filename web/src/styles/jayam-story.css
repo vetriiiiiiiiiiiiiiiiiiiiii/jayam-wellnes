@@ -515,43 +515,6 @@
   justify-content: center;
   margin-top: 26px;
 }
-
-.kv-stage {
-  position: relative;
-  width: min(82vw, 400px);
-  margin-top: 28px;
-  perspective: 1000px;
-}
-
-.kv-halo {
-  position: absolute;
-  top: 6%;
-  left: 50%;
-  width: 150%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(104, 178, 160, 0.38) 0%, rgba(104, 178, 160, 0.12) 40%, rgba(104, 178, 160, 0) 66%);
-  transform: translateX(-50%);
-}
-
-.kv-pack {
-  position: relative;
-  display: block;
-  width: 72%;
-  margin: 0 auto;
-}
-
-.kv-pack .jayam-art {
-  aspect-ratio: 260 / 320;
-  overflow: visible;
-  padding: 0;
-  background: transparent;
-}
-
-.kv-pack img {
-  border-radius: 24px;
-}
-
 .kv-seal {
   position: absolute;
   right: 4%;
@@ -568,17 +531,6 @@
 .kv-seal img {
   width: 86%;
 }
-
-.kv-floor {
-  position: absolute;
-  bottom: -2%;
-  left: 15%;
-  width: 70%;
-  height: 8%;
-  border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(44, 105, 117, 0.3) 0%, rgba(44, 105, 117, 0) 70%);
-}
-
 .kv-points {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -608,12 +560,6 @@
 /* Scroll-linked motion: the pack rises into place on arrival and the headline eases
    out as you move on — CSS only, so nothing runs on the main thread while scrolling */
 @supports (animation-timeline: view()) {
-  .kv-pack {
-    animation: kv-pack-in linear both;
-    animation-timeline: view();
-    animation-range: entry 0% cover 50%;
-  }
-
   .kv-copy {
     animation: kv-copy-out linear both;
     animation-timeline: view();
@@ -767,5 +713,502 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .kv-pack, .kv-copy, .ps-life h2, .ps-about h2, .pg-section-title, .ps-promise-line { animation: none; }
+  .kv-copy, .ps-life h2, .ps-about h2, .pg-section-title, .ps-promise-line { animation: none; }
+}
+
+/* ==========================================
+   SECTION PHOTOS AND THE LIFESTYLE COLLAGE
+   Every photo is chosen per chapter in Admin → Products.
+   ========================================== */
+.pn {
+  background: var(--white);
+}
+
+.ps figure {
+  margin: 0;
+}
+
+.ps figure img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Lifestyle: photo beside the words, or the words alone, centred */
+.ps-life-photo {
+  aspect-ratio: 4 / 5;
+  width: min(100%, 440px);
+  justify-self: center;
+  overflow: hidden;
+  border: 8px solid rgba(255, 255, 255, 0.92);
+  border-radius: 32px;
+  box-shadow: 0 50px 80px -40px rgba(0, 0, 0, 0.65);
+  rotate: 2.5deg;
+}
+
+.ps-life-inner--text {
+  grid-template-columns: minmax(0, 820px);
+  justify-content: center;
+  text-align: center;
+}
+
+.ps-life-inner--text .ps-life-copy > p:not(.ps-chip) {
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.ps-life-inner--text .ps-tags {
+  justify-content: center;
+}
+
+/* A day with it: a wide photo over the timeline */
+.ps-day-photo {
+  aspect-ratio: 21 / 9;
+  overflow: hidden;
+  margin-bottom: 64px !important;
+  border-radius: 32px;
+  box-shadow: 0 40px 70px -45px rgba(44, 105, 117, 0.7);
+}
+
+/* ---------- Collage: three shapes stepping down a diagonal ---------- */
+.ps-collage {
+  position: relative;
+  overflow: hidden;
+  margin-top: 120px;
+  padding: 40px 22px 90px;
+}
+
+.ps-collage-band {
+  position: absolute;
+  z-index: 0;
+  top: 22%;
+  left: -10%;
+  width: 120%;
+  height: 56%;
+  background: linear-gradient(90deg, var(--mist) 0%, var(--sage-tint) 100%);
+  rotate: 9deg;
+}
+
+.ps-collage-head {
+  position: relative;
+  z-index: 1;
+  max-width: 1120px;
+  margin: 0 auto 48px;
+}
+
+.ps-collage-head h2 {
+  max-width: 620px;
+  margin: 0;
+  color: var(--teal);
+  font: 750 clamp(34px, 4.6vw, 56px) / 1.06 var(--display);
+  letter-spacing: -0.035em;
+}
+
+.ps-collage-head p:not(.pg-eyebrow) {
+  max-width: 480px;
+  margin: 14px 0 0;
+  color: var(--muted);
+  font: 400 clamp(16px, 1.4vw, 19px) / 1.55 var(--sans);
+}
+
+.ps-collage-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.ps-shot {
+  overflow: hidden;
+  border: 8px solid var(--white);
+  border-radius: 26px;
+  box-shadow: 0 40px 60px -32px rgba(44, 105, 117, 0.6);
+  transition: scale 500ms var(--ease-soft);
+}
+
+.ps-shot:hover {
+  z-index: 3;
+  scale: 1.03;
+}
+
+.ps-shot--1 {
+  z-index: 1;
+  grid-area: 1 / 1 / 2 / 6;
+  aspect-ratio: 3 / 4;
+  rotate: -3deg;
+}
+
+.ps-shot--2 {
+  z-index: 2;
+  grid-area: 1 / 5 / 2 / 11;
+  align-self: start;
+  aspect-ratio: 4 / 3;
+  margin-top: 26%;
+  rotate: 1.5deg;
+}
+
+.ps-shot--3 {
+  z-index: 3;
+  grid-area: 1 / 9 / 2 / 13;
+  align-self: start;
+  aspect-ratio: 1;
+  margin-top: 88%;
+  rotate: -2deg;
+}
+
+/* With fewer photos, keep them generous */
+.ps-collage--1 .ps-shot--1 {
+  grid-area: 1 / 4 / 2 / 10;
+}
+
+.ps-collage--2 .ps-shot--1 {
+  grid-area: 1 / 2 / 2 / 7;
+}
+
+.ps-collage--2 .ps-shot--2 {
+  grid-area: 1 / 6 / 2 / 12;
+}
+
+/* What's inside, with its photo */
+.pp--story .ps-about-inner--photo {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  justify-items: stretch;
+  text-align: left;
+}
+
+.ps-about-photo {
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 8px solid rgba(255, 255, 255, 0.85);
+  border-radius: 50%;
+  box-shadow: 0 40px 70px -40px rgba(44, 105, 117, 0.75);
+}
+
+.pp--story .ps-about-inner--photo .ps-facts {
+  grid-column: 1 / -1;
+  justify-self: center;
+  text-align: center;
+}
+
+/* Is it right for you, with its photo */
+.ps-fit-grid--photo {
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr) minmax(0, 1fr);
+}
+
+.ps-fit-photo {
+  min-height: 100%;
+  overflow: hidden;
+  border-radius: 28px;
+}
+
+/* Closing promise over a full-width photo */
+.ps-promise--photo {
+  position: relative;
+  display: grid;
+  max-width: none;
+  min-height: 72vh;
+  place-items: center;
+  overflow: hidden;
+  padding: 80px 22px;
+}
+
+.ps-promise-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ps-promise--photo::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(29, 71, 80, 0.45) 0%, rgba(29, 71, 80, 0.72) 100%);
+  content: '';
+}
+
+.ps-promise--photo .ps-promise-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+}
+
+.ps-promise--photo .ps-promise-line {
+  background: none;
+  color: var(--white);
+}
+
+.ps-promise--photo .ap-pill {
+  border-color: var(--white);
+  background: var(--white);
+  color: var(--teal);
+}
+
+/* Photos drift at different speeds as the collage scrolls past */
+@supports (animation-timeline: view()) {
+  .ps-shot {
+    animation: ps-drift linear both;
+    animation-timeline: view();
+    animation-range: entry 0% exit 100%;
+  }
+
+  .ps-shot--1 { --drift: 50px; }
+  .ps-shot--2 { --drift: 90px; }
+  .ps-shot--3 { --drift: 140px; }
+
+  @keyframes ps-drift {
+    from { translate: 0 var(--drift); }
+    to { translate: 0 calc(var(--drift) * -0.6); }
+  }
+}
+
+@media (max-width: 860px) {
+  .ps-life-photo { width: min(82%, 360px); }
+  .ps-day-photo { aspect-ratio: 16 / 10; margin-bottom: 40px !important; border-radius: 24px; }
+  .ps-collage { margin-top: 88px; padding: 20px 16px 60px; }
+  .ps-collage-band { top: 30%; height: 44%; rotate: 14deg; }
+  .ps-collage-grid { display: flex; flex-direction: column; }
+  .ps-shot { border-width: 6px; border-radius: 20px; }
+  .ps-shot--1 { width: 64%; }
+  .ps-shot--2 { width: 80%; margin-top: -14%; align-self: flex-end; }
+  .ps-shot--3 { width: 56%; margin-top: -10%; margin-left: 6%; }
+  .pp--story .ps-about-inner--photo { grid-template-columns: 1fr; text-align: center; }
+  .ps-about-photo { width: min(72%, 300px); justify-self: center; }
+  .ps-fit-grid--photo { grid-template-columns: 1fr; }
+  .ps-fit-photo { min-height: 0; aspect-ratio: 16 / 10; }
+  .ps-promise--photo { min-height: 60vh; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ps-shot { animation: none; }
+}
+
+.ps-collage {
+  padding-bottom: 170px;
+}
+
+@media (max-width: 860px) {
+  .ps-collage { padding-bottom: 72px; }
+  .ps-shot { animation: none !important; }
+}
+
+/* A gentle drift that keeps the three photos stepping clearly down the diagonal */
+.ps-shot--1 { --drift: 20px; }
+.ps-shot--2 { --drift: 34px; margin-top: 30%; }
+.ps-shot--3 { --drift: 48px; margin-top: 112%; }
+
+@media (max-width: 860px) {
+  .ps-shot--2 { margin-top: -14%; }
+  .ps-shot--3 { margin-top: -10%; }
+}
+
+/* These must outrank `.ps figure { margin: 0 }` */
+.ps .ps-shot--2 { margin-top: 30%; }
+.ps .ps-shot--3 { margin-top: 112%; }
+
+@media (max-width: 860px) {
+  .ps .ps-shot--2 { margin-top: -14%; }
+  .ps .ps-shot--3 { margin-top: -10%; margin-left: 6%; }
+}
+
+/* ---------- Product hero: three lifestyle photos on a diagonal ---------- */
+.kv-collage {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  width: min(100%, 1040px);
+  margin-top: 44px;
+  padding-bottom: 40px;
+}
+
+.kv-shot {
+  margin: 0;
+  overflow: hidden;
+  border: 8px solid var(--white);
+  border-radius: 26px;
+  box-shadow: 0 36px 60px -32px rgba(44, 105, 117, 0.65);
+}
+
+.kv-shot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.kv-shot--1 {
+  z-index: 1;
+  grid-area: 1 / 1 / 2 / 6;
+  aspect-ratio: 3 / 4;
+  rotate: -3deg;
+}
+
+.kv-shot--2 {
+  z-index: 2;
+  grid-area: 1 / 5 / 2 / 9;
+  align-self: start;
+  aspect-ratio: 1;
+  margin-top: 16%;
+  rotate: 2deg;
+}
+
+.kv-shot--3 {
+  z-index: 3;
+  grid-area: 1 / 8 / 2 / 13;
+  align-self: start;
+  aspect-ratio: 4 / 3;
+  margin-top: 46%;
+  rotate: -1.5deg;
+}
+
+.kv-collage--1 .kv-shot--1 {
+  grid-area: 1 / 4 / 2 / 10;
+}
+
+.kv-collage--2 .kv-shot--1 {
+  grid-area: 1 / 2 / 2 / 7;
+}
+
+.kv-collage--2 .kv-shot--2 {
+  grid-area: 1 / 6 / 2 / 12;
+}
+
+.kv-collage .kv-seal {
+  z-index: 4;
+  top: 2%;
+  right: 6%;
+  bottom: auto;
+  width: 15%;
+}
+
+/* ---------- Feature boxes: a photo fading into the card colour ---------- */
+.pp-highlight--photo {
+  position: relative;
+  overflow: hidden;
+  min-height: 420px;
+  isolation: isolate;
+}
+
+.pp-highlight-photo {
+  position: absolute;
+  z-index: -2;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 66%;
+  object-fit: cover;
+  transition: scale 900ms var(--ease-soft);
+}
+
+.pp-highlight--photo:hover .pp-highlight-photo {
+  scale: 1.05;
+}
+
+.pp-highlight--photo::after {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 34%, var(--hl-bg) 66%);
+  content: '';
+}
+
+.pp-highlight--photo.pp-highlight--fern { --hl-bg: #2c6975; background: #2c6975; }
+.pp-highlight--photo.pp-highlight--wheat { --hl-bg: #dde9d8; background: #dde9d8; }
+.pp-highlight--photo.pp-highlight--earth { --hl-bg: #1d4750; background: #1d4750; }
+.pp-highlight--photo.pp-highlight--cherry { --hl-bg: #f1f6f0; background: #f1f6f0; }
+.pp-highlight--photo.pp-highlight--hay { --hl-bg: #e0ecde; background: #e0ecde; }
+.pp-highlight--photo.pp-highlight--surface { --hl-bg: #f1f6f0; background: #f1f6f0; }
+
+.pp-highlight--photo .pp-highlight-number {
+  align-self: flex-end;
+  border-radius: 980px;
+  background: rgba(255, 255, 255, 0.88);
+  padding: 3px 10px;
+  color: var(--teal);
+  opacity: 1;
+}
+
+.pp-highlight--photo h3 {
+  padding-top: 170px;
+}
+
+.pp-bento .pp-highlight--photo:nth-child(7n + 1) .pp-highlight-photo {
+  height: 72%;
+}
+
+.pp-bento .pp-highlight--photo:nth-child(7n + 1)::after {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 42%, var(--hl-bg) 72%);
+}
+
+@media (max-width: 860px) {
+  .kv-collage { display: flex; flex-direction: column; margin-top: 32px; }
+  .kv-shot { border-width: 6px; border-radius: 20px; }
+  .kv-shot--1 { width: 62%; align-self: flex-start; }
+  .kv-shot--2 { width: 48%; margin-top: -28%; align-self: flex-end; }
+  .kv-shot--3 { width: 74%; margin-top: -8%; margin-left: 4%; }
+  .kv-collage .kv-seal { top: auto; right: 2%; bottom: 8%; width: 26%; }
+  .pp-highlight--photo { min-height: 400px; }
+}
+
+/* Photo on top with a soft fade; the text sits below it, so long copy never covers it */
+.pp-highlight--photo {
+  min-height: 0;
+  padding: 0 28px 28px;
+}
+
+.pp-highlight-photo {
+  position: relative;
+  z-index: auto;
+  flex: 1 1 220px;
+  width: calc(100% + 56px);
+  height: auto;
+  min-height: 210px;
+  margin: 0 -28px 16px;
+  -webkit-mask-image: linear-gradient(180deg, #000 74%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 74%, transparent 100%);
+}
+
+.pp-bento .pp-highlight--photo:nth-child(7n + 1) .pp-highlight-photo {
+  height: auto;
+}
+
+.pp-highlight--photo::after,
+.pp-bento .pp-highlight--photo:nth-child(7n + 1)::after {
+  content: none;
+}
+
+.pp-highlight--photo .pp-highlight-number {
+  position: absolute;
+  z-index: 1;
+  top: 16px;
+  right: 16px;
+}
+
+.pp-highlight--photo h3 {
+  margin: 0 0 10px;
+  padding-top: 0;
+}
+
+.pp-highlight-photo {
+  max-width: none;
+}
+
+/* Quality badges: always one row, shrinking to fit the screen */
+.pp-badges {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: clamp(4px, 1.6vw, 22px);
+  max-width: 1000px;
+  margin: -8px auto 36px;
+  padding: 0 clamp(10px, 2vw, 22px);
+  list-style: none;
+}
+
+.pp-badges img {
+  display: block;
+  width: 100%;
+  height: auto;
 }

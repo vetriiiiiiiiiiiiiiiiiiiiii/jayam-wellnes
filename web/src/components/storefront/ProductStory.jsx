@@ -1,5 +1,5 @@
 import { Check, Info, Moon, Sun, Sunrise } from 'lucide-react';
-import ProductVisual from './ProductVisual';
+import { mediaUrl } from '../../lib/media';
 
 // The product's story, told in five chapters that lead into each other:
 // who it is for → why you reach for it → what is inside → is it right for you → the promise.
@@ -20,21 +20,24 @@ export const storyChapters = (story) => {
   const goodToKnow = (story.fit?.goodToKnow || []).filter(filled);
   const fit = forYou.length || goodToKnow.length ? { ...story.fit, forYou, goodToKnow } : null;
   const promise = filled(story.promise) ? story.promise : null;
-  return { lifestyle, moments, about, fit, promise };
+  const photos = (story.collage?.images || []).filter(filled);
+  const collage = photos.length ? { ...story.collage, photos } : null;
+  return { lifestyle, moments, collage, about, fit, promise };
 };
 
 export const hasStory = (story) => Object.values(storyChapters(story)).some(Boolean);
 
-export default function ProductStory({ product, story, description, onBuy }) {
+export default function ProductStory({ story, description, onBuy }) {
   if (!hasStory(story)) return null;
-  const { lifestyle, moments, about, fit, promise } = storyChapters(story);
+  const { lifestyle, moments, collage, about, fit, promise } = storyChapters(story);
+  const promisePhoto = filled(story.promiseImage) ? story.promiseImage : null;
 
   return (
     <div className="ps">
       {lifestyle && (
         <section className="ps-life" aria-labelledby="ps-life-title">
           <span className="ps-life-word" aria-hidden="true">{lifestyle.word}</span>
-          <div className="ps-life-inner">
+          <div className={`ps-life-inner${lifestyle.image ? '' : ' ps-life-inner--text'}`}>
             <div className="ps-life-copy" data-reveal>
               {lifestyle.label && <p className="ps-chip">{lifestyle.label}</p>}
               <h2 id="ps-life-title">{lifestyle.title}</h2>
@@ -45,10 +48,11 @@ export default function ProductStory({ product, story, description, onBuy }) {
                 </ul>
               )}
             </div>
-            <div className="ps-life-visual" aria-hidden="true" data-reveal>
-              <span className="ps-life-pack"><ProductVisual product={product} /></span>
-              <span className="ps-life-seal"><img src="/jayam-logo.png" alt="" loading="lazy" /></span>
-            </div>
+            {lifestyle.image && (
+              <figure className="ps-life-photo" data-reveal>
+                <img src={mediaUrl(lifestyle.image)} alt="" loading="lazy" decoding="async" />
+              </figure>
+            )}
           </div>
         </section>
       )}
@@ -56,6 +60,11 @@ export default function ProductStory({ product, story, description, onBuy }) {
       {moments?.items?.length > 0 && (
         <section className="ps-day" aria-labelledby="ps-day-title">
           <h2 id="ps-day-title" className="pg-section-title" data-reveal>{moments.title}</h2>
+          {moments.image && (
+            <figure className="ps-day-photo" data-reveal>
+              <img src={mediaUrl(moments.image)} alt="" loading="lazy" decoding="async" />
+            </figure>
+          )}
           <ol className="ps-timeline">
             {moments.items.map(({ time, title, body }, index) => {
               const Icon = MOMENT_ICONS[index % MOMENT_ICONS.length];
@@ -72,9 +81,34 @@ export default function ProductStory({ product, story, description, onBuy }) {
         </section>
       )}
 
+      {collage && (
+        <section className={`ps-collage ps-collage--${collage.photos.length}`} aria-label={collage.title || 'Lifestyle photos'}>
+          <span className="ps-collage-band" aria-hidden="true" />
+          {(collage.eyebrow || collage.title || collage.body) && (
+            <header className="ps-collage-head" data-reveal>
+              {collage.eyebrow && <p className="pg-eyebrow">{collage.eyebrow}</p>}
+              {collage.title && <h2>{collage.title}</h2>}
+              {collage.body && <p>{collage.body}</p>}
+            </header>
+          )}
+          <div className="ps-collage-grid">
+            {collage.photos.map((photo, index) => (
+              <figure key={`${index}-${photo}`} className={`ps-shot ps-shot--${index + 1}`} data-reveal>
+                <img src={mediaUrl(photo)} alt="" loading="lazy" decoding="async" />
+              </figure>
+            ))}
+          </div>
+        </section>
+      )}
+
       {about && (
         <section className="ps-about" aria-labelledby="ps-about-title">
-          <div className="ps-about-inner">
+          <div className={`ps-about-inner${about.image ? ' ps-about-inner--photo' : ''}`}>
+            {about.image && (
+              <figure className="ps-about-photo" data-reveal>
+                <img src={mediaUrl(about.image)} alt="" loading="lazy" decoding="async" />
+              </figure>
+            )}
             <div className="ps-about-copy" data-reveal>
               {about.eyebrow && <p className="pg-eyebrow">{about.eyebrow}</p>}
               <h2 id="ps-about-title">{about.title}</h2>
@@ -103,7 +137,12 @@ export default function ProductStory({ product, story, description, onBuy }) {
       {fit && (
         <section className="ps-fit" aria-labelledby="ps-fit-title">
           <h2 id="ps-fit-title" className="pg-section-title" data-reveal>{fit.title}</h2>
-          <div className="ps-fit-grid">
+          <div className={`ps-fit-grid${fit.image ? ' ps-fit-grid--photo' : ''}`}>
+            {fit.image && (
+              <figure className="ps-fit-photo" data-reveal>
+                <img src={mediaUrl(fit.image)} alt="" loading="lazy" decoding="async" />
+              </figure>
+            )}
             {fit.forYou?.length > 0 && (
               <article className="ps-fit-card ps-fit-card--yes" data-reveal>
                 <h3>Made for you if…</h3>
@@ -125,10 +164,13 @@ export default function ProductStory({ product, story, description, onBuy }) {
       )}
 
       {promise && (
-        <section className="ps-promise" data-reveal>
-          <span className="ps-promise-seal" aria-hidden="true"><img src="/jayam-logo.png" alt="" loading="lazy" /></span>
-          <p className="ps-promise-line">{promise}</p>
-          {onBuy && <button type="button" className="ap-pill" onClick={onBuy}>Add to bag</button>}
+        <section className={`ps-promise${promisePhoto ? ' ps-promise--photo' : ''}`} data-reveal>
+          {promisePhoto && <img className="ps-promise-bg" src={mediaUrl(promisePhoto)} alt="" loading="lazy" decoding="async" />}
+          <div className="ps-promise-inner">
+            <span className="ps-promise-seal" aria-hidden="true"><img src="/jayam-logo.png" alt="" loading="lazy" /></span>
+            <p className="ps-promise-line">{promise}</p>
+            {onBuy && <button type="button" className="ap-pill" onClick={onBuy}>Add to bag</button>}
+          </div>
         </section>
       )}
     </div>
