@@ -16,7 +16,7 @@ const SIZES = {
 };
 
 const ALLOWED = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/gif'];
-const MAX_BYTES = 8 * 1024 * 1024;
+const MAX_BYTES = 20 * 1024 * 1024;
 
 const removeQuietly = (file) => {
   try {
@@ -32,7 +32,7 @@ async function storeImage(file, kind, ownerId = 'site') {
   const input = path.resolve(file.path);
   try {
     if (!ALLOWED.includes(file.mimetype)) throw new Error('Please upload a JPEG, PNG, WebP or AVIF image');
-    if (file.size > MAX_BYTES) throw new Error('Images must be 8 MB or smaller');
+    if (file.size > MAX_BYTES) throw new Error('Images must be 20 MB or smaller');
 
     const size = SIZES[kind] || SIZES.content;
     const random = Math.random().toString(36).slice(2, 10);

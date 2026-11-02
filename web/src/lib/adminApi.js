@@ -26,7 +26,7 @@ export const adminApi = {
   uploadImage: (file) => {
     const form = new FormData();
     form.append('image', file);
-    return call(() => authApi.post('admin/uploads', form), 'Could not upload the image');
+    return call(() => authApi.post('admin/uploads', form), 'Could not upload the image. Please try a smaller JPEG or PNG.');
   },
 
   enquiries: (status) => call(() => authApi.get('admin/enquiries', { params: status ? { status } : {} }), 'Could not load enquiries'),

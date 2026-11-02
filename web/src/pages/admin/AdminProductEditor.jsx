@@ -255,7 +255,7 @@ export default function AdminProductEditor() {
               )}
             </div>
             <input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp,image/avif" multiple hidden onChange={addFiles} />
-            <p className="ad-muted ad-small">JPEG, PNG, WebP or AVIF, up to 8 MB each. Photos are resized and saved when you save the product.</p>
+            <p className="ad-muted ad-small">JPEG, PNG, WebP or AVIF, up to 20 MB each. Photos are resized and saved when you save the product.</p>
           </section>
 
           {!creating && (

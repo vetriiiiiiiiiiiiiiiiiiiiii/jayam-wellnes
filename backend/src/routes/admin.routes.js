@@ -6,8 +6,17 @@ const adminController = require('../controllers/adminController');
 // Uploads land in a temp folder, then are resized to WebP by services/mediaService
 const upload = multer({
   dest: 'uploads/temp/',
-  limits: { fileSize: 8 * 1024 * 1024, files: 20 },
+  limits: { fileSize: 20 * 1024 * 1024, files: 20 },
   fileFilter: (req, file, cb) => cb(null, /^image\/(jpeg|png|webp|avif|gif)$/.test(file.mimetype)),
+});
+
+// Run multer, turning its failures into messages the admin panel can show
+const accept = (middleware) => (req, res, next) => middleware(req, res, (error) => {
+  if (!error) return next();
+  if (error.code === 'LIMIT_FILE_SIZE') return res.status(400).json({ message: 'Images must be 20 MB or smaller' });
+  if (error.code === 'LIMIT_FILE_COUNT' || error.code === 'LIMIT_UNEXPECTED_FILE') return res.status(400).json({ message: 'Please upload up to 20 photos at a time' });
+  console.error('Upload failed:', error);
+  res.status(500).json({ message: `The server could not save the photo (${error.code || 'unknown error'})` });
 });
 
 const router = express.Router();
@@ -27,8 +36,8 @@ router.post('/orders/:id/refund', adminController.refundOrder);
 // Product Management
 router.get('/products', adminController.getAllProducts);
 router.post('/products/add-defaults', adminController.addDefaultProducts);
-router.post('/products', upload.array('images', 20), adminController.createProduct);
-router.put('/products/:id', upload.array('images', 20), adminController.updateProduct);
+router.post('/products', accept(upload.array('images', 20)), adminController.createProduct);
+router.put('/products/:id', accept(upload.array('images', 20)), adminController.updateProduct);
 router.delete('/products/:id', adminController.deleteProduct);
 
 // User Management
@@ -51,6 +60,6 @@ router.put('/enquiries/:id', enquiryController.updateEnquiryStatus);
 // Editable storefront text
 const contentController = require('../controllers/contentController');
 router.put('/content/:key', contentController.updateContent);
-router.post('/uploads', upload.single('image'), adminController.uploadContentImage);
+router.post('/uploads', accept(upload.single('image')), adminController.uploadContentImage);
 
 module.exports = router;
