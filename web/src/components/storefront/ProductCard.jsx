@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from './CartProvider';
 import { CATEGORY_LABELS, formatPrice } from '../../lib/store';
 import ProductVisual from './ProductVisual';
+import { mediaUrl } from '../../lib/media';
 
 export const shortName = (product) => product.name.replace(/^Organic\s+/i, '').split(' — ')[0];
 
@@ -38,11 +39,13 @@ const KICKERS = {
 
 // A product tile in the apple.com manner: kicker, big name, one-line tagline,
 // "Learn more" and "Buy", the price, then the product large at the bottom.
+// With a tile photo from Admin → Products, that photo fills the whole box instead.
 // size: "feature" (full width), "regular" (half width) or "compact" (thirds)
 export default function ProductCard({ product, size = 'regular' }) {
   const { addToCart } = useCart();
   const navigate = useNavigate();
   const image = product.images?.[0]?.url;
+  const tilePhoto = product.story?.tileImage;
   const hasVariants = product.variants?.length > 0;
   const price = hasVariants
     ? Math.min(...product.variants.map((variant) => variant.price))
@@ -58,7 +61,12 @@ export default function ProductCard({ product, size = 'regular' }) {
   };
 
   return (
-    <article className={`at at--${size} at--${TINTS[product.slug] || 'mist'}`}>
+    <article className={`at at--${size} at--${TINTS[product.slug] || 'mist'}${tilePhoto ? ' at--photo' : ''}`}>
+      {tilePhoto && (
+        <Link to={`/products/${product.slug}`} className="at-photo" tabIndex={-1} aria-hidden="true">
+          <img src={mediaUrl(tilePhoto)} alt="" loading="lazy" decoding="async" />
+        </Link>
+      )}
       <div className="at-copy">
         <p className="at-kicker">{KICKERS[product.slug] || product.category || CATEGORY_LABELS[product.productType] || 'Wellness'}</p>
         <h2><Link to={`/products/${product.slug}`}>{shortName(product)}</Link></h2>
@@ -69,9 +77,11 @@ export default function ProductCard({ product, size = 'regular' }) {
         </div>
         <p className="at-price">{hasVariants ? 'From ' : ''}{formatPrice(price)}</p>
       </div>
-      <Link to={`/products/${product.slug}`} className="at-art" tabIndex={-1} aria-hidden="true">
-        <ProductVisual product={product} />
-      </Link>
+      {!tilePhoto && (
+        <Link to={`/products/${product.slug}`} className="at-art" tabIndex={-1} aria-hidden="true">
+          <ProductVisual product={product} />
+        </Link>
+      )}
     </article>
   );
 }

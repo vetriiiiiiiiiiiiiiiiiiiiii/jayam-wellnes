@@ -166,7 +166,7 @@ export default function ProductPage() {
 
       {product.highlights?.length > 0 && (
         <section className="pp-highlights pp-bento" aria-labelledby="pp-highlights-title">
-          <h2 id="pp-highlights-title" className="pg-section-title">The details <em>that matter.</em></h2>
+          {product.story?.featuresImage && <h2 id="pp-highlights-title" className="pg-section-title">The details <em>that matter.</em></h2>}
           <div className="pp-highlight-grid">
             {product.highlights.map(({ title, body, image }, index) => (
               <article key={title} className={`pp-highlight pp-highlight--photo pp-highlight--${TONES[index % TONES.length]}`} data-reveal>
@@ -178,8 +178,10 @@ export default function ProductPage() {
                 </div>
               </article>
             ))}
-            {product.story?.featuresImage && (
+            {product.story?.featuresImage ? (
               <img className="pp-highlight-cutout" src={mediaUrl(product.story.featuresImage)} alt="" loading="lazy" decoding="async" />
+            ) : (
+              <h2 id="pp-highlights-title" className="pp-highlight-heading">The details <em>that matter.</em></h2>
             )}
           </div>
         </section>

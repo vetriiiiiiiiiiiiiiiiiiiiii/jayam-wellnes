@@ -2,8 +2,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowDown, ArrowLeft, ArrowUp, ExternalLink, ImagePlus, Trash2 } from 'lucide-react';
 import { adminApi, mediaUrl } from '../../lib/adminApi';
-import { ListEditor, useNotice } from './adminBits';
+import { ListEditor, PhotoField, useNotice } from './adminBits';
 import ProductStoryEditor, { storyForEditing } from './ProductStoryEditor';
+
+const MAX_PHOTOS = 20;
 
 const EMPTY = {
   name: '', tagline: '', category: 'Herbal Supplements', productType: 'SUPPLEMENT',
@@ -58,7 +60,7 @@ export default function AdminProductEditor() {
   const setList = (key) => (list) => setValues((current) => ({ ...current, [key]: list }));
 
   const addFiles = (event) => {
-    const files = [...event.target.files].slice(0, 10 - images.length - newFiles.length);
+    const files = [...event.target.files].slice(0, MAX_PHOTOS - images.length - newFiles.length);
     setNewFiles((current) => [...current, ...files.map((file) => ({ file, preview: URL.createObjectURL(file) }))]);
     event.target.value = '';
   };
@@ -146,6 +148,12 @@ export default function AdminProductEditor() {
 
           <section className="ad-card">
             <h2>Highlights and specifications</h2>
+            <PhotoField
+              label="PNG for the white space beside box 1"
+              hint="a picture with no background, e.g. the pack; click Save changes after uploading"
+              value={values.story.featuresImage}
+              onChange={(featuresImage) => setValues((current) => ({ ...current, story: { ...current.story, featuresImage } }))}
+            />
             <ListEditor
               label="Highlights — the feature tiles on the product page"
               items={values.highlights}
@@ -204,8 +212,19 @@ export default function AdminProductEditor() {
           </section>
 
           <section className="ad-card">
+            <h2>Shop box photo</h2>
+            <p className="ad-muted ad-small">Fills the product’s whole box in the shop and under “more products”. Upright photos work best; the name and buttons sit over the top part. Without one, the box shows the pack on its colour.</p>
+            <PhotoField
+              label="Box photo"
+              hint="portrait, about 3:4"
+              value={values.story.tileImage}
+              onChange={(tileImage) => setValues((current) => ({ ...current, story: { ...current.story, tileImage } }))}
+            />
+          </section>
+
+          <section className="ad-card">
             <h2>Photos</h2>
-            <p className="ad-muted ad-small">The first photo is the main one — it appears on the home page, in the shop and on the product page. Without photos, the site shows the illustrated Jayam pack.</p>
+            <p className="ad-muted ad-small">Add up to {MAX_PHOTOS}; you can select several at once. The first photo is the main one on the home page and in the shop. All of them show in the gallery in the product page’s buy section. Without photos, the site shows the illustrated Jayam pack.</p>
             <p className="ad-tip"><b>Tip:</b> for the home page, use a cut-out PNG of the pack with a transparent background, roughly portrait (about 4:5). It stands on the page with the same soft shadow as the illustrations.</p>
             <div className="ad-images">
               {images.map((image, index) => (
@@ -228,7 +247,7 @@ export default function AdminProductEditor() {
                   </div>
                 </figure>
               ))}
-              {images.length + newFiles.length < 10 && (
+              {images.length + newFiles.length < MAX_PHOTOS && (
                 <button type="button" className="ad-image-add" onClick={() => fileInput.current?.click()}>
                   <ImagePlus size={22} aria-hidden="true" />
                   Add photos

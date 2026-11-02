@@ -6,7 +6,7 @@ const adminController = require('../controllers/adminController');
 // Uploads land in a temp folder, then are resized to WebP by services/mediaService
 const upload = multer({
   dest: 'uploads/temp/',
-  limits: { fileSize: 8 * 1024 * 1024, files: 10 },
+  limits: { fileSize: 8 * 1024 * 1024, files: 20 },
   fileFilter: (req, file, cb) => cb(null, /^image\/(jpeg|png|webp|avif|gif)$/.test(file.mimetype)),
 });
 
@@ -27,8 +27,8 @@ router.post('/orders/:id/refund', adminController.refundOrder);
 // Product Management
 router.get('/products', adminController.getAllProducts);
 router.post('/products/add-defaults', adminController.addDefaultProducts);
-router.post('/products', upload.array('images', 10), adminController.createProduct);
-router.put('/products/:id', upload.array('images', 10), adminController.updateProduct);
+router.post('/products', upload.array('images', 20), adminController.createProduct);
+router.put('/products/:id', upload.array('images', 20), adminController.updateProduct);
 router.delete('/products/:id', adminController.deleteProduct);
 
 // User Management
