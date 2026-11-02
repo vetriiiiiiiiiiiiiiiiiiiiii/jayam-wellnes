@@ -65,7 +65,7 @@ export default function ProductCard({ product, size = 'regular' }) {
         {product.tagline && <p className="at-tagline">{product.tagline}</p>}
         <div className="at-ctas">
           <Link to={`/products/${product.slug}`} className="ap-pill">Learn more</Link>
-          <button type="button" className="ap-pill ap-pill--outline" onClick={buy}>{hasVariants ? 'Choose' : 'Buy'}</button>
+          <button type="button" className="ap-pill ap-pill--accent" onClick={buy}>{hasVariants ? 'Choose' : 'Buy'}</button>
         </div>
         <p className="at-price">{hasVariants ? 'From ' : ''}{formatPrice(price)}</p>
       </div>

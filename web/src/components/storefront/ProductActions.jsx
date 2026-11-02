@@ -54,7 +54,7 @@ export default function ProductActions({ product, selectedVariant, onVariantSele
           <span aria-live="polite">{quantity}</span>
           <button type="button" aria-label="Increase quantity" disabled={selectedVariant && quantity >= selectedVariant.stock} onClick={() => setQuantity((value) => value + 1)}>+</button>
         </div>
-        <button type="button" className="ap-pill pa-add" onClick={handleAddToCart} disabled={added || soldOut}>
+        <button type="button" className="ap-pill ap-pill--accent pa-add" onClick={handleAddToCart} disabled={added || soldOut}>
           {soldOut ? 'Out of stock' : added ? 'Added ✓' : 'Add to bag'}
         </button>
       </div>

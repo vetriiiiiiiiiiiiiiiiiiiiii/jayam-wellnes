@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
-import MoringaTree from '../story/MoringaTree';
+import MoringaPhoto from '../story/MoringaPhoto';
 
-// A short invitation into Our Story, with the moringa tree from that page.
+// A short invitation into Our Story, with a photo of real moringa trees.
 export default function StoryTeaser({ content }) {
   return (
     <section className="js">
@@ -14,8 +14,8 @@ export default function StoryTeaser({ content }) {
             <Link to="/our-story" className="wl-button wl-button--light">{content.cta}</Link>
           </div>
         </div>
-        <div className="js-tree" style={{ '--p': 1 }} aria-hidden="true">
-          <MoringaTree className="js-tree-svg" lite />
+        <div className="js-tree">
+          <MoringaPhoto />
         </div>
       </div>
     </section>

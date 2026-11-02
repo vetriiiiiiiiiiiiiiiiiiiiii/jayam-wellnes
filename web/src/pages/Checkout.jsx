@@ -89,7 +89,7 @@ function PaymentStep({ order, total, details, onEdit }) {
         />
       </section>
       {errorMessage && <p className="pg-error" role="alert">{errorMessage}</p>}
-      <button className="ap-pill ap-pill--block" type="submit" disabled={!stripe || paying}>
+      <button className="ap-pill ap-pill--block ap-pill--accent" type="submit" disabled={!stripe || paying}>
         {paying ? 'Processing…' : `Pay ${formatPrice(total)}`}
       </button>
       <p className="pg-note">Order {order.orderNumber}</p>
@@ -233,7 +233,7 @@ export default function CheckoutPage() {
               Next, pay securely with card, Apple Pay or Google Pay. We’ll email your order confirmation and receipt, and tracking details when it ships.
             </p>
             {errorMessage && <p className="pg-error" role="alert">{errorMessage}</p>}
-            <button className="ap-pill ap-pill--block" type="submit" disabled={loading}>
+            <button className="ap-pill ap-pill--block ap-pill--accent" type="submit" disabled={loading}>
               {loading ? 'Please wait…' : 'Continue to payment'}
             </button>
             <Link to="/shop" className="ap-link co-back">‹ Continue shopping</Link>

@@ -42,7 +42,7 @@ export default function ProductSubnav({ name, price, sections }) {
         </ul>
         <div className="pn-buy">
           <span>{formatPrice(price)}</span>
-          <a href="#buy" className="ap-pill" onClick={(event) => jump(event, 'buy')}>Buy</a>
+          <a href="#buy" className="ap-pill ap-pill--accent" onClick={(event) => jump(event, 'buy')}>Buy</a>
         </div>
       </div>
     </nav>

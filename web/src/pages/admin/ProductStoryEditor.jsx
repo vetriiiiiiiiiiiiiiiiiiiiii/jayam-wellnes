@@ -6,6 +6,7 @@ import { ListEditor, PhotoField, StringList } from './adminBits';
 
 const EMPTY_STORY = {
   heroImages: ['', '', ''],
+  featuresImage: '',
   lifestyle: { label: '', title: '', body: '', tags: [], word: '', image: '' },
   moments: {
     title: 'Why you’ll reach for it.',
@@ -77,6 +78,11 @@ export default function ProductStoryEditor({ story, onChange }) {
         <PhotoField label="Photo 1" hint="tall portrait, about 3:4" value={story.heroImages?.[0]} onChange={setHeroImage(0)} />
         <PhotoField label="Photo 2" hint="square, 1:1" value={story.heroImages?.[1]} onChange={setHeroImage(1)} />
         <PhotoField label="Photo 3" hint="wide landscape, about 4:3" value={story.heroImages?.[2]} onChange={setHeroImage(2)} />
+      </fieldset>
+
+      <fieldset className="ad-fieldset">
+        <legend>The details that matter — picture beside box 1</legend>
+        <PhotoField label="PNG without a background" hint="sits directly on the page, no box; leave empty to keep the space blank" value={story.featuresImage} onChange={(value) => onChange({ ...story, featuresImage: value })} />
       </fieldset>
 
       <details className="ad-chapter" open>

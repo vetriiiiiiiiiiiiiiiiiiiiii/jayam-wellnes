@@ -18,7 +18,7 @@ export default function ProductHero({ product, name, category, points, images })
         <h1 id="kv-title">{product.tagline || name}</h1>
         <p className="kv-name">{product.name}</p>
         <div className="ap-ctas">
-          <a href="#buy" className="ap-pill" onClick={(event) => jump(event, 'buy')}>Buy now</a>
+          <a href="#buy" className="ap-pill ap-pill--accent" onClick={(event) => jump(event, 'buy')}>Buy now</a>
           <a href="#features" className="ap-link" onClick={(event) => jump(event, 'features')}>Explore ›</a>
         </div>
       </div>

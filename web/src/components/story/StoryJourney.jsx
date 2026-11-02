@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import StoryLandscape from './StoryLandscape';
-import MoringaTree from './MoringaTree';
+import MoringaPhoto from './MoringaPhoto';
 
 // The Our Story opening: a pinned full-screen scene that evolves as the visitor scrolls.
 // Each panel takes a little over half a screen of scrolling and holds still while it is
@@ -95,15 +95,15 @@ export default function StoryJourney() {
 
   const step = progress * (PANELS.length - 1);
   const active = Math.round(step);
-  const treeGrowth = 0.88 + 0.12 * Math.min(progress / 0.85, 1);
+  const treeGrowth = 1 + 0.08 * Math.min(progress / 0.85, 1);
 
   return (
     <section ref={sectionRef} className="sj" style={{ height: `${PANELS.length * PANEL_SCROLL + 45}vh` }} aria-label="Our story">
       <div className="sj-stage">
         <StoryLandscape progress={progress} compact={compact} />
 
-        <div className="sj-tree" style={{ transform: `scale(${treeGrowth.toFixed(3)})` }} aria-hidden="true">
-          <MoringaTree className="sj-tree-svg" lite={compact} />
+        <div className="sj-tree" style={{ transform: `scale(${treeGrowth.toFixed(3)})` }}>
+          <MoringaPhoto />
         </div>
 
         <div className="sj-panels">

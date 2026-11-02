@@ -169,7 +169,7 @@ export default function ProductStory({ story, description, onBuy }) {
           <div className="ps-promise-inner">
             <span className="ps-promise-seal" aria-hidden="true"><img src="/jayam-logo.png" alt="" loading="lazy" /></span>
             <p className="ps-promise-line">{promise}</p>
-            {onBuy && <button type="button" className="ap-pill" onClick={onBuy}>Add to bag</button>}
+            {onBuy && <button type="button" className="ap-pill ap-pill--accent" onClick={onBuy}>Add to bag</button>}
           </div>
         </section>
       )}

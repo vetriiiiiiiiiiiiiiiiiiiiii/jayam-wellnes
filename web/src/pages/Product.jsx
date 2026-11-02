@@ -172,10 +172,15 @@ export default function ProductPage() {
               <article key={title} className={`pp-highlight pp-highlight--photo pp-highlight--${TONES[index % TONES.length]}`} data-reveal>
                 <img className="pp-highlight-photo" src={mediaUrl(image || PLACEHOLDER_PHOTOS[index % PLACEHOLDER_PHOTOS.length])} alt="" loading="lazy" decoding="async" />
                 <span className="pp-highlight-number">{String(index + 1).padStart(2, '0')}</span>
-                <h3>{title}</h3>
-                <p>{body}</p>
+                <div className="pp-highlight-text">
+                  <h3>{title}</h3>
+                  <p>{body}</p>
+                </div>
               </article>
             ))}
+            {product.story?.featuresImage && (
+              <img className="pp-highlight-cutout" src={mediaUrl(product.story.featuresImage)} alt="" loading="lazy" decoding="async" />
+            )}
           </div>
         </section>
       )}

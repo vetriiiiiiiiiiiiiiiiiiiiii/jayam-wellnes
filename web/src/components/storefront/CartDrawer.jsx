@@ -82,7 +82,7 @@ export default function CartDrawer({ isOpen, onClose }) {
                 <div><dt>Subtotal</dt><dd>{formatPrice(cartTotal)}</dd></div>
                 <div><dt>Shipping</dt><dd>{shipping === 0 ? 'Free' : formatPrice(shipping)}</dd></div>
               </dl>
-              <button type="button" className="ap-pill ap-pill--block" onClick={() => go('/checkout')}>Check out</button>
+              <button type="button" className="ap-pill ap-pill--block ap-pill--accent" onClick={() => go('/checkout')}>Check out</button>
             </footer>
           </>
         )}

@@ -17,7 +17,7 @@ export default function JayamHero({ content }) {
         <h1>{content.title}</h1>
         {content.sub && <p className="jh-sub">{content.sub}</p>}
         <div className="ap-ctas">
-          <a href="#collection" className="ap-pill">{content.primaryCta}</a>
+          <a href="#collection" className="ap-pill ap-pill--accent">{content.primaryCta}</a>
           <Link to="/our-story" className="ap-link">{content.secondaryCta} ›</Link>
         </div>
       </div>

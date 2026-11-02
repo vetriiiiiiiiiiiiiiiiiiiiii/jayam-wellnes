@@ -86,7 +86,7 @@ export default function ProductShowcase({ products, content }) {
                 <p className="sw-price">{formatPrice(product.price)}{detail ? ` · ${detail}` : ''}</p>
                 <div className="ap-ctas">
                   <Link to={`/products/${slug}`} className="ap-pill">Learn more</Link>
-                  <button type="button" className="ap-pill ap-pill--outline" onClick={() => buy(product)}>Buy</button>
+                  <button type="button" className="ap-pill ap-pill--accent" onClick={() => buy(product)}>Buy</button>
                 </div>
                 {next && (
                   <a href={`#sw-${next.slug}`} className="sw-next">
