@@ -6,14 +6,15 @@ import { adminApi, mediaUrl } from '../../lib/adminApi';
 
 const ORDER_TONES = { PENDING: 'grey', PROCESSING: 'amber', SHIPPED: 'blue', DELIVERED: 'green', CANCELLED: 'red' };
 const ORDER_LABELS = { PENDING: 'Pending', PROCESSING: 'To ship', SHIPPED: 'Shipped', DELIVERED: 'Delivered', CANCELLED: 'Cancelled' };
-const PAYMENT_TONES = { PENDING: 'grey', PAID: 'green', FAILED: 'red', REFUNDED: 'red' };
+const PAYMENT_TONES = { PENDING: 'grey', PAID: 'green', FAILED: 'red', REFUNDED: 'red', PARTIALLY_REFUNDED: 'amber' };
+const PAYMENT_LABELS = { PENDING: 'Unpaid', PAID: 'Paid', FAILED: 'Failed', REFUNDED: 'Refunded', PARTIALLY_REFUNDED: 'Partly refunded' };
 
 export function OrderBadge({ status }) {
   return <span className={`ad-badge ad-badge--${ORDER_TONES[status] || 'grey'}`}>{ORDER_LABELS[status] || status}</span>;
 }
 
 export function PaymentBadge({ status }) {
-  return <span className={`ad-badge ad-badge--${PAYMENT_TONES[status] || 'grey'} ad-badge--soft`}>{status === 'PAID' ? 'Paid' : status.charAt(0) + status.slice(1).toLowerCase()}</span>;
+  return <span className={`ad-badge ad-badge--${PAYMENT_TONES[status] || 'grey'} ad-badge--soft`}>{PAYMENT_LABELS[status] || status}</span>;
 }
 
 // Side panel used for order details and editors

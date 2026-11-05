@@ -37,6 +37,12 @@ enum PaymentStatus {
   PAID
   FAILED
   REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum DiscountType {
+  PERCENT
+  FIXED
 }
 
 enum Carrier {
@@ -233,7 +239,13 @@ model Order {
   items                 OrderItem[]
   subtotal              Float         @default(0)
   shippingFee           Float         @default(0)
+  // Discount code used at checkout and the amount it took off the subtotal
+  discountCode          String?
+  discount              Float         @default(0)
   total                 Float
+  // Money returned so far (refunds from the admin panel or the Stripe Dashboard)
+  refundedAmount        Float         @default(0)
+  refundedAt            DateTime?
   currency              String        @default("USD")
   paymentMethod         String        @default("STRIPE")
   // Stripe PaymentIntent that pays for this order (set when checkout starts)
@@ -318,4 +330,20 @@ model SiteContent {
   key       String   @id
   data      Json
   updatedAt DateTime @updatedAt
+}
+
+// Discount codes customers enter at checkout (Admin → Discounts)
+model DiscountCode {
+  id          String       @id @default(cuid())
+  code        String       @unique // stored upper-case
+  type        DiscountType @default(PERCENT)
+  value       Float // percent (1–100) or dollars off
+  minSubtotal Float        @default(0)
+  maxUses     Int? // null = unlimited
+  usedCount   Int          @default(0) // counted when an order is paid
+  startsAt    DateTime?
+  endsAt      DateTime?
+  active      Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }

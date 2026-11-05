@@ -15,7 +15,14 @@ export const adminApi = {
 
   orders: () => call(() => authApi.get('admin/orders/all'), 'Could not load orders'),
   updateOrder: (id, body) => call(() => authApi.put(`admin/orders/${id}`, body), 'Could not update the order'),
-  refundOrder: (id) => call(() => authApi.post(`admin/orders/${id}/refund`), 'Could not refund the order'),
+  refundOrder: (id, amount) => call(() => authApi.post(`admin/orders/${id}/refund`, amount == null ? {} : { amount }), 'Could not refund the order'),
+
+  discounts: () => call(() => authApi.get('admin/discounts'), 'Could not load discount codes'),
+  saveDiscount: (id, body) => call(() => (id ? authApi.put(`admin/discounts/${id}`, body) : authApi.post('admin/discounts', body)), 'Could not save the discount'),
+  deleteDiscount: (id) => call(() => authApi.delete(`admin/discounts/${id}`), 'Could not delete the discount'),
+
+  setup: () => call(() => authApi.get('admin/setup'), 'Could not load the setup check'),
+  sendTestEmail: () => call(() => authApi.post('admin/setup/test-email'), 'Could not send the test email'),
 
   products: () => call(() => authApi.get('admin/products'), 'Could not load products'),
   createProduct: (form) => call(() => authApi.post('admin/products', form), 'Could not create the product'),

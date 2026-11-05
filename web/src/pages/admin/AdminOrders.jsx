@@ -10,17 +10,20 @@ const receiptUrl = (order) => `${base}/api/orders/${encodeURIComponent(order.ord
 
 const VIEWS = [
   { id: 'all', label: 'All', test: () => true },
-  { id: 'to-ship', label: 'To ship', test: (o) => o.paymentStatus === 'PAID' && o.status === 'PROCESSING' },
+  { id: 'to-ship', label: 'To ship', test: (o) => ['PAID', 'PARTIALLY_REFUNDED'].includes(o.paymentStatus) && o.status === 'PROCESSING' },
   { id: 'shipped', label: 'Shipped', test: (o) => o.status === 'SHIPPED' },
   { id: 'delivered', label: 'Delivered', test: (o) => o.status === 'DELIVERED' },
   { id: 'unpaid', label: 'Unpaid', test: (o) => o.paymentStatus === 'PENDING' && o.status === 'PENDING' },
+  { id: 'refunded', label: 'Refunded', test: (o) => o.refundedAmount > 0 },
   { id: 'cancelled', label: 'Cancelled', test: (o) => o.status === 'CANCELLED' },
 ];
 
 function OrderDetail({ order, onChanged, notify }) {
   const [busy, setBusy] = useState(false);
   const address = order.address || {};
-  const paid = order.paymentStatus === 'PAID';
+  const paid = ['PAID', 'PARTIALLY_REFUNDED'].includes(order.paymentStatus);
+  const remaining = Math.round((order.total - (order.refundedAmount || 0)) * 100) / 100;
+  const [refundAmount, setRefundAmount] = useState(remaining.toFixed(2));
 
   const update = async (body, message) => {
     setBusy(true);
@@ -38,16 +41,27 @@ function OrderDetail({ order, onChanged, notify }) {
   };
 
   const cancel = async () => {
-    const question = paid
-      ? `Cancel ${order.orderNumber} and refund ${formatPrice(order.total)} to the customer?`
-      : `Cancel ${order.orderNumber}?`;
-    if (!window.confirm(question)) return;
+    if (!window.confirm(`Cancel ${order.orderNumber}? The customer has not been charged.`)) return;
     setBusy(true);
     const result = await adminApi.refundOrder(order.id);
     setBusy(false);
     if (!result.ok) return notify(result.message, 'error');
     notify(result.data.message);
-    onChanged({ ...order, status: 'CANCELLED', paymentStatus: paid ? 'REFUNDED' : order.paymentStatus });
+    onChanged({ ...order, status: 'CANCELLED' });
+  };
+
+  const refund = async (event) => {
+    event.preventDefault();
+    const amount = Number(refundAmount);
+    const full = Math.abs(amount - remaining) < 0.005;
+    const ends = full && ['PENDING', 'PROCESSING'].includes(order.status);
+    if (!window.confirm(`Refund ${formatPrice(amount)} to the customer for ${order.orderNumber}?${ends ? ' This cancels the order and returns the items to stock.' : ''}`)) return;
+    setBusy(true);
+    const result = await adminApi.refundOrder(order.id, amount);
+    setBusy(false);
+    if (!result.ok) return notify(result.message, 'error');
+    notify(`${result.data.message}. The customer has been emailed.`);
+    onChanged(result.data.order);
   };
 
   return (
@@ -78,8 +92,10 @@ function OrderDetail({ order, onChanged, notify }) {
             </li>
           ))}
           <li className="ad-lines-sub"><span>Subtotal</span><span>{formatPrice(order.subtotal)}</span></li>
+          {order.discount > 0 && <li className="ad-lines-sub"><span>Discount{order.discountCode ? ` · ${order.discountCode}` : ''}</span><span>−{formatPrice(order.discount)}</span></li>}
           <li className="ad-lines-sub"><span>Shipping</span><span>{order.shippingFee ? formatPrice(order.shippingFee) : 'Free'}</span></li>
           <li className="ad-lines-total"><span>Total</span><b>{formatPrice(order.total)}</b></li>
+          {order.refundedAmount > 0 && <li className="ad-lines-sub"><span>Refunded{order.refundedAt ? ` ${formatDateTime(order.refundedAt)}` : ''}</span><span>−{formatPrice(order.refundedAmount)}</span></li>}
         </ul>
         {(paid || order.paymentStatus === 'REFUNDED') && (
           <a href={receiptUrl(order)} target="_blank" rel="noreferrer" className="ad-link-text">View receipt <ExternalLink size={13} aria-hidden="true" /></a>
@@ -107,11 +123,28 @@ function OrderDetail({ order, onChanged, notify }) {
         </section>
       )}
 
-      {order.status !== 'CANCELLED' && (
+      {paid && remaining > 0 && (
+        <section className="ad-danger-zone">
+          <h3>Refund</h3>
+          <p className="ad-muted ad-small">
+            Refunds go back to the customer’s card through Stripe, and they’re emailed. Refund part of the order, or the full {formatPrice(remaining)}.
+            {['PENDING', 'PROCESSING'].includes(order.status) ? ' A full refund before shipping also cancels the order and returns the items to stock.' : ''}
+          </p>
+          <form className="ad-inline-form" onSubmit={refund}>
+            <label className="ad-money">
+              <span aria-hidden="true">$</span>
+              <input type="number" min="0.01" max={remaining} step="0.01" value={refundAmount} onChange={(event) => setRefundAmount(event.target.value)} required aria-label="Amount to refund" />
+            </label>
+            <button type="submit" className="ad-btn ad-btn--danger" disabled={busy}>Refund</button>
+          </form>
+        </section>
+      )}
+
+      {!paid && order.paymentStatus !== 'REFUNDED' && order.status !== 'CANCELLED' && (
         <section className="ad-danger-zone">
           <h3>Cancel order</h3>
-          <p className="ad-muted ad-small">{paid ? 'Cancelling refunds the full amount through Stripe and returns the items to stock.' : 'The order has not been paid; cancelling releases the reserved stock.'}</p>
-          <button type="button" className="ad-btn ad-btn--danger" disabled={busy} onClick={cancel}>{paid ? 'Cancel and refund' : 'Cancel order'}</button>
+          <p className="ad-muted ad-small">The order has not been paid; cancelling releases the reserved stock and emails the customer. Unpaid checkouts are also cancelled automatically after two hours.</p>
+          <button type="button" className="ad-btn ad-btn--danger" disabled={busy} onClick={cancel}>Cancel order</button>
         </section>
       )}
     </div>

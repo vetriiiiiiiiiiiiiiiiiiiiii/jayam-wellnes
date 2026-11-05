@@ -1560,3 +1560,56 @@
   background: var(--white);
   color: var(--teal);
 }
+
+/* ---------- Checkout: discount code ---------- */
+.co-code {
+  display: flex;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.co-code input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--sage-tint);
+  border-radius: 980px;
+  padding: 10px 16px;
+  color: var(--teal);
+  font: 500 15px var(--sans);
+  text-transform: uppercase;
+}
+
+.co-code input::placeholder {
+  color: var(--muted);
+  text-transform: none;
+}
+
+.co-code .ap-pill {
+  padding: 9px 18px;
+  font-size: 15px;
+}
+
+.co-code-applied {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 18px 0 0;
+  border-radius: 14px;
+  background: var(--surface);
+  padding: 10px 14px;
+  color: var(--teal);
+  font: 600 14px var(--sans);
+}
+
+.co-code-applied .ap-link {
+  margin: 0;
+  border: 0;
+  background: none;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.co-code-error {
+  margin-top: 10px;
+}

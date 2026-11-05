@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
@@ -6,7 +6,7 @@ import { useCart } from '../components/storefront/CartProvider';
 import PageHead from '../components/storefront/PageHead';
 import ItemThumb from '../components/storefront/ItemThumb';
 import { useAuth } from '../lib/auth';
-import { createOrder } from '../services/api';
+import { checkDiscount, createOrder } from '../services/api';
 import { FREE_SHIPPING_THRESHOLD, US_STATES, formatPrice, shippingFor } from '../lib/store';
 import usePageMeta from '../lib/usePageMeta';
 
@@ -106,12 +106,41 @@ export default function CheckoutPage() {
   const [details, setDetails] = useState(null);
   const [startedOrder, setOrder] = useState(null);
   const shipping = shippingFor(cartTotal);
-  const orderTotal = Math.round((cartTotal + shipping) * 100) / 100;
+  const [discount, setDiscount] = useState(null); // { code, amount, label }
+  const [discountError, setDiscountError] = useState('');
+  const [checkingCode, setCheckingCode] = useState(false);
+  const discountAmount = discount?.amount || 0;
+  const orderTotal = Math.round((cartTotal - discountAmount + shipping) * 100) / 100;
 
   // If the bag changes after payment has started, the amount is stale: start over
   const cartSignature = useMemo(() => cart.map((item) => `${item.id}x${item.quantity}`).join('|'), [cart]);
   const [paymentCartSignature, setPaymentCartSignature] = useState(null);
   const order = startedOrder && paymentCartSignature === cartSignature ? startedOrder : null;
+
+  // A percentage code changes with the bag, so check it again when the subtotal changes
+  useEffect(() => {
+    if (!discount?.code) return undefined;
+    let active = true;
+    checkDiscount(discount.code, cartTotal).then((result) => {
+      if (!active) return;
+      if (result.success) setDiscount(result);
+      else { setDiscount(null); setDiscountError(result.message); }
+    });
+    return () => { active = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cartTotal]);
+
+  const applyCode = async (event) => {
+    event.preventDefault();
+    const code = String(new FormData(event.currentTarget).get('code') || '').trim();
+    if (!code) return;
+    setCheckingCode(true);
+    setDiscountError('');
+    const result = await checkDiscount(code, cartTotal);
+    setCheckingCode(false);
+    if (result.success) setDiscount(result);
+    else setDiscountError(result.message);
+  };
 
   const handleDetails = async (event) => {
     event.preventDefault();
@@ -141,6 +170,7 @@ export default function CheckoutPage() {
     setLoading(true);
     const result = await createOrder({
       ...nextDetails,
+      discountCode: discount?.code,
       items: cart.map((item) => ({
         productId: item.productId || item.id.split(':')[0],
         variantSku: item.variantSku,
@@ -151,6 +181,8 @@ export default function CheckoutPage() {
 
     if (!result.success || !result.clientSecret) {
       setErrorMessage(result.message || 'We could not start your payment. Please try again.');
+      // The code may have run out since it was applied
+      if (discount && /discount code/i.test(result.message || '')) setDiscount(null);
       return;
     }
     setPaymentCartSignature(cartSignature);
@@ -253,9 +285,23 @@ export default function CheckoutPage() {
           </div>
           <dl className="os-totals">
             <div><dt>Subtotal</dt><dd>{formatPrice(cartTotal)}</dd></div>
+            {discount && <div><dt>Discount · {discount.code}</dt><dd>−{formatPrice(discountAmount)}</dd></div>}
             <div><dt>Shipping</dt><dd>{shipping === 0 ? 'Free' : formatPrice(shipping)}</dd></div>
-            <div className="os-total"><dt>Total</dt><dd>{formatPrice(orderTotal)}</dd></div>
+            <div className="os-total"><dt>Total</dt><dd>{formatPrice(order ? order.total : orderTotal)}</dd></div>
           </dl>
+          {!order && (discount ? (
+            <p className="co-code-applied">
+              <span>{discount.code} applied · {discount.label}</span>
+              <button type="button" className="ap-link" onClick={() => setDiscount(null)}>Remove</button>
+            </p>
+          ) : (
+            <form className="co-code" onSubmit={applyCode}>
+              <label className="sr-only" htmlFor="co-code">Discount code</label>
+              <input id="co-code" name="code" placeholder="Discount code" autoComplete="off" autoCapitalize="characters" maxLength={32} />
+              <button type="submit" className="ap-pill ap-pill--outline" disabled={checkingCode}>{checkingCode ? 'Checking…' : 'Apply'}</button>
+            </form>
+          ))}
+          {discountError && !discount && <p className="pg-error co-code-error" role="alert">{discountError}</p>}
           <p className="pg-note">
             {shipping === 0
               ? 'Your order qualifies for free U.S. shipping.'

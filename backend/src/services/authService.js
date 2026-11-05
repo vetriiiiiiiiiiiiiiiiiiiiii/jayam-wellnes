@@ -1,4 +1,5 @@
 const prisma = require("../config/prisma");
+const { sendWelcomeEmail } = require("./orderEmails");
 
 const adminEmails = () =>
   [process.env.SUPERADMIN_EMAILS || "", process.env.DEFAULT_SUPERADMIN_EMAIL || ""]
@@ -56,6 +57,7 @@ async function findOrCreateGoogleUser({ sub, email, emailVerified = true, name, 
         role: isAdminEmail(normalisedEmail) ? "admin" : "user",
       },
     });
+    sendWelcomeEmail(user);
   } else if (isAdminEmail(user.email) && user.role !== "admin") {
     user = await prisma.user.update({ where: { id: user.id }, data: { role: "admin" } });
   }

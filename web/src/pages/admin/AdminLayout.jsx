@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
-  ExternalLink, FileText, LayoutDashboard, LogOut, Mail, Menu, Package, ShoppingBag, Star, Users, X,
-} from 'lucide-react';
+  ExternalLink, FileText, LayoutDashboard, LogOut, Mail, Menu, Package, Settings, ShoppingBag, Star, TicketPercent, Users, X } from 'lucide-react';
 import { useAuth } from '../../lib/auth';
 import '../../styles/jayam-admin.css';
 
@@ -10,10 +9,12 @@ const LINKS = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/admin/orders', label: 'Orders', icon: ShoppingBag },
   { to: '/admin/products', label: 'Products', icon: Package },
+  { to: '/admin/discounts', label: 'Discounts', icon: TicketPercent },
   { to: '/admin/content', label: 'Site content', icon: FileText },
   { to: '/admin/enquiries', label: 'Enquiries', icon: Mail },
   { to: '/admin/reviews', label: 'Reviews', icon: Star },
   { to: '/admin/users', label: 'Users', icon: Users },
+  { to: '/admin/setup', label: 'Setup', icon: Settings },
 ];
 
 // The admin shell: only signed-in admins get past it.

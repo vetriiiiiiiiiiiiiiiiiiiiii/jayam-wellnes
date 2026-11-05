@@ -7,6 +7,10 @@ const { getStripe } = require('../config/stripe');
 const { markOrderPaid, releaseOrderStock, toCents } = require('../services/orderPayments');
 const { publicOrder } = require('../utils/orderLinks');
 const { escapeHtml, money } = require('../services/orderEmails');
+const { applyDiscount } = require('../services/discounts');
+
+// Stripe's smallest card charge in USD
+const MIN_CHARGE = 0.5;
 
 class StockError extends Error {}
 
@@ -101,7 +105,7 @@ exports.createOrder = async (req, res) => {
   let savedOrder;
 
   try {
-    const { email, name, phone, address, items } = req.body;
+    const { email, name, phone, address, items, discountCode } = req.body;
 
     if (!email || !name || !address?.street || !address?.city || !address?.state || !address?.zipCode) {
       return res.status(400).json({ success: false, message: 'Complete your contact and shipping details before ordering.' });
@@ -188,7 +192,15 @@ exports.createOrder = async (req, res) => {
 
     const subtotal = roundMoney(orderItems.reduce((total, item) => total + item.price * item.quantity, 0));
     const shippingFee = shippingFor(subtotal);
-    const orderTotal = roundMoney(subtotal + shippingFee);
+    let discount = { code: null, amount: 0 };
+    if (discountCode) {
+      discount = await applyDiscount(discountCode, subtotal);
+      if (discount.error) return res.status(400).json({ success: false, message: discount.error });
+    }
+    const orderTotal = roundMoney(subtotal - discount.amount + shippingFee);
+    if (orderTotal < MIN_CHARGE) {
+      return res.status(400).json({ success: false, message: 'This order total is too small to pay online. Please add another item.' });
+    }
 
     // Reserve stock and create the order atomically
     savedOrder = await prisma.$transaction(async (tx) => {
@@ -222,6 +234,8 @@ exports.createOrder = async (req, res) => {
           address: shippingAddress,
           subtotal,
           shippingFee,
+          discountCode: discount.code,
+          discount: discount.amount,
           total: orderTotal,
           currency: CURRENCY,
           status: 'PENDING',
@@ -253,7 +267,8 @@ exports.createOrder = async (req, res) => {
           country: 'US',
         },
       },
-      metadata: { orderId: savedOrder.id, orderNumber: savedOrder.orderNumber },
+      receipt_email: savedOrder.email,
+      metadata: { orderId: savedOrder.id, orderNumber: savedOrder.orderNumber, ...(discount.code && { discountCode: discount.code }) },
     }, { idempotencyKey: `order-${savedOrder.id}` });
     savedOrder = await prisma.order.update({
       where: { id: savedOrder.id },
@@ -280,6 +295,21 @@ exports.createOrder = async (req, res) => {
       await releaseStock(reservedVariants);
     }
     res.status(500).json({ success: false, message: 'We could not place your order. Please try again.' });
+  }
+};
+
+// POST /api/orders/discount — check a code for the checkout summary before ordering.
+// The order itself re-checks the code against the real prices.
+exports.previewDiscount = async (req, res) => {
+  try {
+    const subtotal = Number(req.body.subtotal);
+    if (!Number.isFinite(subtotal) || subtotal <= 0) return res.status(400).json({ success: false, message: 'Your bag is empty.' });
+    const result = await applyDiscount(req.body.code, roundMoney(subtotal));
+    if (result.error) return res.status(400).json({ success: false, message: result.error });
+    res.json({ success: true, ...result });
+  } catch (error) {
+    console.error('Discount check failed:', error);
+    res.status(500).json({ success: false, message: 'We could not check that code. Please try again.' });
   }
 };
 
@@ -337,7 +367,7 @@ exports.getReceipt = async (req, res) => {
     const token = String(req.query.token || '');
     const valid = order && token.length === order.accessToken.length &&
       crypto.timingSafeEqual(Buffer.from(token), Buffer.from(order.accessToken));
-    if (!valid || !['PAID', 'REFUNDED'].includes(order.paymentStatus)) {
+    if (!valid || !['PAID', 'REFUNDED', 'PARTIALLY_REFUNDED'].includes(order.paymentStatus)) {
       return res.status(404).type('html').send('<p style="font-family:sans-serif">Receipt not found.</p>');
     }
 
@@ -348,20 +378,20 @@ exports.getReceipt = async (req, res) => {
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Receipt ${escapeHtml(order.orderNumber)} — ${store}</title>
 <style>
-  body{font-family:Helvetica,Arial,sans-serif;color:#1f2a22;background:#f6f3ec;margin:0;padding:24px 16px}
+  body{font-family:-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;color:#2c6975;background:#f1f6f0;margin:0;padding:24px 16px}
   .sheet{max-width:720px;margin:0 auto;background:#fff;border-radius:12px;padding:32px}
-  h1{font-family:Georgia,serif;font-weight:400;margin:0 0 4px}
+  h1{font-weight:700;margin:0 0 4px}
   .muted{color:#666;font-size:14px}
   .grid{display:flex;flex-wrap:wrap;gap:24px;margin:24px 0}
   .grid>div{flex:1 1 200px}
-  h2{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#8a6d3b;margin:0 0 6px}
+  h2{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#4f7f88;margin:0 0 6px}
   table{width:100%;border-collapse:collapse;margin-top:8px}
   th,td{text-align:left;padding:10px 4px;border-bottom:1px solid #eee;font-size:14px}
   td.num,th.num{text-align:right}
   tfoot td{border:0;padding:6px 4px}
-  .total td{font-weight:700;font-size:16px;border-top:2px solid #1f2a22}
+  .total td{font-weight:700;font-size:16px;border-top:2px solid #2c6975}
   .actions{max-width:720px;margin:0 auto 16px;text-align:right}
-  button{background:#234330;color:#fff;border:0;border-radius:999px;padding:10px 20px;font-size:14px;cursor:pointer}
+  button{background:#fc8500;color:#133a41;font-weight:600;border:0;border-radius:999px;padding:10px 20px;font-size:14px;cursor:pointer}
   @media print{body{background:#fff;padding:0}.sheet{border-radius:0;padding:0}.actions{display:none}}
 </style></head>
 <body>
@@ -369,7 +399,7 @@ exports.getReceipt = async (req, res) => {
   <div class="sheet">
     <p class="muted">${store}</p>
     <h1>Receipt</h1>
-    <p class="muted">Order ${escapeHtml(order.orderNumber)} · ${order.paymentStatus === 'REFUNDED' ? 'Refunded' : 'Paid'} ${date(order.paidAt || order.createdAt)}</p>
+    <p class="muted">Order ${escapeHtml(order.orderNumber)} · Paid ${date(order.paidAt || order.createdAt)}${order.refundedAmount ? ` · ${order.paymentStatus === 'REFUNDED' ? 'Refunded' : 'Partly refunded'} ${date(order.refundedAt)}` : ''}</p>
     <div class="grid">
       <div><h2>Billed to</h2><div>${escapeHtml(order.name)}<br>${escapeHtml(order.email)}</div></div>
       <div><h2>Ship to</h2><div>${escapeHtml(a.street)}${a.street2 ? `<br>${escapeHtml(a.street2)}` : ''}<br>${escapeHtml(a.city)}, ${escapeHtml(a.state)} ${escapeHtml(a.zipCode)}<br>United States</div></div>
@@ -382,8 +412,10 @@ exports.getReceipt = async (req, res) => {
       </tbody>
       <tfoot>
         <tr><td colspan="3" class="num">Subtotal</td><td class="num">${money(order.subtotal)}</td></tr>
+        ${order.discount ? `<tr><td colspan="3" class="num">Discount${order.discountCode ? ` (${escapeHtml(order.discountCode)})` : ''}</td><td class="num">−${money(order.discount)}</td></tr>` : ''}
         <tr><td colspan="3" class="num">Shipping</td><td class="num">${order.shippingFee ? money(order.shippingFee) : 'Free'}</td></tr>
         <tr class="total"><td colspan="3" class="num">Total (USD)</td><td class="num">${money(order.total)}</td></tr>
+        ${order.refundedAmount ? `<tr><td colspan="3" class="num">Refunded</td><td class="num">−${money(order.refundedAmount)}</td></tr><tr><td colspan="3" class="num"><strong>Net paid</strong></td><td class="num"><strong>${money(order.total - order.refundedAmount)}</strong></td></tr>` : ''}
       </tfoot>
     </table>
     <p class="muted" style="margin-top:24px">Thank you for shopping with ${store}.</p>

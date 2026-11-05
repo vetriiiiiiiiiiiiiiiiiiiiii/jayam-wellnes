@@ -1106,3 +1106,47 @@ a.ad-tile:hover {
 .ad-list-fields {
   align-content: start;
 }
+
+/* ---------- Setup checklist and refunds ---------- */
+.ad-checklist {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ad-check-item {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.ad-check-item > svg { margin-top: 1px; }
+.ad-check-item--ok > svg { color: #2f8a5b; }
+.ad-check-item--warn > svg { color: #c46a00; }
+.ad-check-item--todo > svg { color: #9aa9ab; }
+
+.ad-check-item .ad-small {
+  margin-top: 2px;
+  line-height: 1.6;
+}
+
+.ad-code {
+  border-radius: 6px;
+  background: #eef4ef;
+  padding: 1px 6px;
+  font: 500 12px ui-monospace, SFMono-Regular, Menlo, monospace;
+  word-break: break-all;
+}
+
+.ad-money {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ad-money input {
+  width: 110px;
+}

@@ -35,12 +35,16 @@ const publicOrder = (order) => ({
   items: (order.items || []).map(({ name, variantName, image, quantity, price }) => ({ name, variantName, image: mediaUrl(image), quantity, price })),
   subtotal: order.subtotal,
   shippingFee: order.shippingFee,
+  discountCode: order.discountCode,
+  discount: order.discount,
+  refundedAmount: order.refundedAmount,
   total: order.total,
   currency: order.currency,
-  receiptUrl: order.paymentStatus === 'PAID' || order.paymentStatus === 'REFUNDED' ? receiptUrl(order) : null,
+  receiptUrl: ['PAID', 'REFUNDED', 'PARTIALLY_REFUNDED'].includes(order.paymentStatus) ? receiptUrl(order) : null,
 });
 
 module.exports = {
+  frontendUrl,
   CARRIERS,
   carrierTrackingUrl,
   trackOrderUrl,

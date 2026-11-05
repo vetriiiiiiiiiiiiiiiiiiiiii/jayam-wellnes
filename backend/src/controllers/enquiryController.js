@@ -1,5 +1,6 @@
 const prisma = require('../config/prisma');
 const { sendEmail } = require('../services/mailService');
+const { layout } = require('../services/emailLayout');
 const { withId } = require('../utils/serialize');
 
 const CATEGORIES = {
@@ -59,10 +60,9 @@ exports.createEnquiry = async (req, res) => {
     queueEmail(
       email,
       `We've received your enquiry — ${storeName}`,
-      `<p>Hi ${escapeHtml(name)},</p>
+      layout('We’ve received your message', `<p>Hi ${escapeHtml(name)},</p>
        <p>Thank you for contacting ${escapeHtml(storeName)}. We've received your enquiry and will respond within 1 business day.</p>
-       <p><strong>Subject:</strong> ${escapeHtml(subject)}<br><strong>Topic:</strong> ${escapeHtml(categoryLabel)}</p>
-       <p>Warm regards,<br>The Jayam team</p>`,
+       <p><strong>Subject:</strong> ${escapeHtml(subject)}<br><strong>Topic:</strong> ${escapeHtml(categoryLabel)}</p>`),
       process.env.SUPPORT_EMAIL || undefined
     );
 
@@ -70,14 +70,14 @@ exports.createEnquiry = async (req, res) => {
     queueEmail(
       process.env.SUPPORT_EMAIL,
       `[${categoryLabel}] ${subject}`,
-      `<p><strong>New enquiry from the website</strong></p>
-       <p><strong>Name:</strong> ${escapeHtml(name)}<br>
+      layout('New enquiry from the website', `<p><strong>Name:</strong> ${escapeHtml(name)}<br>
        <strong>Email:</strong> ${escapeHtml(email)}<br>
        ${phone ? `<strong>Phone:</strong> ${escapeHtml(phone)}<br>` : ''}
        <strong>Category:</strong> ${escapeHtml(categoryLabel)}<br>
        ${orderNumber ? `<strong>Order number:</strong> ${escapeHtml(orderNumber)}<br>` : ''}
        <strong>Subject:</strong> ${escapeHtml(subject)}</p>
-       <p style="white-space:pre-wrap">${escapeHtml(message)}</p>`,
+       <p style="white-space:pre-wrap">${escapeHtml(message)}</p>
+       <p>Reply to this email to answer ${escapeHtml(name)} directly.</p>`, { team: true }),
       email
     );
 

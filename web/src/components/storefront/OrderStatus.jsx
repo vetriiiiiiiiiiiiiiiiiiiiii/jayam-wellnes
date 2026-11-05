@@ -11,15 +11,19 @@ const STEP_INDEX = { PENDING: -1, PROCESSING: 0, SHIPPED: 1, DELIVERED: 2 };
 const formatDate = (value) =>
   value ? new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : null;
 
+// Paid at some point (a refund later does not undo the delivery steps)
+const wasPaid = (order) => ['PAID', 'PARTIALLY_REFUNDED', 'REFUNDED'].includes(order.paymentStatus);
+
 const headline = (order) => {
   if (order.status === 'CANCELLED') return order.paymentStatus === 'REFUNDED' ? 'Cancelled and refunded' : 'Cancelled';
-  if (order.paymentStatus !== 'PAID') return 'Awaiting payment';
+  if (!wasPaid(order)) return 'Awaiting payment';
+  if (order.paymentStatus === 'REFUNDED') return 'Refunded';
   return { PROCESSING: 'Preparing your order', SHIPPED: 'On its way', DELIVERED: 'Delivered' }[order.status] || 'Order received';
 };
 
 // Order summary shared by the checkout success and track-your-order pages
 export default function OrderStatus({ order }) {
-  const current = order.paymentStatus === 'PAID' ? STEP_INDEX[order.status] ?? -1 : -1;
+  const current = wasPaid(order) ? STEP_INDEX[order.status] ?? -1 : -1;
   const address = order.address || {};
 
   return (
@@ -63,8 +67,10 @@ export default function OrderStatus({ order }) {
       </div>
       <dl className="os-totals">
         <div><dt>Subtotal</dt><dd>{formatPrice(order.subtotal)}</dd></div>
+        {order.discount > 0 && <div><dt>Discount{order.discountCode ? ` (${order.discountCode})` : ''}</dt><dd>−{formatPrice(order.discount)}</dd></div>}
         <div><dt>Shipping</dt><dd>{order.shippingFee ? formatPrice(order.shippingFee) : 'Free'}</dd></div>
         <div className="os-total"><dt>Total</dt><dd>{formatPrice(order.total)}</dd></div>
+        {order.refundedAmount > 0 && <div><dt>Refunded</dt><dd>−{formatPrice(order.refundedAmount)}</dd></div>}
       </dl>
 
       <p className="pg-note">

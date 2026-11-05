@@ -1,8 +1,9 @@
 const prisma = require('../config/prisma');
 const { getStripe } = require('../config/stripe');
 const { CARRIERS } = require('../utils/orderLinks');
-const { sendShippingNotification, sendDeliveryNotification } = require('../services/orderEmails');
-const { releaseOrderStock } = require('../services/orderPayments');
+const { sendShippingNotification, sendDeliveryNotification, sendCancellationNotification } = require('../services/orderEmails');
+const { releaseOrderStock, syncRefunds, toCents } = require('../services/orderPayments');
+const { roundMoney } = require('../config/store');
 const { addProductImages, deleteStoredImage, removeQuietly, storeImage } = require('../services/mediaService');
 const { addMissingProducts } = require('../services/defaultProducts');
 const { productInclude, serializeOrder, serializeProduct, serializeUser } = require('../utils/serialize');
@@ -119,7 +120,7 @@ exports.updateOrderStatus = async (req, res) => {
     if (trackingChanged && (!nextCarrier || !nextTracking)) {
       return res.status(400).json({ message: 'Add both a carrier and a tracking number' });
     }
-    if ((trackingChanged || status === 'SHIPPED' || status === 'DELIVERED') && existing.paymentStatus !== 'PAID') {
+    if ((trackingChanged || status === 'SHIPPED' || status === 'DELIVERED') && !['PAID', 'PARTIALLY_REFUNDED'].includes(existing.paymentStatus)) {
       return res.status(400).json({ message: 'Only paid orders can be shipped' });
     }
 
@@ -154,45 +155,56 @@ exports.updateOrderStatus = async (req, res) => {
 // ==========================================
 // ORDER REFUNDS
 // ==========================================
+// POST /admin/orders/:id/refund  { amount?: dollars }
+// Paid orders: refund the amount given, or everything not yet refunded. A full refund
+// before the order ships also cancels it and puts the stock back.
+// Unpaid orders: cancel the order and its payment (nothing was charged).
 exports.refundOrder = async (req, res) => {
   try {
-    const { id } = req.params;
-    const order = await prisma.order.findUnique({ where: { id } });
-
+    const order = await prisma.order.findUnique({ where: { id: req.params.id }, include: { items: true } });
     if (!order) return res.status(404).json({ message: 'Order not found' });
-
-    if (order.status === 'CANCELLED') {
-      return res.status(400).json({ message: 'Order is already cancelled' });
-    }
-
     const stripe = getStripe();
-    const refund = order.paymentStatus === 'PAID' && order.stripePaymentIntentId;
-    if (refund && !stripe) {
-      return res.status(500).json({ message: 'Stripe keys missing on server' });
+
+    if (!['PAID', 'PARTIALLY_REFUNDED'].includes(order.paymentStatus)) {
+      if (order.paymentStatus === 'REFUNDED') return res.status(400).json({ message: 'This order is already fully refunded' });
+      const { count } = await prisma.order.updateMany({
+        where: { id: order.id, status: { not: 'CANCELLED' }, paymentStatus: { in: ['PENDING', 'FAILED'] } },
+        data: { status: 'CANCELLED' },
+      });
+      if (count === 0) return res.status(400).json({ message: 'Order is already cancelled' });
+      await releaseOrderStock(order.id);
+      if (stripe && order.stripePaymentIntentId) {
+        await stripe.paymentIntents.cancel(order.stripePaymentIntentId).catch((error) =>
+          console.error(`[Admin] Could not cancel PaymentIntent for ${order.orderNumber}:`, error.message));
+      }
+      await sendCancellationNotification(order);
+      return res.json({ success: true, message: 'Order cancelled. The customer was not charged.' });
     }
 
-    // Cancel in the database first so the payment_intent.canceled webhook is a no-op
-    const { count } = await prisma.order.updateMany({
-      where: { id, status: { not: 'CANCELLED' } },
-      data: { status: 'CANCELLED', ...(refund && { paymentStatus: 'REFUNDED' }) }
+    if (!stripe) return res.status(503).json({ message: 'Stripe is not set up on the server (STRIPE_SECRET_KEY)' });
+    const remaining = roundMoney(order.total - order.refundedAmount);
+    const amount = req.body?.amount == null || req.body.amount === '' ? remaining : roundMoney(Number(req.body.amount));
+    if (!Number.isFinite(amount) || amount <= 0) return res.status(400).json({ message: 'Enter an amount to refund' });
+    if (amount > remaining) return res.status(400).json({ message: `You can refund up to ${remaining.toFixed(2)}` });
+
+    const cents = toCents(amount);
+    const refund = await stripe.refunds.create(
+      { payment_intent: order.stripePaymentIntentId, amount: cents, metadata: { orderNumber: order.orderNumber } },
+      { idempotencyKey: `refund-${order.id}-${toCents(order.refundedAmount)}-${cents}` }
+    );
+    const charge = await stripe.charges.retrieve(typeof refund.charge === 'string' ? refund.charge : refund.charge.id);
+    const result = await syncRefunds(charge);
+    console.log(`[Admin] Refunded ${amount} on order ${order.orderNumber}`);
+
+    const updated = result?.order || order;
+    res.json({
+      success: true,
+      message: updated.paymentStatus === 'REFUNDED' ? 'Order fully refunded' : `Refunded ${amount.toFixed(2)}`,
+      order: serializeOrder(updated),
     });
-    if (count === 0) {
-      return res.status(400).json({ message: 'Order is already cancelled' });
-    }
-    await releaseOrderStock(order.id);
-
-    if (refund) {
-      await stripe.refunds.create({ payment_intent: order.stripePaymentIntentId }, { idempotencyKey: `refund-${order.id}` });
-      console.log(`[Admin] Refund issued for order ${order.orderNumber}`);
-    } else if (stripe && order.stripePaymentIntentId) {
-      await stripe.paymentIntents.cancel(order.stripePaymentIntentId).catch((error) =>
-        console.error(`[Admin] Could not cancel PaymentIntent for ${order.orderNumber}:`, error.message));
-    }
-
-    res.json({ success: true, message: refund ? 'Order cancelled and refunded successfully' : 'Order cancelled' });
   } catch (error) {
     console.error('[Admin] Refund Error:', error);
-    res.status(500).json({ message: 'Failed to process cancellation and refund' });
+    res.status(500).json({ message: error.type?.startsWith('Stripe') ? `Stripe: ${error.message}` : 'Failed to process the refund' });
   }
 };
 

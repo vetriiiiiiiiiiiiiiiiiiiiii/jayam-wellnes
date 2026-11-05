@@ -62,4 +62,13 @@ const contentController = require('../controllers/contentController');
 router.put('/content/:key', contentController.updateContent);
 router.post('/uploads', accept(upload.single('image')), adminController.uploadContentImage);
 
+// Discount codes and the setup check
+const storeSettingsController = require('../controllers/storeSettingsController');
+router.get('/discounts', storeSettingsController.listDiscounts);
+router.post('/discounts', storeSettingsController.saveDiscount);
+router.put('/discounts/:id', storeSettingsController.saveDiscount);
+router.delete('/discounts/:id', storeSettingsController.deleteDiscount);
+router.get('/setup', storeSettingsController.getSetup);
+router.post('/setup/test-email', storeSettingsController.sendTestEmail);
+
 module.exports = router;

@@ -6,6 +6,8 @@ const generateTokenAndSetCookie = require("../utils/generateToken");
 const { clearAuthCookie } = require("../utils/generateToken");
 const { serializeUser } = require("../utils/serialize");
 const { sendEmail } = require("../services/mailService");
+const { sendWelcomeEmail } = require("../services/orderEmails");
+const { layout, button } = require("../services/emailLayout");
 const { findOrCreateGoogleUser, isAdminEmail } = require("../services/authService");
 const { escapeHtml } = require("../services/orderEmails");
 
@@ -75,6 +77,7 @@ exports.Signup = async (req, res) => {
     });
 
     generateTokenAndSetCookie(res, user.id);
+    sendWelcomeEmail(user);
     res.status(201).json({ success: true, message: "Account created", user: publicUser(user) });
   } catch (error) {
     console.error("[Auth] Signup error:", error);
@@ -163,11 +166,10 @@ exports.forgotPassword = async (req, res) => {
       sendEmail(
         user.email,
         `Reset your ${store} password`,
-        `<p>Hi ${escapeHtml(user.fullname || "there")},</p>
+        layout("Reset your password", `<p>Hi ${escapeHtml(user.fullname || "there")},</p>
          <p>We received a request to reset your password. This link works for one hour:</p>
-         <p><a href="${link}" style="display:inline-block;background:#2c6975;color:#fff;padding:12px 22px;border-radius:999px;text-decoration:none">Choose a new password</a></p>
-         <p>If you didn’t ask for this, you can ignore this email — your password won’t change.</p>
-         <p>— The Jayam team</p>`
+         <p>${button(link, "Choose a new password")}</p>
+         <p>If you didn’t ask for this, you can ignore this email — your password won’t change.</p>`)
       ).catch((error) => console.error("[Auth] Reset email failed:", error.message));
     }
     res.json(reply);
