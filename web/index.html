@@ -14,6 +14,24 @@
     <meta property="og:title" content="Jayam Wellness — Bringing the best to your hands" />
     <meta property="og:description" content="Simple, clean, plant-based wellness from Jayam — organic Moringa supplements and botanical skincare." />
     <meta name="twitter:card" content="summary_large_image" />
+    <!-- Intro film: first page of a visit only, never in the admin panel, for crawlers or
+         for visitors who reduce motion. A black screen holds until the film appears. -->
+    <script>
+      (function () {
+        try {
+          var seen = sessionStorage.getItem('jayam_intro_seen');
+          var calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          var bot = navigator.webdriver || /bot|crawl|spider|slurp|lighthouse|headless/i.test(navigator.userAgent);
+          if (!seen && !calm && !bot && location.pathname.indexOf('/admin') !== 0) {
+            document.documentElement.classList.add('jayam-intro');
+          }
+        } catch (error) {}
+      })();
+    </script>
+    <style>
+      html.jayam-intro, html.jayam-intro body { background: #000; }
+      html.jayam-intro #root { visibility: hidden; }
+    </style>
   </head>
   <body class="bg-brand-pearl">
     <div id="root"></div>
