@@ -89,7 +89,8 @@ export default function AdminSetup() {
           <Check state={email.configured ? 'ok' : 'todo'} title="API key">
             {email.configured ? `Sending through ${email.provider === 'resend' ? 'Resend' : 'SMTP'}.` : <>Add <Key>RESEND_API_KEY</Key>. Until then emails are only written to the server log.</>}
           </Check>
-          <Check state={email.fromIsTestAddress ? 'warn' : 'ok'} title="Sender address">
+          <Check state={email.fromError || email.fromIsTestAddress ? 'warn' : 'ok'} title="Sender address">
+            {email.fromError && <><b>{email.fromError}</b><br /></>}
             {email.from ? <>Sending as <Key>{email.from}</Key>. </> : null}
             {email.fromIsTestAddress
               ? <>Verify your domain in Resend → Domains, then set <Key>MAIL_FROM</Key>, e.g. <Key>Jayam Wellness &lt;orders@yourdomain.com&gt;</Key>. Resend’s test address only delivers to your own inbox.</>

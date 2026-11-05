@@ -11,8 +11,29 @@ const nodemailer = require('nodemailer');
 const RESEND_ENDPOINT = 'https://api.resend.com/emails';
 const TIMEOUT_MS = 10000;
 
-const fromAddress = () =>
-  process.env.MAIL_FROM || `${process.env.STORE_NAME || 'Jayam Wellness'} <onboarding@resend.dev>`;
+const EMAIL = /[^\s<>"',;]+@[^\s<>"',;]+\.[a-z]{2,}/i;
+const storeName = () => process.env.STORE_NAME || 'Jayam Wellness';
+
+/**
+ * Read MAIL_FROM forgivingly: stray quotes, a bare address, or a name and address
+ * without angle brackets all become "Name <address>". Returns { from, error }.
+ */
+const parseFrom = (raw = process.env.MAIL_FROM) => {
+  const value = String(raw || '').trim().replace(/^['"]+|['"]+$/g, '').trim();
+  if (!value) return { from: `${storeName()} <onboarding@resend.dev>` };
+  const address = value.match(EMAIL)?.[0];
+  if (!address) {
+    return { error: `MAIL_FROM has no email address in it (it is "${value}"). Use: ${storeName()} <orders@yourdomain.com>` };
+  }
+  const name = value.replace(address, '').replace(/[<>"]/g, '').trim();
+  return { from: `${name || storeName()} <${address}>` };
+};
+
+const fromAddress = () => {
+  const { from, error } = parseFrom();
+  if (error) throw new Error(error);
+  return from;
+};
 
 let smtp;
 const smtpTransport = () => {
@@ -79,4 +100,5 @@ const sendEmail = async (to, subject, html, options = {}) => {
 module.exports = {
   sendEmail,
   mailConfigured,
+  parseFrom,
 };

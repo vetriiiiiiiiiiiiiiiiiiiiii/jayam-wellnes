@@ -1,6 +1,6 @@
 const prisma = require('../config/prisma');
 const { getStripe } = require('../config/stripe');
-const { sendEmail, mailConfigured } = require('../services/mailService');
+const { sendEmail, mailConfigured, parseFrom } = require('../services/mailService');
 const { layout } = require('../services/emailLayout');
 const { recipients } = require('../services/adminAlerts');
 const { normaliseCode } = require('../services/discounts');
@@ -69,6 +69,7 @@ const keyMode = (key) => (!key ? null : key.startsWith('sk_live_') || key.starts
 exports.getSetup = async (req, res) => {
   const backendUrl = (process.env.BACKEND_URL || '').replace(/\/$/, '');
   const mailFrom = process.env.MAIL_FROM || '';
+  const sender = parseFrom();
   let stripeAccount = null;
   const stripe = getStripe();
   if (stripe) {
@@ -90,7 +91,8 @@ exports.getSetup = async (req, res) => {
     email: {
       provider: process.env.RESEND_API_KEY ? 'resend' : process.env.SMTP_HOST ? 'smtp' : null,
       configured: mailConfigured(),
-      from: mailFrom || null,
+      from: sender.from || null,
+      fromError: sender.error || null,
       fromIsTestAddress: !mailFrom || mailFrom.includes('resend.dev'),
       supportEmail: process.env.SUPPORT_EMAIL || null,
       alertRecipients: recipients(),
