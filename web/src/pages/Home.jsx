@@ -4,12 +4,13 @@ import JayamHero from '../components/home/JayamHero';
 import ProductShowcase from '../components/home/ProductShowcase';
 import PlantToPack from '../components/home/PlantToPack';
 import StoryTeaser from '../components/home/StoryTeaser';
+import HomeReviews from '../components/home/HomeReviews';
 import FinalCta from '../components/home/FinalCta';
 import useScrollReveal from '../lib/useScrollReveal';
 import { useSiteContent } from '../lib/content';
 import usePageMeta from '../lib/usePageMeta';
 
-// Home flow: hero with the Jayam seal → product showcase → plant to pack → our story → call to action.
+// Home flow: hero with the Jayam seal → product showcase → plant to pack → our story → reviews → call to action.
 // All text comes from Admin → Site content, falling back to the defaults in lib/content.js.
 function Home() {
   usePageMeta();
@@ -36,6 +37,7 @@ function Home() {
       <ProductShowcase products={products} content={content.showcase} />
       <PlantToPack content={content.plant} />
       <StoryTeaser content={content.story} />
+      <HomeReviews products={products} />
       <FinalCta content={content.final} />
     </div>
   );

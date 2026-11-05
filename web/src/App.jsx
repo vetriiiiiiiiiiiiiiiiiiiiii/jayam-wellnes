@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Navigate, Outlet, Route, Routes, useLocation }
 
 import Navbar from './components/storefront/Navbar';
 import Footer from './components/storefront/Footer';
+import JayamCursor from './components/storefront/JayamCursor';
 import { CartProvider } from './components/storefront/CartProvider';
 import { AuthProvider } from './lib/auth';
 import Home from './pages/Home';
@@ -59,6 +60,7 @@ function StorefrontLayout() {
         </Suspense>
       </main>
       <Footer />
+      <JayamCursor />
     </>
   );
 }

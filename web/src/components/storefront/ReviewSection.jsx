@@ -33,7 +33,7 @@ export default function ReviewSection({ productId, reviews: initialReviews }) {
       setSuccess('Thank you — your review has been posted.');
       form.reset();
     } catch (err) {
-      setError(err.response?.data?.error || 'An unexpected error occurred.');
+      setError(err.response?.data?.error || err.response?.data?.message || 'An unexpected error occurred.');
     } finally {
       setIsSubmitting(false);
     }

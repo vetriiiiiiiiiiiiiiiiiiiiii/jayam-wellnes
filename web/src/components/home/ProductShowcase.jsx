@@ -71,7 +71,6 @@ export default function ProductShowcase({ products, content }) {
             <div className="sw-inner">
               <Link to={`/products/${slug}`} className="sw-visual" tabIndex={-1} aria-hidden="true" data-reveal>
                 <span className="sw-pack"><ProductVisual product={product} /></span>
-                <span className="sw-seal"><img src="/jayam-logo.png" alt="" loading="lazy" /></span>
                 <span className="sw-shadow" />
               </Link>
 

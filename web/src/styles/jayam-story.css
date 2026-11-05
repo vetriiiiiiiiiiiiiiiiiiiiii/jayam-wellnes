@@ -1613,3 +1613,52 @@
 .co-code-error {
   margin-top: 10px;
 }
+
+/* ---------- Cursor: a moringa leaf in place of the arrow (desktop only) ----------
+   The leaf's tip is the click point. Text fields keep the normal text cursor. */
+@media (hover: hover) and (pointer: fine) {
+  .jayam-site,
+  .jayam-site * {
+    cursor: url('/cursor/leaf.svg') 2 2, auto;
+  }
+
+  .jayam-site :is(a, button, [role='button'], select, summary, label, .at-art, .at-photo, .sw-visual),
+  .jayam-site :is(a, button, [role='button'], select, summary, label) * {
+    cursor: url('/cursor/leaf.svg') 2 2, pointer;
+  }
+
+  .jayam-site .ap-pill--accent,
+  .jayam-site .ap-pill--accent * {
+    cursor: url('/cursor/leaf-buy.svg') 2 2, pointer;
+  }
+
+  .jayam-site :is(input, textarea, [contenteditable='true']) {
+    cursor: text;
+  }
+
+  .jayam-site :is(button, input, select, textarea):disabled {
+    cursor: not-allowed;
+  }
+}
+
+/* Leaflets that scatter on Add to bag */
+.jc-burst {
+  position: fixed;
+  z-index: 9999;
+  width: 9px;
+  height: 15px;
+  margin: -7px 0 0 -4px;
+  border-radius: 50%;
+  background: linear-gradient(160deg, #68b2a0, #2c6975);
+  pointer-events: none;
+  rotate: var(--turn);
+  animation: jc-burst 800ms var(--ease-soft) both;
+}
+
+.jc-burst:nth-child(3n) { background: linear-gradient(160deg, #ffb347, #fc8500); }
+
+@keyframes jc-burst {
+  0% { opacity: 0; translate: 0 0; scale: 0.4; }
+  20% { opacity: 1; }
+  100% { opacity: 0; translate: var(--dx) var(--dy); scale: 1; rotate: calc(var(--turn) + 120deg); }
+}
