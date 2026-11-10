@@ -1,5 +1,6 @@
 import { CLAIM_DEFAULTS, STORY_DEFAULTS } from '../../lib/content';
 import { ListEditor, PhotoField, StringList } from './adminBits';
+import { BENEFITS, BENEFIT_DEFAULTS, BENEFIT_KEYS } from '../../lib/benefits';
 
 // The product page story, edited with the product. Five chapters, each optional:
 // a chapter with nothing in it simply isn't shown on the product page.
@@ -7,6 +8,7 @@ import { ListEditor, PhotoField, StringList } from './adminBits';
 const EMPTY_STORY = {
   heroImages: ['', '', ''],
   claims: [],
+  benefits: [],
   featuresImage: '',
   tileImage: '',
   featuresImage: '',
@@ -42,6 +44,8 @@ export const storyForEditing = (product) => {
   const story = merge(EMPTY_STORY, product?.story || STORY_DEFAULTS[product?.slug] || null);
   // Products saved before claims existed start from the default claims
   if (!Array.isArray(product?.story?.claims)) story.claims = CLAIM_DEFAULTS[product?.slug] || [];
+  // …and from the default benefit icons
+  if (!Array.isArray(product?.story?.benefits)) story.benefits = BENEFIT_DEFAULTS[product?.slug] || [];
   return story;
 };
 
@@ -69,6 +73,12 @@ export default function ProductStoryEditor({ story, onChange }) {
     set('collage', 'images')(images);
   };
 
+  const benefits = Array.isArray(story.benefits) ? story.benefits : [];
+  const toggleBenefit = (key) => {
+    const next = benefits.includes(key) ? benefits.filter((item) => item !== key) : [...benefits, key];
+    onChange({ ...story, benefits: BENEFIT_KEYS.filter((item) => next.includes(item)) });
+  };
+
   return (
     <section className="ad-card">
       <div className="ad-card-head">
@@ -86,13 +96,27 @@ export default function ProductStoryEditor({ story, onChange }) {
         <PhotoField label="Photo 1" hint="tall portrait, about 3:4" value={story.heroImages?.[0]} onChange={setHeroImage(0)} />
         <PhotoField label="Photo 2" hint="square, 1:1" value={story.heroImages?.[1]} onChange={setHeroImage(1)} />
         <PhotoField label="Photo 3" hint="wide landscape, about 4:3" value={story.heroImages?.[2]} onChange={setHeroImage(2)} />
-        <StringList
-          label="Health claims under the photos — end supplement benefit claims with *"
-          items={story.claims}
-          onChange={(claims) => onChange({ ...story, claims })}
-          placeholder="e.g. Natural energy*"
-          addLabel="Add a claim"
-        />
+        <div className="ad-field">
+          <span>Health benefits under the photos <small>— tick the ones to show ({benefits.length} of {BENEFITS.length})</small></span>
+          <div className="ad-benefits">
+            {BENEFITS.map((benefit) => (
+              <label key={benefit.key} className={`ad-benefit${benefits.includes(benefit.key) ? ' is-on' : ''}`}>
+                <input type="checkbox" checked={benefits.includes(benefit.key)} onChange={() => toggleBenefit(benefit.key)} />
+                <span className="ad-benefit-icon">{benefit.icon}</span>
+                <span className="ad-benefit-label">{benefit.label}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+        {benefits.length === 0 && (
+          <StringList
+            label="No benefits ticked: these text claims show instead — end supplement benefit claims with *"
+            items={story.claims}
+            onChange={(claims) => onChange({ ...story, claims })}
+            placeholder="e.g. Natural energy*"
+            addLabel="Add a claim"
+          />
+        )}
       </fieldset>
 
       <details className="ad-chapter" open>

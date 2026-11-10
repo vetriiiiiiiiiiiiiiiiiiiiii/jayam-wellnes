@@ -11,7 +11,7 @@ const jump = (event, id) => {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
 
-export default function ProductHero({ product, name, category, points, images, claims = [], fdaStatement }) {
+export default function ProductHero({ product, name, category, points, images, claims = [], benefits = [], fdaStatement }) {
   return (
     <section className="kv" id="overview" aria-labelledby="kv-title">
       <div className="kv-copy">
@@ -33,7 +33,20 @@ export default function ProductHero({ product, name, category, points, images, c
         <span className="kv-seal"><img src="/jayam-mark.png" alt="" /></span>
       </div>
 
-      {claims.length > 0 && (
+      {benefits.length > 0 ? (
+        <div className="kv-benefits">
+          <p className="kv-claims-label">Helps support</p>
+          <ul className={`kv-benefit-grid kv-benefit-grid--${benefits.length}`}>
+            {benefits.map((benefit, index) => (
+              <li key={benefit.key} style={{ '--i': index }}>
+                <span className="kv-benefit-icon">{benefit.icon}</span>
+                <span className="kv-benefit-label">{benefit.label}</span>
+              </li>
+            ))}
+          </ul>
+          {fdaStatement && <p className="kv-claims-note">{fdaStatement}</p>}
+        </div>
+      ) : claims.length > 0 && (
         <div className="kv-claims">
           <p className="kv-claims-label">Helps support</p>
           <ul>

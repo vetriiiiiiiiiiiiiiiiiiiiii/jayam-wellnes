@@ -1150,3 +1150,62 @@ a.ad-tile:hover {
 .ad-money input {
   width: 110px;
 }
+
+/* Product story → health benefit picker */
+.ad-benefits {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+}
+
+.ad-benefit {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  border: 1.5px solid var(--ad-line);
+  border-radius: 14px;
+  background: #fff;
+  padding: 14px 10px 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.ad-benefit:hover { border-color: var(--ad-sea); }
+
+.ad-benefit.is-on {
+  border-color: var(--ad-teal);
+  background: #eef6f3;
+}
+
+.ad-field .ad-benefit input {
+  position: absolute;
+  top: 9px;
+  left: 9px;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--ad-teal);
+}
+
+.ad-benefit-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: #e4f1ec;
+  color: var(--ad-teal);
+}
+
+.ad-benefit-icon svg { width: 26px; height: 26px; }
+
+.ad-benefit:not(.is-on) .ad-benefit-icon { opacity: 0.55; }
+
+.ad-benefit-label {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.3;
+}
