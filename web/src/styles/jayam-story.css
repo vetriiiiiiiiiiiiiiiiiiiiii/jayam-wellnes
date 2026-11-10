@@ -1897,3 +1897,155 @@
 .sw-theme--sage .sw-card .sw-subtitle {
   background: var(--white);
 }
+
+/* ---------- Footer: site credit ---------- */
+.af-credit {
+  margin: 14px 0 0;
+  color: var(--muted);
+  font: 400 12px var(--sans);
+  text-align: center;
+}
+
+.af-credit a {
+  color: var(--teal);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.af-credit a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ==========================================
+   NAVBAR — a soft link track with a gliding pill, a gradient hairline,
+   a shadow once the page scrolls, and a teal ribbon
+   ========================================== */
+.an::before {
+  border-bottom: 0;
+  box-shadow: 0 1px 0 rgba(44, 105, 117, 0.08);
+  transition: box-shadow 300ms ease;
+}
+
+/* A thin teal-to-orange line under the bar */
+.an::after {
+  position: absolute;
+  top: 63px;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--sea) 25%, var(--teal) 50%, var(--accent) 75%, transparent 100%);
+  opacity: 0.35;
+  content: '';
+  pointer-events: none;
+}
+
+.an.is-scrolled::before {
+  box-shadow: 0 10px 30px -18px rgba(19, 58, 65, 0.45);
+}
+
+.an-bar {
+  max-width: 1200px;
+}
+
+/* Links sit on a soft track; a white pill glides to the hovered or current link */
+.an-links {
+  position: relative;
+  gap: 2px;
+  border: 1px solid rgba(205, 224, 201, 0.8);
+  border-radius: 980px;
+  background: var(--surface);
+  padding: 4px;
+}
+
+.an-links li {
+  position: relative;
+  z-index: 1;
+}
+
+.an-links .an-pill {
+  position: absolute;
+  z-index: 0;
+  top: 4px;
+  bottom: 4px;
+  left: 0;
+  border-radius: 980px;
+  background: var(--white);
+  box-shadow: 0 1px 2px rgba(19, 58, 65, 0.08), 0 6px 16px -8px rgba(44, 105, 117, 0.45);
+  pointer-events: none;
+  transition: transform 380ms var(--ease-soft), width 380ms var(--ease-soft), opacity 200ms ease;
+}
+
+.an-links a {
+  display: block;
+  border-radius: 980px;
+  padding: 8px 16px;
+  color: rgba(44, 105, 117, 0.78);
+  font-weight: 500;
+}
+
+.an-links a:hover,
+.an-links a.active {
+  color: var(--teal);
+}
+
+.an-links a.active {
+  font-weight: 600;
+}
+
+/* Icons: soft circles; the bag is the one filled button */
+.an-actions {
+  gap: 6px;
+}
+
+.an-icon {
+  width: 40px;
+  height: 40px;
+  transition: background-color 200ms ease, transform 200ms ease;
+}
+
+.an-icon:hover {
+  background: var(--mist);
+  transform: translateY(-1px);
+}
+
+.an-bag {
+  background: var(--teal);
+  color: var(--white);
+}
+
+.an-bag:hover {
+  background: #1d4750;
+}
+
+.an-bag-count.an-bag-count {
+  top: -3px;
+  right: -3px;
+  box-shadow: 0 0 0 2px var(--white);
+}
+
+/* Ribbon: a teal band with a small leaf */
+.an-ribbon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--teal-glow);
+  color: var(--white);
+  font-weight: 500;
+}
+
+.an-ribbon svg {
+  flex: none;
+  color: var(--sage-tint);
+}
+
+.an-ribbon a {
+  color: #ffd29a;
+  font-weight: 600;
+}
+
+@media (max-width: 860px) {
+  .an::after { top: 63px; }
+  .an-icon { width: 38px; height: 38px; }
+}

@@ -65,6 +65,9 @@ export default function Footer() {
             <span>United States</span>
           </span>
         </div>
+        <p className="af-credit">
+          Crafted by <a href="https://lumiodigital.store" target="_blank" rel="noopener">Lumio Digital</a>
+        </p>
       </div>
     </footer>
   );
