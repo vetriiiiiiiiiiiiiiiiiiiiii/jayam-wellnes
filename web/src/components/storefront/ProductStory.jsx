@@ -27,7 +27,7 @@ export const storyChapters = (story) => {
 
 export const hasStory = (story) => Object.values(storyChapters(story)).some(Boolean);
 
-export default function ProductStory({ story, description, onBuy }) {
+export default function ProductStory({ story, description, onBuy, banner, bannerAlt = '' }) {
   if (!hasStory(story)) return null;
   const { lifestyle, moments, collage, about, fit, promise } = storyChapters(story);
   const promisePhoto = filled(story.promiseImage) ? story.promiseImage : null;
@@ -161,6 +161,12 @@ export default function ProductStory({ story, description, onBuy }) {
             )}
           </div>
         </section>
+      )}
+
+      {banner && (
+        <figure className="ps-banner" data-reveal>
+          <img src={mediaUrl(banner)} alt={bannerAlt} loading="lazy" decoding="async" />
+        </figure>
       )}
 
       {promise && (

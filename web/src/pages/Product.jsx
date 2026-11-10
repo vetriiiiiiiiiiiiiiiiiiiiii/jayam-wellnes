@@ -10,7 +10,7 @@ import ProductSubnav from '../components/storefront/ProductSubnav';
 import ProductHero from '../components/storefront/ProductHero';
 import ProductStory, { hasStory } from '../components/storefront/ProductStory';
 import { useCart } from '../components/storefront/CartProvider';
-import { CLAIM_DEFAULTS, useSiteContent } from '../lib/content';
+import { CLAIM_DEFAULTS, bannerFor, useSiteContent } from '../lib/content';
 import { benefitsFor } from '../lib/benefits';
 import { CATEGORY_LABELS, FREE_SHIPPING_THRESHOLD, formatPrice } from '../lib/store';
 import useScrollReveal from '../lib/useScrollReveal';
@@ -158,7 +158,7 @@ export default function ProductPage() {
 
       <div id="features" className="pp-features">
       {story ? (
-        <ProductStory story={story} description={product.description} onBuy={buy} />
+        <ProductStory story={story} description={product.description} onBuy={buy} banner={bannerFor(product)} bannerAlt={product.name} />
       ) : product.description && (
         <section className="pp-overview" data-reveal>
           <p className="pg-eyebrow">Overview</p>

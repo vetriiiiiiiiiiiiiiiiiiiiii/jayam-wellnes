@@ -2234,3 +2234,24 @@
 .kv-benefits + .kv-points {
   margin-top: 36px;
 }
+
+/* ---------- Product banner under "Is it right for you?" (Admin → Products) ---------- */
+.ps .ps-banner {
+  max-width: 1120px;
+  margin: 64px auto 0;
+  padding: 0 22px;
+}
+
+.ps .ps-banner img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 28px;
+  background: #fff;
+  box-shadow: 0 30px 60px -40px rgba(19, 58, 65, 0.55);
+}
+
+@media (max-width: 560px) {
+  .ps .ps-banner { margin-top: 44px; }
+  .ps .ps-banner img { border-radius: 18px; }
+}

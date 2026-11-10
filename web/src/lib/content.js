@@ -96,6 +96,17 @@ export const CLAIM_DEFAULTS = {
   'beauty-drops-moringa-facial-elixir': ['Brightening', 'Deeply nourishing', 'Radiant-looking skin'],
 };
 
+// The wide product banner under "Is it right for you?" (Admin → Products can change or clear it)
+export const BANNER_DEFAULTS = {
+  'moringa-leaf-capsules': '/banners/moringa-leaf-capsules.webp',
+  'moringa-leaf-amla-tablets': '/banners/moringa-leaf-amla-tablets.webp',
+  'moringa-flower-tablets': '/banners/moringa-flower-tablets.webp',
+  'moringa-seed-capsules': '/banners/moringa-seed-capsules.webp',
+};
+
+// The saved banner; a product that never had one set uses its default
+export const bannerFor = (product) => (typeof product?.story?.fit?.banner === 'string' ? product.story.fit.banner : BANNER_DEFAULTS[product?.slug] || '');
+
 export const STORY_DEFAULTS = {
   'moringa-leaf-amla-tablets': {
     lifestyle: {

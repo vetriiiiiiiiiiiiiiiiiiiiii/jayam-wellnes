@@ -1,4 +1,4 @@
-import { CLAIM_DEFAULTS, STORY_DEFAULTS } from '../../lib/content';
+import { BANNER_DEFAULTS, CLAIM_DEFAULTS, STORY_DEFAULTS } from '../../lib/content';
 import { ListEditor, PhotoField, StringList } from './adminBits';
 import { BENEFITS, BENEFIT_DEFAULTS, BENEFIT_KEYS } from '../../lib/benefits';
 
@@ -24,7 +24,7 @@ const EMPTY_STORY = {
   },
   collage: { eyebrow: '', title: '', body: '', images: ['', '', ''] },
   about: { eyebrow: '', title: '', body: '', facts: [], image: '' },
-  fit: { title: 'Is it right for you?', forYou: [], goodToKnow: [], image: '' },
+  fit: { title: 'Is it right for you?', forYou: [], goodToKnow: [], image: '', banner: '' },
   promise: '',
   promiseImage: '',
 };
@@ -44,6 +44,8 @@ export const storyForEditing = (product) => {
   const story = merge(EMPTY_STORY, product?.story || STORY_DEFAULTS[product?.slug] || null);
   // Products saved before claims existed start from the default claims
   if (!Array.isArray(product?.story?.claims)) story.claims = CLAIM_DEFAULTS[product?.slug] || [];
+  // …the default banner…
+  if (typeof product?.story?.fit?.banner !== 'string') story.fit = { ...story.fit, banner: BANNER_DEFAULTS[product?.slug] || '' };
   // …and from the default benefit icons
   if (!Array.isArray(product?.story?.benefits)) story.benefits = BENEFIT_DEFAULTS[product?.slug] || [];
   return story;
@@ -174,6 +176,7 @@ export default function ProductStoryEditor({ story, onChange }) {
         <StringList label="Made for you if…" items={story.fit.forYou} onChange={set('fit', 'forYou')} placeholder="e.g. You lead an active life" addLabel="Add a line" />
         <StringList label="Good to know" items={story.fit.goodToKnow} onChange={set('fit', 'goodToKnow')} placeholder="e.g. Take 2 a day with food" addLabel="Add a line" />
         <PhotoField label="Photo beside the lists" hint="portrait" value={story.fit.image} onChange={set('fit', 'image')} />
+        <PhotoField label="Wide banner under this chapter" hint="full width, about 1024 × 420; remove it to hide the banner" value={story.fit.banner} onChange={set('fit', 'banner')} />
       </details>
 
       <details className="ad-chapter">
