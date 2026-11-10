@@ -126,7 +126,7 @@ export const STORY_DEFAULTS = {
     fit: {
       title: 'Is it right for you?',
       forYou: ['You want one simple daily supplement, not five', 'You like plant-based, vegan and Non-GMO', 'You prefer formulas without fillers or binders', 'You want support for energy and immunity together*'],
-      goodToKnow: ['For adults only', 'Take 2 tablets a day with food', 'Ask your healthcare provider first if you are pregnant, nursing or taking medication'],
+      goodToKnow: ['Take 2 tablets a day with food', 'Ask your healthcare provider first if you are pregnant, nursing or taking medication'],
     },
     promise: 'Two superfoods. One daily ritual. Nothing unnecessary.',
   },
@@ -159,7 +159,7 @@ export const STORY_DEFAULTS = {
     fit: {
       title: 'Is it right for you?',
       forYou: ['You are a woman aged 20 or over', 'You want clean, single-ingredient support', 'You care about skin and hair from within*', 'You prefer vegan and Non-GMO'],
-      goodToKnow: ['For adults only', 'Take 2 tablets a day with food', 'Ask your healthcare provider first if you are pregnant, nursing or taking medication'],
+      goodToKnow: ['Take 2 tablets a day with food', 'Ask your healthcare provider first if you are pregnant, nursing or taking medication'],
     },
     promise: 'Nature’s goodness, made for women’s wellness.',
   },
@@ -192,7 +192,7 @@ export const STORY_DEFAULTS = {
     fit: {
       title: 'Is it right for you?',
       forYou: ['You lead an active, demanding life', 'You want caffeine-free daily support*', 'You prefer a single, pure ingredient', 'You value vegan, Non-GMO formulas'],
-      goodToKnow: ['For adults only', 'Take 2 capsules a day with food', 'Ask your healthcare provider first if you are taking medication'],
+      goodToKnow: ['Take 2 capsules a day with food', 'Ask your healthcare provider first if you are taking medication'],
     },
     promise: 'Pure nature. Everyday vitality.',
   },
@@ -225,7 +225,7 @@ export const STORY_DEFAULTS = {
     fit: {
       title: 'Is it right for you?',
       forYou: ['You are new to botanical supplements', 'You want a simple, affordable start', 'You eat plant-based or want more greens', 'You like clean, single-ingredient formulas'],
-      goodToKnow: ['For adults only', 'Take 2 capsules a day with food', 'Ask your healthcare provider first if you are pregnant, nursing or taking medication'],
+      goodToKnow: ['Take 2 capsules a day with food', 'Ask your healthcare provider first if you are pregnant, nursing or taking medication'],
     },
     promise: 'Nature’s everyday superfood, made simple.',
   },

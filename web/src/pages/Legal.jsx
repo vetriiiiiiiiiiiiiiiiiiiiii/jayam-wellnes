@@ -50,7 +50,7 @@ const PAGES = {
       ['Cookies', <p key="e">We use a single essential cookie to keep you signed in, and your browser’s local storage to remember your bag. We do not use advertising or tracking cookies.</p>],
       ['How long we keep it', <p key="f">We keep order records for as long as needed for accounting and tax purposes (generally seven years). You can delete your account at any time by contacting us; past order records are kept as the law requires.</p>],
       ['Your rights', <p key="g">Depending on where you live (for example, California under the CCPA/CPRA), you may have the right to know what personal information we hold about you, to correct it, to delete it, and to opt out of its sale — which we do not do. To make a request, {contactLine}. We will not treat you differently for exercising these rights.</p>],
-      ['Children', <p key="h">Our products are for adults. We do not knowingly collect information from children under 13.</p>],
+      ['Children', <p key="h">We do not knowingly collect information from children under 13.</p>],
       ['Changes', <p key="i">If we change this policy, we will update the date at the top of this page.</p>],
     ],
   },
@@ -61,7 +61,7 @@ const PAGES = {
     sections: [
       ['About these terms', <p key="a">These terms apply when you use this website or buy from {BUSINESS}. By placing an order you agree to them. Questions? {contactLine}.</p>],
       ['Our products', <>
-        <p>Our supplements are intended for adults and are meant to complement a balanced diet and lifestyle. <b>These statements have not been evaluated by the Food and Drug Administration. Our products are not intended to diagnose, treat, cure, or prevent any disease.</b></p>
+        <p>Our supplements are meant to complement a balanced diet and lifestyle. <b>These statements have not been evaluated by the Food and Drug Administration. Our products are not intended to diagnose, treat, cure, or prevent any disease.</b></p>
         <p>Please read each product’s ingredients, directions and warnings before use. If you are pregnant or nursing, taking medication, or have a medical condition, consult your healthcare provider first. Our products are manufactured in a facility that also processes peanuts.</p>
       </>],
       ['Orders and prices', <p key="c">All prices are in U.S. dollars. We may correct pricing errors and may cancel an order if a product is unavailable or a price was listed in error — if we do, we will refund any amount you paid. Your order is confirmed when payment succeeds and you receive our confirmation email.</p>],

@@ -148,7 +148,7 @@ export default function ProductStoryEditor({ story, onChange }) {
         <summary>5 · Is it right for you?</summary>
         <Text label="Heading" value={story.fit.title} onChange={set('fit', 'title')} />
         <StringList label="Made for you if…" items={story.fit.forYou} onChange={set('fit', 'forYou')} placeholder="e.g. You lead an active life" addLabel="Add a line" />
-        <StringList label="Good to know" items={story.fit.goodToKnow} onChange={set('fit', 'goodToKnow')} placeholder="e.g. For adults only" addLabel="Add a line" />
+        <StringList label="Good to know" items={story.fit.goodToKnow} onChange={set('fit', 'goodToKnow')} placeholder="e.g. Take 2 a day with food" addLabel="Add a line" />
         <PhotoField label="Photo beside the lists" hint="portrait" value={story.fit.image} onChange={set('fit', 'image')} />
       </details>
 

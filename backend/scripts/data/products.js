@@ -5,7 +5,7 @@ const SUPPLEMENT_DISCLAIMER =
   'Consult your healthcare provider if you have a medical condition, are taking medication, or are pregnant or nursing.';
 
 const SUPPLEMENT_WARNINGS =
-  'For adults only. Consult a physician if you are pregnant or nursing, taking medication, or have a medical condition. ' +
+  'Consult a physician if you are pregnant or nursing, taking medication, or have a medical condition. ' +
   'Keep out of reach of children.';
 
 const ALLERGENS =
@@ -23,7 +23,6 @@ const supplementSpecs = ({ form, ingredient }) => [
   { name: 'Dietary', value: 'Vegan, Non-GMO' },
   { name: 'Allergens', value: ALLERGENS },
   { name: 'Storage', value: 'Store in a cool, dry place away from direct sunlight and moisture.' },
-  { name: 'Suitable for', value: 'Adults only' },
 ];
 
 module.exports = [
@@ -169,7 +168,6 @@ module.exports = [
       { name: 'Free from', value: 'Paraffins, fillers, artificial fragrance' },
       { name: 'Allergens', value: ALLERGENS },
       { name: 'Storage', value: 'Store in a cool, dry place away from direct sunlight and heat.' },
-      { name: 'Suitable for', value: 'Adults only' },
     ],
   },
 ];

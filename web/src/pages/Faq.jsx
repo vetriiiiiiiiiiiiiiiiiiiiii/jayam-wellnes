@@ -66,10 +66,6 @@ const sections = [
         a: <p>Yes — our supplements are designed to be part of your daily routine at the recommended serving of 2 per day, and each pack is a 2-month supply. If you are pregnant or nursing, taking medication, or have a medical condition, please check with your physician first.</p>,
       },
       {
-        q: 'Who are your products for?',
-        a: <p>Our products are for adults only. Please keep them out of reach of children.</p>,
-      },
-      {
         q: 'How should I store them?',
         a: <p>Store in a cool, dry place away from direct sunlight, heat and moisture.</p>,
       },
