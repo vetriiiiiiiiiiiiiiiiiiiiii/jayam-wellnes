@@ -1191,16 +1191,11 @@ a.ad-tile:hover {
 }
 
 .ad-benefit-icon {
-  display: grid;
-  place-items: center;
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  background: #e4f1ec;
-  color: var(--ad-teal);
+  width: 56px;
+  height: 56px;
 }
 
-.ad-benefit-icon svg { width: 26px; height: 26px; }
+.ad-benefit-icon img { display: block; width: 100%; height: 100%; border-radius: 50%; }
 
 .ad-benefit:not(.is-on) .ad-benefit-icon { opacity: 0.55; }
 
