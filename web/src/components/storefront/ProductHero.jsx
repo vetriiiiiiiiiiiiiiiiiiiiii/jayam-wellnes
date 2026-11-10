@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { BadgeCheck, Clock, Leaf, Package, ShieldCheck, Sparkles } from 'lucide-react';
 import { mediaUrl } from '../../lib/media';
 
@@ -11,7 +12,32 @@ const jump = (event, id) => {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
 
+// Draws the benefit icons in once the panel is on screen (straight away for reduced motion)
+function useDrawn() {
+  const ref = useRef(null);
+  const [drawn, setDrawn] = useState(false);
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) return undefined;
+    if (!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setDrawn(true);
+      return undefined;
+    }
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setDrawn(true);
+        observer.disconnect();
+      }
+    }, { threshold: 0.25 });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+  return [ref, drawn];
+}
+
 export default function ProductHero({ product, name, category, points, images, claims = [], benefits = [], fdaStatement }) {
+  const [benefitsRef, drawn] = useDrawn();
+
   return (
     <section className="kv" id="overview" aria-labelledby="kv-title">
       <div className="kv-copy">
@@ -34,12 +60,16 @@ export default function ProductHero({ product, name, category, points, images, c
       </div>
 
       {benefits.length > 0 ? (
-        <div className="kv-benefits">
-          <p className="kv-claims-label">Helps support</p>
+        <div ref={benefitsRef} className={`kv-benefits${drawn ? ' is-drawn' : ''}`}>
+          <span className="kv-benefits-glow" aria-hidden="true" />
+          <p className="kv-benefits-label">Helps support</p>
+          <h2 className="kv-benefits-title">Everyday support, <em>naturally.</em></h2>
           <ul className={`kv-benefit-grid kv-benefit-grid--${benefits.length}`}>
             {benefits.map((benefit, index) => (
               <li key={benefit.key} style={{ '--i': index }}>
-                <span className="kv-benefit-icon">{benefit.icon}</span>
+                <span className="kv-benefit-ring" aria-hidden="true">
+                  <span className="kv-benefit-icon">{benefit.icon}</span>
+                </span>
                 <span className="kv-benefit-label">{benefit.label}</span>
               </li>
             ))}

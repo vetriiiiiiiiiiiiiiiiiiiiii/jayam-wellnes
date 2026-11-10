@@ -3,9 +3,12 @@
 // story.benefits). The wording is kept to supplement "structure/function" language, so
 // the ones marked * show with the FDA statement.
 
+import { Children, cloneElement } from 'react';
+
+// pathLength="1" on every line lets the product page draw each icon in as it scrolls into view
 const Svg = ({ children }) => (
   <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    {children}
+    {Children.map(children, (child) => cloneElement(child, { pathLength: 1 }))}
   </svg>
 );
 
