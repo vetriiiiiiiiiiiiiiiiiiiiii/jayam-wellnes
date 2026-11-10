@@ -3,7 +3,6 @@ const { mediaUrl } = require('./serialize');
 
 const CARRIERS = {
   USPS: { name: 'USPS', trackingUrl: (number) => `https://tools.usps.com/go/TrackConfirmAction?tLabels=${encodeURIComponent(number)}` },
-  UPS: { name: 'UPS', trackingUrl: (number) => `https://www.ups.com/track?loc=en_US&tracknum=${encodeURIComponent(number)}` },
 };
 
 const frontendUrl = () => (process.env.FRONTEND_URL || process.env.CLIENT_URL || 'http://localhost:5173').replace(/\/$/, '');

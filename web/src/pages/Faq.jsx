@@ -14,7 +14,7 @@ const sections = [
         q: 'What ingredients do you use?',
         a: (
           <>
-            <p>Each Jayam product has a short, plant-based ingredient list, sourced from India:</p>
+            <p>Each Jayam product has a short, plant-based ingredient list:</p>
             <ul>
               <li><strong>Moringa Leaf + Amla Tablets</strong> — organic Moringa leaf powder and Amla powder (500 mg per tablet)</li>
               <li><strong>Moringa Leaf Capsules</strong> — organic Moringa leaf powder (500 mg per capsule)</li>
@@ -71,7 +71,7 @@ const sections = [
       },
       {
         q: 'How should I store them?',
-        a: <p>Store in a cool, dry place away from direct sunlight, heat and moisture. Supplements have a shelf life of 2 years from the date of manufacture; Beauty Drops has a shelf life of 3 years.</p>,
+        a: <p>Store in a cool, dry place away from direct sunlight, heat and moisture.</p>,
       },
     ],
   },
@@ -93,7 +93,7 @@ const sections = [
       },
       {
         q: 'Which carriers do you use?',
-        a: <p>We ship with USPS and UPS.</p>,
+        a: <p>We ship with USPS.</p>,
       },
       {
         q: 'Can I track my order?',

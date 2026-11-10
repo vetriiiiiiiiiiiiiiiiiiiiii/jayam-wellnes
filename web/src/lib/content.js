@@ -63,7 +63,7 @@ export const HOME_DEFAULTS = {
     intro: 'From farm to your hands, every step is intentional — clean ingredients, gentle processing and packaging that respects you and the planet.',
     // image: the card photo (replaceable from the admin panel later); empty shows the illustration
     steps: [
-      { title: 'Organic botanicals', body: 'Moringa leaves, flowers and seeds, and Amla — carefully selected and sourced from India.', link: '/our-story', image: '/difference/botanicals.jpg' },
+      { title: 'Organic botanicals', body: 'Moringa leaves, flowers and seeds, and Amla — carefully selected.', link: '/our-story', image: '/difference/botanicals.jpg' },
       { title: 'Gently vacuum-dried', body: 'A careful process that helps preserve naturally occurring nutrients and botanical character.', link: '/faq#products', image: '/difference/vacuum-dried.jpg' },
       { title: 'Made with care', body: 'Produced in GMP-certified facilities and third-party tested for purity.', link: '/faq#products', image: '/difference/made-with-care.jpg' },
       { title: 'Plastic-free packs', body: 'Biodegradable paper tubes that protect freshness — and the planet.', link: '/shop', image: '/difference/plastic-free.jpg' },
@@ -86,6 +86,16 @@ export const HOME_DEFAULTS = {
 
 // Product storytelling, told in five chapters that build on each other:
 // who it is for → why you reach for it → what is inside → is it right for you → the promise.
+// Health claims under the product's hero photos (Admin → Products can change them).
+// Supplement benefit claims carry an asterisk: the FDA statement is shown with them.
+export const CLAIM_DEFAULTS = {
+  'moringa-leaf-amla-tablets': ['Immune function*', 'Natural energy*', 'Digestion*', 'Radiant-looking skin*'],
+  'moringa-leaf-capsules': ['Natural energy*', 'Digestive health*', 'Naturally rich in vitamins and minerals'],
+  'moringa-flower-tablets': ['Hormonal balance*', 'Immune function*', 'Digestion*', 'Radiant-looking skin*'],
+  'moringa-seed-capsules': ['Men’s energy*', 'Immune function*', 'Digestive health*', 'Skin health*'],
+  'beauty-drops-moringa-facial-elixir': ['Brightening', 'Deeply nourishing', 'Radiant-looking skin'],
+};
+
 export const STORY_DEFAULTS = {
   'moringa-leaf-amla-tablets': {
     lifestyle: {

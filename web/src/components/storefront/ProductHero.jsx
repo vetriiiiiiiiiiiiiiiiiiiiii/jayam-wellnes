@@ -2,7 +2,8 @@ import { BadgeCheck, Clock, Leaf, Package, ShieldCheck, Sparkles } from 'lucide-
 import { mediaUrl } from '../../lib/media';
 
 // The product's opening screen, realme style: a giant headline, three lifestyle photos
-// set diagonally with the Jayam seal (Admin → Products), and its key points underneath.
+// set diagonally with the Jayam logo (Admin → Products), its health claims, and its key
+// points underneath.
 const ICONS = [Leaf, ShieldCheck, BadgeCheck, Sparkles, Package, Clock];
 
 const jump = (event, id) => {
@@ -10,7 +11,7 @@ const jump = (event, id) => {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
 
-export default function ProductHero({ product, name, category, points, images }) {
+export default function ProductHero({ product, name, category, points, images, claims = [], fdaStatement }) {
   return (
     <section className="kv" id="overview" aria-labelledby="kv-title">
       <div className="kv-copy">
@@ -29,8 +30,18 @@ export default function ProductHero({ product, name, category, points, images })
             <img src={mediaUrl(image)} alt="" decoding="async" fetchPriority={index === 0 ? 'high' : undefined} />
           </figure>
         ))}
-        <span className="kv-seal"><img src="/jayam-logo.png" alt="" /></span>
+        <span className="kv-seal"><img src="/jayam-mark.png" alt="" /></span>
       </div>
+
+      {claims.length > 0 && (
+        <div className="kv-claims">
+          <p className="kv-claims-label">Helps support</p>
+          <ul>
+            {claims.map((claim) => <li key={claim}>{claim}</li>)}
+          </ul>
+          {fdaStatement && <p className="kv-claims-note">{fdaStatement}</p>}
+        </div>
+      )}
 
       {points.length > 0 && (
         <ul className="kv-points">

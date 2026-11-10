@@ -102,7 +102,7 @@ exports.updateOrderStatus = async (req, res) => {
       return res.status(400).json({ message: 'Invalid order status' });
     }
     if (carrier && !CARRIERS[carrier]) {
-      return res.status(400).json({ message: 'Carrier must be USPS or UPS' });
+      return res.status(400).json({ message: 'Carrier must be USPS' });
     }
     if (trackingNumber && !/^[A-Z0-9]{8,40}$/.test(trackingNumber)) {
       return res.status(400).json({ message: 'Enter a valid tracking number' });

@@ -40,7 +40,7 @@ const PAGES = {
         <p>We do not sell your personal information. We share it only with service providers who help us run the store, under contracts that limit their use of it:</p>
         <ul>
           <li><b>Stripe</b> — payment processing.</li>
-          <li><b>USPS and UPS</b> — delivering your order.</li>
+          <li><b>USPS</b> — delivering your order.</li>
           <li><b>Resend</b> — sending order and account emails.</li>
           <li><b>Google</b> — only if you choose to sign in with Google.</li>
           <li>Our hosting provider, which stores the website and its data.</li>
@@ -81,7 +81,7 @@ const PAGES = {
     sections: [
       ['Where we ship', <p key="a">We ship across the United States, including U.S. territories. We don’t offer international shipping at this time.</p>],
       ['Shipping costs', <p key="b">Standard shipping is {formatPrice(SHIPPING_FEE)}. Orders of {formatPrice(FREE_SHIPPING_THRESHOLD)} and above ship free.</p>],
-      ['Delivery times', <p key="c">Orders usually arrive in 2–7 business days with USPS or UPS. Delivery to Alaska, Hawaii and U.S. territories may take longer. When your order ships we email you the carrier and tracking number, and you can follow it on our <Link to="/track-order">Track your order</Link> page.</p>],
+      ['Delivery times', <p key="c">Orders usually arrive in 2–7 business days with USPS. Delivery to Alaska, Hawaii and U.S. territories may take longer. When your order ships we email you the carrier and tracking number, and you can follow it on our <Link to="/track-order">Track your order</Link> page.</p>],
       ['Damaged or wrong items', <p key="d">If something arrives damaged or isn’t what you ordered, {contactLine} within 7 days of delivery with your order number and a photo. We’ll send a replacement or a full refund — you won’t need to return it.</p>],
       ['Returns', <>
         <p>We accept returns of <b>unopened, sealed</b> products within <b>30 days of delivery</b>. For safety, we can’t accept returns of opened supplements or skincare unless they were damaged or incorrect.</p>

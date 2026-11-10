@@ -76,11 +76,8 @@ export default function Navbar() {
           </button>
 
           <Link to="/" className="an-logo" aria-label="Jayam Wellness home">
-            <span className="an-logo-mark"><img src="/jayam-logo.png" alt="" width="44" height="44" /></span>
-            <span className="an-wordmark">
-              <b>JAYAM</b>
-              <small>Wellness</small>
-            </span>
+            <span className="an-logo-mark"><img src="/jayam-triangle.png" alt="" width="302" height="228" /></span>
+            <img className="an-wordmark-img" src="/jayam-wordmark.png" alt="" width="231" height="58" />
           </Link>
 
           <ul className="an-links">

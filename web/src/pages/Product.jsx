@@ -10,7 +10,7 @@ import ProductSubnav from '../components/storefront/ProductSubnav';
 import ProductHero from '../components/storefront/ProductHero';
 import ProductStory, { hasStory } from '../components/storefront/ProductStory';
 import { useCart } from '../components/storefront/CartProvider';
-import { useSiteContent } from '../lib/content';
+import { CLAIM_DEFAULTS, useSiteContent } from '../lib/content';
 import { CATEGORY_LABELS, FREE_SHIPPING_THRESHOLD, formatPrice } from '../lib/store';
 import useScrollReveal from '../lib/useScrollReveal';
 import usePageMeta from '../lib/usePageMeta';
@@ -121,6 +121,7 @@ export default function ProductPage() {
   // Photos set in Admin → Products; stand-ins until they are uploaded
   const savedHero = (product.story?.heroImages || []).filter(Boolean);
   const heroImages = savedHero.length ? savedHero : PLACEHOLDER_PHOTOS.slice(0, 3);
+  const claims = (Array.isArray(product.story?.claims) ? product.story.claims : CLAIM_DEFAULTS[product.slug] || []).filter(Boolean);
   // The story edited on the product (Admin → Products); older text from Site content as a fallback
   const story = hasStory(product.story) ? product.story : hasStory(stories[product.slug]) ? stories[product.slug] : null;
 
@@ -151,7 +152,7 @@ export default function ProductPage() {
   return (
     <main className="pg pp pp--story">
       <ProductSubnav name={shortTitle} price={price} sections={sections} />
-      <ProductHero product={product} name={shortTitle} category={category} points={TRUST_POINTS[product.productType] || []} images={heroImages} />
+      <ProductHero product={product} name={shortTitle} category={category} points={TRUST_POINTS[product.productType] || []} images={heroImages} claims={claims} fdaStatement={claims.some((claim) => claim.includes('*')) ? FDA_STATEMENT : null} />
 
       <div id="features" className="pp-features">
       {story ? (

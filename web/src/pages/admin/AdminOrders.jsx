@@ -111,7 +111,6 @@ function OrderDetail({ order, onChanged, notify }) {
           <form className="ad-inline-form" onSubmit={saveTracking}>
             <select name="carrier" defaultValue={order.carrier || 'USPS'} aria-label="Carrier">
               <option value="USPS">USPS</option>
-              <option value="UPS">UPS</option>
             </select>
             <input name="trackingNumber" placeholder="Tracking number" defaultValue={order.trackingNumber || ''} required aria-label="Tracking number" />
             <button type="submit" className="ad-btn" disabled={busy}>{order.trackingNumber ? 'Update tracking' : 'Save & mark shipped'}</button>

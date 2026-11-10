@@ -306,7 +306,7 @@ export default function CheckoutPage() {
             {shipping === 0
               ? 'Your order qualifies for free U.S. shipping.'
               : `Add ${formatPrice(FREE_SHIPPING_THRESHOLD - cartTotal)} more for free shipping.`}
-            {' '}Delivery usually takes 2–7 business days via USPS or UPS; Alaska, Hawaii and U.S. territories may take longer.
+            {' '}Delivery usually takes 2–7 business days via USPS; Alaska, Hawaii and U.S. territories may take longer.
           </p>
         </aside>
       </div>
