@@ -3,8 +3,9 @@
 // story.benefits). The icons are the client's own artwork, cut into round images in
 // public/benefits/. The wording is kept to supplement "structure/function" language, so
 // the ones marked * show with the FDA statement.
-// Each product can also reword any of the 12 (story.benefitLabels) and add its own benefits
-// with an uploaded icon (story.customBenefits: [{ image, label }]).
+// Each product can also reword any of the 12 (story.benefitLabels), swap its icon
+// (story.benefitIcons), remove it from the product altogether (story.benefitsRemoved), and add
+// its own benefits with an uploaded icon (story.customBenefits: [{ image, label, hidden }]).
 import { mediaUrl } from './media';
 
 export const BENEFITS = [
@@ -41,11 +42,19 @@ export const benefitsFor = (product) => {
   const story = product?.story || {};
   const keys = Array.isArray(story.benefits) ? story.benefits : BENEFIT_DEFAULTS[product?.slug] || [];
   const labels = story.benefitLabels && typeof story.benefitLabels === 'object' ? story.benefitLabels : {};
+  const icons = story.benefitIcons && typeof story.benefitIcons === 'object' ? story.benefitIcons : {};
+  const removed = Array.isArray(story.benefitsRemoved) ? story.benefitsRemoved : [];
   const chosen = BENEFITS
-    .filter((benefit) => keys.includes(benefit.key))
-    .map((benefit) => (filled(labels[benefit.key]) ? { ...benefit, label: labels[benefit.key].trim() } : benefit));
+    .filter((benefit) => keys.includes(benefit.key) && !removed.includes(benefit.key))
+    .map((benefit) => ({
+      ...benefit,
+      label: filled(labels[benefit.key]) ? labels[benefit.key].trim() : benefit.label,
+      icon: filled(icons[benefit.key])
+        ? <img src={mediaUrl(icons[benefit.key])} alt="" width="180" height="180" loading="lazy" decoding="async" />
+        : benefit.icon,
+    }));
   const own = (Array.isArray(story.customBenefits) ? story.customBenefits : [])
-    .filter((item) => filled(item?.image) && filled(item?.label))
+    .filter((item) => !item?.hidden && filled(item?.image) && filled(item?.label))
     .map((item, index) => ({
       key: `own-${index}`,
       label: item.label.trim(),

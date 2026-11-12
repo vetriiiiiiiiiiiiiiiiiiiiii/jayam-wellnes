@@ -1,5 +1,8 @@
 import { BANNER_DEFAULTS, CLAIM_DEFAULTS, STORY_DEFAULTS } from '../../lib/content';
-import { ListEditor, PhotoField, StringList } from './adminBits';
+import { useRef, useState } from 'react';
+import { ImagePlus, Plus, RotateCcw, Trash2 } from 'lucide-react';
+import { adminApi, mediaUrl } from '../../lib/adminApi';
+import { ListEditor, PhotoCropper, PhotoField, StringList } from './adminBits';
 import { BENEFITS, BENEFIT_DEFAULTS, BENEFIT_KEYS } from '../../lib/benefits';
 
 // The product page story, edited with the product. Five chapters, each optional:
@@ -10,6 +13,8 @@ const EMPTY_STORY = {
   claims: [],
   benefits: [],
   benefitLabels: {},
+  benefitIcons: {},
+  benefitsRemoved: [],
   customBenefits: [],
   featuresImage: '',
   tileImage: '',
@@ -50,10 +55,73 @@ export const storyForEditing = (product) => {
   if (typeof product?.story?.fit?.banner !== 'string') story.fit = { ...story.fit, banner: BANNER_DEFAULTS[product?.slug] || '' };
   // Reworded benefits are a free-form map, which the merge above doesn't carry over
   story.benefitLabels = product?.story?.benefitLabels && typeof product.story.benefitLabels === 'object' ? { ...product.story.benefitLabels } : {};
+  story.benefitIcons = product?.story?.benefitIcons && typeof product.story.benefitIcons === 'object' ? { ...product.story.benefitIcons } : {};
   // …and from the default benefit icons
   if (!Array.isArray(product?.story?.benefits)) story.benefits = BENEFIT_DEFAULTS[product?.slug] || [];
   return story;
 };
+
+// One benefit in the editor: show it or not, change its icon (cropped to a circle), change
+// its wording, or remove it
+function BenefitTile({ icon, image, label, placeholder, shown, onShow, onImage, onLabel, onRemove }) {
+  const input = useRef(null);
+  const [cropping, setCropping] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+
+  const send = async (file) => {
+    setBusy(true);
+    setError('');
+    const result = await adminApi.uploadImage(file);
+    setBusy(false);
+    if (result.ok) onImage(result.data.url);
+    else setError(result.message);
+  };
+
+  return (
+    <div className={`ad-benefit${shown ? ' is-on' : ''}`}>
+      <label className="ad-benefit-show" title="Show on the product page">
+        <input type="checkbox" checked={shown} onChange={onShow} aria-label={`Show ${label || 'this benefit'}`} />
+      </label>
+      <button type="button" className="ad-benefit-remove" onClick={onRemove} aria-label={`Remove ${label || 'this benefit'}`} title="Remove">
+        <Trash2 size={15} aria-hidden="true" />
+      </button>
+      <button type="button" className="ad-benefit-icon ad-benefit-icon--edit" onClick={() => input.current?.click()} disabled={busy} title="Change the icon">
+        {image ? <img src={mediaUrl(image)} alt="" /> : icon || <ImagePlus size={20} aria-hidden="true" />}
+        <span className="ad-benefit-icon-tag">{busy ? '…' : 'Change'}</span>
+      </button>
+      <textarea
+        className="ad-benefit-text"
+        rows={2}
+        aria-label="Benefit wording"
+        placeholder={placeholder}
+        value={label}
+        onChange={(event) => onLabel(event.target.value)}
+      />
+      {error && <p className="ad-error ad-small">{error}</p>}
+      <input
+        ref={input}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/avif"
+        hidden
+        onChange={(event) => {
+          const file = event.target.files[0];
+          event.target.value = '';
+          if (file) setCropping(file);
+        }}
+      />
+      {cropping && (
+        <PhotoCropper
+          file={cropping}
+          ratio={1}
+          round
+          onCancel={() => setCropping(null)}
+          onCrop={(file) => { setCropping(null); send(file); }}
+        />
+      )}
+    </div>
+  );
+}
 
 function Text({ label, hint, value, onChange, long, rows = 3 }) {
   return (
@@ -85,8 +153,16 @@ export default function ProductStoryEditor({ story, onChange }) {
     onChange({ ...story, benefits: BENEFIT_KEYS.filter((item) => next.includes(item)) });
   };
   const labels = story.benefitLabels || {};
+  const icons = story.benefitIcons || {};
+  const removed = Array.isArray(story.benefitsRemoved) ? story.benefitsRemoved : [];
   const setLabel = (key, value) => onChange({ ...story, benefitLabels: { ...labels, [key]: value } });
+  const setIcon = (key, value) => onChange({ ...story, benefitIcons: { ...icons, [key]: value } });
+  const removeBenefit = (key) => onChange({ ...story, benefitsRemoved: [...removed.filter((item) => item !== key), key], benefits: benefits.filter((item) => item !== key) });
+  const restoreBenefit = (key) => onChange({ ...story, benefitsRemoved: removed.filter((item) => item !== key) });
   const customBenefits = Array.isArray(story.customBenefits) ? story.customBenefits : [];
+  const setCustom = (index, patch) => onChange({ ...story, customBenefits: customBenefits.map((item, i) => (i === index ? { ...item, ...patch } : item)) });
+  const library = BENEFITS.filter((benefit) => !removed.includes(benefit.key));
+  const shownCount = benefits.filter((key) => !removed.includes(key)).length + customBenefits.filter((item) => !item.hidden).length;
 
   return (
     <section className="ad-card">
@@ -106,40 +182,52 @@ export default function ProductStoryEditor({ story, onChange }) {
         <PhotoField label="Photo 2" hint="square, 1:1" ratio={1} value={story.heroImages?.[1]} onChange={setHeroImage(1)} />
         <PhotoField label="Photo 3" hint="wide landscape, 4:3" ratio={4 / 3} value={story.heroImages?.[2]} onChange={setHeroImage(2)} />
         <div className="ad-field">
-          <span>Health benefits under the photos <small>— tick the ones to show ({benefits.length} of {BENEFITS.length}); you can change the wording of a ticked one</small></span>
+          <span>Health benefits under the photos <small>— {shownCount} shown. Tick to show, click an icon to change it, edit the words, or use the bin to remove one</small></span>
           <div className="ad-benefits">
-            {BENEFITS.map((benefit) => {
-              const on = benefits.includes(benefit.key);
-              return (
-                <div key={benefit.key} className={`ad-benefit${on ? ' is-on' : ''}`}>
-                  <label className="ad-benefit-pick">
-                    <input type="checkbox" checked={on} onChange={() => toggleBenefit(benefit.key)} />
-                    <span className="ad-benefit-icon">{benefit.icon}</span>
-                    {!on && <span className="ad-benefit-label">{benefit.label}</span>}
-                  </label>
-                  {on && (
-                    <textarea
-                      className="ad-benefit-text"
-                      rows={2}
-                      aria-label={`Wording for ${benefit.label}`}
-                      placeholder={benefit.label}
-                      value={labels[benefit.key] ?? benefit.label}
-                      onChange={(event) => setLabel(benefit.key, event.target.value)}
-                    />
-                  )}
-                </div>
-              );
-            })}
+            {library.map((benefit) => (
+              <BenefitTile
+                key={benefit.key}
+                icon={benefit.icon}
+                image={icons[benefit.key]}
+                label={labels[benefit.key] ?? benefit.label}
+                placeholder={benefit.label}
+                shown={benefits.includes(benefit.key)}
+                onShow={() => toggleBenefit(benefit.key)}
+                onImage={(url) => setIcon(benefit.key, url)}
+                onLabel={(value) => setLabel(benefit.key, value)}
+                onRemove={() => removeBenefit(benefit.key)}
+              />
+            ))}
+            {customBenefits.map((item, index) => (
+              <BenefitTile
+                key={`own-${index}`}
+                image={item.image}
+                label={item.label || ''}
+                placeholder="Text under the icon, e.g. Supports joint comfort*"
+                shown={!item.hidden}
+                onShow={() => setCustom(index, { hidden: !item.hidden })}
+                onImage={(url) => setCustom(index, { image: url })}
+                onLabel={(value) => setCustom(index, { label: value })}
+                onRemove={() => onChange({ ...story, customBenefits: customBenefits.filter((_, i) => i !== index) })}
+              />
+            ))}
+            <button type="button" className="ad-benefit ad-benefit--add" onClick={() => onChange({ ...story, customBenefits: [...customBenefits, { image: '', label: '', hidden: false }] })}>
+              <Plus size={22} aria-hidden="true" />
+              <span>Add a benefit</span>
+            </button>
           </div>
+          {removed.length > 0 && (
+            <div className="ad-benefit-removed">
+              <small>Removed from this product:</small>
+              {BENEFITS.filter((benefit) => removed.includes(benefit.key)).map((benefit) => (
+                <button key={benefit.key} type="button" className="ad-chip" onClick={() => restoreBenefit(benefit.key)}>
+                  <RotateCcw size={12} aria-hidden="true" /> {labels[benefit.key] || benefit.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
-        <ListEditor
-          label="Your own benefits — shown after the ticked ones; upload any square-ish icon and it’s cropped to a circle"
-          items={customBenefits}
-          onChange={(items) => onChange({ ...story, customBenefits: items })}
-          fields={[{ key: 'image', placeholder: 'Icon', photo: true, ratio: 1, round: true }, { key: 'label', placeholder: 'Text under the icon, e.g. Supports joint comfort*' }]}
-          addLabel="Add a benefit"
-        />
-        {benefits.length === 0 && customBenefits.length === 0 && (
+        {shownCount === 0 && (
           <StringList
             label="No benefits ticked: these text claims show instead — end supplement benefit claims with *"
             items={story.claims}
@@ -148,6 +236,11 @@ export default function ProductStoryEditor({ story, onChange }) {
             addLabel="Add a claim"
           />
         )}
+      </fieldset>
+
+      <fieldset className="ad-fieldset">
+        <legend>Product banner — the wide picture under “Is it right for you?”</legend>
+        <PhotoField label="Banner" hint="wide, 1024 × 420; any size works, you’ll crop it. Remove it to hide the banner" ratio={1024 / 420} value={story.fit.banner} onChange={set('fit', 'banner')} />
       </fieldset>
 
       <details className="ad-chapter" open>
@@ -205,7 +298,6 @@ export default function ProductStoryEditor({ story, onChange }) {
         <StringList label="Made for you if…" items={story.fit.forYou} onChange={set('fit', 'forYou')} placeholder="e.g. You lead an active life" addLabel="Add a line" />
         <StringList label="Good to know" items={story.fit.goodToKnow} onChange={set('fit', 'goodToKnow')} placeholder="e.g. Take 2 a day with food" addLabel="Add a line" />
         <PhotoField label="Photo beside the lists" hint="portrait" value={story.fit.image} onChange={set('fit', 'image')} />
-        <PhotoField label="Wide banner under this chapter" hint="full width, 1024 × 420; remove it to hide the banner" ratio={1024 / 420} value={story.fit.banner} onChange={set('fit', 'banner')} />
       </details>
 
       <details className="ad-chapter">

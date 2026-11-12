@@ -166,6 +166,12 @@ export default function ProductPage() {
           {product.description.split(/\n\s*\n/).map((paragraph, index) => <p key={index}>{paragraph}</p>)}
         </section>
       )}
+      {/* Products without a story still show their banner */}
+      {!story && bannerFor(product) && (
+        <figure className="ps-banner pp-banner" data-reveal>
+          <img src={mediaUrl(bannerFor(product))} alt={product.name} loading="lazy" decoding="async" />
+        </figure>
+      )}
 
       {product.highlights?.length > 0 && (
         <section className="pp-highlights pp-bento" aria-labelledby="pp-highlights-title">

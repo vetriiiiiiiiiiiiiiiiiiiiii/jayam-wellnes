@@ -2237,13 +2237,15 @@
 }
 
 /* ---------- Product banner under "Is it right for you?" (Admin → Products) ---------- */
-.ps .ps-banner {
+.ps .ps-banner,
+.pp-banner {
   max-width: 1120px;
   margin: 64px auto 0;
   padding: 0 22px;
 }
 
-.ps .ps-banner img {
+.ps .ps-banner img,
+.pp-banner img {
   display: block;
   width: 100%;
   height: auto;
