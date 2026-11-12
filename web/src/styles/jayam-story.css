@@ -355,13 +355,12 @@
   width: 96px;
   height: 96px;
   place-items: center;
-  border-radius: 50%;
-  background: var(--white);
-  box-shadow: 0 0 0 1px var(--mist), 0 16px 30px -14px rgba(44, 105, 117, 0.5);
 }
 
+/* The logo on its own, with no disc around it */
 .ps-promise-seal img {
-  width: 86%;
+  width: 100%;
+  filter: drop-shadow(0 10px 18px rgba(19, 58, 65, 0.25));
 }
 
 .ps-promise-line {
@@ -2253,7 +2252,7 @@
   object-fit: cover;
   border-radius: 28px;
   background: #fff;
-  box-shadow: 0 30px 60px -40px rgba(19, 58, 65, 0.55);
+  box-shadow: none;
 }
 
 @media (max-width: 560px) {

@@ -173,7 +173,7 @@ export default function ProductStory({ story, description, onBuy, banner, banner
         <section className={`ps-promise${promisePhoto ? ' ps-promise--photo' : ''}`} data-reveal>
           {promisePhoto && <img className="ps-promise-bg" src={mediaUrl(promisePhoto)} alt="" loading="lazy" decoding="async" />}
           <div className="ps-promise-inner">
-            <span className="ps-promise-seal" aria-hidden="true"><img src="/jayam-logo.png" alt="" loading="lazy" /></span>
+            <span className="ps-promise-seal" aria-hidden="true"><img src="/jayam-mark.png" alt="" loading="lazy" /></span>
             <p className="ps-promise-line">{promise}</p>
             {onBuy && <button type="button" className="ap-pill ap-pill--accent" onClick={onBuy}>Add to bag</button>}
           </div>
