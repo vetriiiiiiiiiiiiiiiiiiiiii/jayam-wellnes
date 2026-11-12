@@ -14,10 +14,11 @@ const discountAmount = (discount, subtotal) => {
 const describe = (discount) => (discount.type === 'PERCENT' ? `${discount.value}% off` : `$${discount.value.toFixed(2)} off`);
 
 /**
- * Check a code against a subtotal. Resolves with { code, amount, label }
- * or { error } with a message the customer can read.
+ * Check a code against a subtotal and the bag's lines ({ productId, price, quantity }).
+ * A code for chosen products only takes money off those products.
+ * Resolves with { code, amount, label } or { error } with a message the customer can read.
  */
-const applyDiscount = async (rawCode, subtotal) => {
+const applyDiscount = async (rawCode, subtotal, lines = []) => {
   const code = normaliseCode(rawCode);
   if (!code) return { error: 'Enter a discount code.' };
   const discount = await prisma.discountCode.findUnique({ where: { code } });
@@ -31,6 +32,14 @@ const applyDiscount = async (rawCode, subtotal) => {
   }
   if (subtotal < discount.minSubtotal) {
     return { error: `That code needs a subtotal of $${discount.minSubtotal.toFixed(2)} or more.` };
+  }
+  const products = discount.productIds || [];
+  if (products.length) {
+    const eligible = roundMoney(lines
+      .filter((line) => products.includes(line.productId))
+      .reduce((total, line) => total + line.price * line.quantity, 0));
+    if (eligible <= 0) return { error: 'That code doesn’t apply to the products in your bag.' };
+    return { code, amount: discountAmount(discount, eligible), label: `${describe(discount)} selected products` };
   }
   return { code, amount: discountAmount(discount, subtotal), label: describe(discount) };
 };

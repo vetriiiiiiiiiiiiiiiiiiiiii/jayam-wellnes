@@ -46,3 +46,11 @@ export const US_STATES = [
   ['PR', 'Puerto Rico'], ['GU', 'Guam'], ['VI', 'U.S. Virgin Islands'], ['AS', 'American Samoa'],
   ['MP', 'Northern Mariana Islands'],
 ];
+
+// The badge for a product with a running offer (prices already include it), e.g. "20% off"
+export const offerBadge = (product) => {
+  const offer = product?.offer;
+  if (!offer) return null;
+  const amount = offer.type === 'PERCENT' ? `${Number(offer.value)}% off` : `${formatPrice(offer.value)} off`;
+  return offer.label ? `${offer.label} · ${amount}` : amount;
+};

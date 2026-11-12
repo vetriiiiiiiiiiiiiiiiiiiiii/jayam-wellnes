@@ -129,6 +129,8 @@ model Product {
   highlights        Json? // [{ title, body }] key benefit bullets
   // Product page story: { lifestyle, moments, about, fit, promise } — edited in Admin → Products
   story             Json?
+  // Limited-time offer on this product: { active, type: PERCENT|FIXED, value, label, startsAt, endsAt }
+  offer             Json?
   warnings          String?
   disclaimer        String?
   stockQuantity     Int              @default(0)
@@ -344,6 +346,8 @@ model DiscountCode {
   startsAt    DateTime?
   endsAt      DateTime?
   active      Boolean      @default(true)
+  // Products the code works on; empty = the whole order
+  productIds  String[]     @default([])
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 }

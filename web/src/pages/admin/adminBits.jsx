@@ -108,7 +108,7 @@ export function StringList({ label, items, onChange, placeholder, addLabel }) {
 // The cropped picture is what gets uploaded, so it always fits the page exactly.
 const clampCentre = (centre, shown, frame) => (shown <= frame ? 0.5 : Math.min(1 - frame / (2 * shown), Math.max(frame / (2 * shown), centre)));
 
-export function PhotoCropper({ file, ratio, round = false, onCancel, onCrop }) {
+export function PhotoCropper({ file, ratio, round = false, overlay = null, onCancel, onCrop }) {
   const [src, setSrc] = useState('');
   const [natural, setNatural] = useState(null);
   const [zoom, setZoom] = useState(1);
@@ -196,12 +196,14 @@ export function PhotoCropper({ file, ratio, round = false, onCancel, onCrop }) {
             onLoad={(event) => setNatural({ width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight })}
             style={natural ? { width: shownW, height: shownH, left: frame.width / 2 - cx * shownW, top: frame.height / 2 - cy * shownH } : { opacity: 0 }}
           />}
+          {overlay && <div className="ad-crop-overlay" aria-hidden="true">{overlay}</div>}
         </div>
         <label className="ad-crop-zoom">
           <span>Zoom</span>
           <input type="range" min="1" max="4" step="0.01" value={zoom} onChange={(event) => setZoom(Number(event.target.value))} />
         </label>
         <div className="ad-row ad-crop-actions">
+          <button type="button" className="ad-btn ad-btn--ghost" onClick={() => { setZoom(1); setCentre({ x: 0.5, y: 0.5 }); }} disabled={busy}>Auto fit</button>
           <button type="button" className="ad-btn ad-btn--ghost" onClick={onCancel} disabled={busy}>Cancel</button>
           <button type="button" className="ad-btn" onClick={crop} disabled={busy || !natural}>{busy ? 'Saving…' : 'Use this crop'}</button>
         </div>
@@ -212,7 +214,7 @@ export function PhotoCropper({ file, ratio, round = false, onCancel, onCrop }) {
 
 // One photo: upload it or paste an address, with a preview. With a ratio, the photo is
 // cropped to that shape before it is uploaded.
-export function PhotoField({ label = 'Photo', hint, value, onChange, ratio, round = false }) {
+export function PhotoField({ label = 'Photo', hint, value, onChange, ratio, round = false, overlay = null }) {
   const input = useRef(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -257,6 +259,7 @@ export function PhotoField({ label = 'Photo', hint, value, onChange, ratio, roun
           file={cropping}
           ratio={ratio}
           round={round}
+          overlay={overlay}
           onCancel={() => setCropping(null)}
           onCrop={(file) => { setCropping(null); send(file); }}
         />

@@ -12,7 +12,7 @@ import ProductStory, { hasStory } from '../components/storefront/ProductStory';
 import { useCart } from '../components/storefront/CartProvider';
 import { CLAIM_DEFAULTS, bannerFor, useSiteContent } from '../lib/content';
 import { benefitsFor } from '../lib/benefits';
-import { CATEGORY_LABELS, FREE_SHIPPING_THRESHOLD, formatPrice } from '../lib/store';
+import { CATEGORY_LABELS, FREE_SHIPPING_THRESHOLD, formatPrice, offerBadge } from '../lib/store';
 import useScrollReveal from '../lib/useScrollReveal';
 import usePageMeta from '../lib/usePageMeta';
 import { PLACEHOLDER_PHOTOS } from '../lib/placeholderPhotos';
@@ -248,7 +248,9 @@ export default function ProductPage() {
           <p className="pp-price">
             {formatPrice(price)}
             {compareAt > price && <s>{formatPrice(compareAt)}</s>}
+            {offerBadge(product) && <span className="offer-badge">{offerBadge(product)}</span>}
           </p>
+          {product.offer?.endsAt && <p className="pp-offer-ends">Offer ends {new Date(product.offer.endsAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}</p>}
           {product.shortDescription && <p className="pp-short">{product.shortDescription}</p>}
 
           {TRUST_POINTS[product.productType] && (

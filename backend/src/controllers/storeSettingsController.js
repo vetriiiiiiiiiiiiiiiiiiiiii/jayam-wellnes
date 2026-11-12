@@ -32,7 +32,8 @@ const discountData = (body) => {
   const endsAt = parseDate(body.endsAt);
   if (startsAt === undefined || endsAt === undefined) return { error: 'Enter valid dates' };
   if (startsAt && endsAt && endsAt <= startsAt) return { error: 'The end date must be after the start date' };
-  return { data: { code, type, value, minSubtotal, maxUses, startsAt, endsAt, active: body.active !== false } };
+  const productIds = Array.isArray(body.productIds) ? [...new Set(body.productIds.map(String).filter(Boolean))].slice(0, 200) : [];
+  return { data: { code, type, value, minSubtotal, maxUses, startsAt, endsAt, active: body.active !== false, productIds } };
 };
 
 exports.listDiscounts = async (req, res) => {

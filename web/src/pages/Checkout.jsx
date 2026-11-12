@@ -121,7 +121,7 @@ export default function CheckoutPage() {
   useEffect(() => {
     if (!discount?.code) return undefined;
     let active = true;
-    checkDiscount(discount.code, cartTotal).then((result) => {
+    checkDiscount(discount.code, cartTotal, cart).then((result) => {
       if (!active) return;
       if (result.success) setDiscount(result);
       else { setDiscount(null); setDiscountError(result.message); }
@@ -136,7 +136,7 @@ export default function CheckoutPage() {
     if (!code) return;
     setCheckingCode(true);
     setDiscountError('');
-    const result = await checkDiscount(code, cartTotal);
+    const result = await checkDiscount(code, cartTotal, cart);
     setCheckingCode(false);
     if (result.success) setDiscount(result);
     else setDiscountError(result.message);

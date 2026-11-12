@@ -605,9 +605,10 @@ export async function createOrder(orderData) {
 }
 
 // A1b. Check a discount code against the bag's subtotal (the order re-checks it)
-export async function checkDiscount(code, subtotal) {
+export async function checkDiscount(code, subtotal, items = []) {
   try {
-    const response = await api.post("/orders/discount", { code, subtotal });
+    const lines = items.map((item) => ({ productId: item.productId, price: item.price, quantity: item.quantity }));
+    const response = await api.post("/orders/discount", { code, subtotal, items: lines });
     return { success: true, code: response.data.code, amount: response.data.amount, label: response.data.label };
   } catch (error) {
     return { success: false, message: error.response?.data?.message || "We could not check that code" };

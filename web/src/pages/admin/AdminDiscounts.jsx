@@ -6,7 +6,7 @@ import { Drawer, useNotice } from './adminBits';
 
 // Discount codes customers type at checkout. Uses are counted once an order is paid.
 
-const EMPTY = { code: '', type: 'PERCENT', value: '', minSubtotal: '', maxUses: '', startsAt: '', endsAt: '', active: true };
+const EMPTY = { code: '', type: 'PERCENT', value: '', minSubtotal: '', maxUses: '', startsAt: '', endsAt: '', active: true, productIds: [] };
 
 const toInput = (value) => (value ? new Date(value).toISOString().slice(0, 10) : '');
 
@@ -21,7 +21,7 @@ const statusOf = (discount) => {
   return ['Active', 'green'];
 };
 
-function DiscountForm({ discount, onSaved, onDeleted, notify }) {
+function DiscountForm({ discount, products, onSaved, onDeleted, notify }) {
   const [values, setValues] = useState(discount ? {
     ...discount,
     value: String(discount.value),
@@ -29,16 +29,24 @@ function DiscountForm({ discount, onSaved, onDeleted, notify }) {
     maxUses: discount.maxUses == null ? '' : String(discount.maxUses),
     startsAt: toInput(discount.startsAt),
     endsAt: toInput(discount.endsAt),
+    productIds: discount.productIds || [],
   } : EMPTY);
+  const [scope, setScope] = useState(discount?.productIds?.length ? 'products' : 'all');
+  const toggleProduct = (productId) => setValues((current) => ({
+    ...current,
+    productIds: current.productIds.includes(productId) ? current.productIds.filter((item) => item !== productId) : [...current.productIds, productId],
+  }));
   const [busy, setBusy] = useState(false);
   const set = (key) => (event) => setValues((current) => ({ ...current, [key]: event.target.type === 'checkbox' ? event.target.checked : event.target.value }));
 
   const save = async (event) => {
     event.preventDefault();
+    if (scope === 'products' && values.productIds.length === 0) return notify('Choose at least one product, or let the code work on the whole order', 'error');
     setBusy(true);
     // Dates are whole days: a code starts at the beginning of its first day and ends after its last
     const result = await adminApi.saveDiscount(discount?.id, {
       ...values,
+      productIds: scope === 'products' ? values.productIds : [],
       startsAt: values.startsAt ? `${values.startsAt}T00:00:00` : null,
       endsAt: values.endsAt ? `${values.endsAt}T23:59:59` : null,
     });
@@ -72,6 +80,23 @@ function DiscountForm({ discount, onSaved, onDeleted, notify }) {
           <input type="number" min="0.01" max={values.type === 'PERCENT' ? 100 : undefined} step="0.01" value={values.value} onChange={set('value')} required />
         </label>
       </div>
+      <div className="ad-field">
+        <span>Works on</span>
+        <div className="ad-row">
+          <label className="ad-check ad-check--inline"><input type="radio" name="scope" checked={scope === 'all'} onChange={() => setScope('all')} /><span><b>The whole order</b></span></label>
+          <label className="ad-check ad-check--inline"><input type="radio" name="scope" checked={scope === 'products'} onChange={() => setScope('products')} /><span><b>Chosen products only</b></span></label>
+        </div>
+        {scope === 'products' && (
+          <div className="ad-product-picks">
+            {!products ? <small className="ad-muted">Loading products…</small> : products.map((product) => (
+              <label key={product.id}>
+                <input type="checkbox" checked={values.productIds.includes(product.id)} onChange={() => toggleProduct(product.id)} />
+                {product.name}
+              </label>
+            ))}
+          </div>
+        )}
+      </div>
       <div className="ad-field-row">
         <label className="ad-field">Minimum subtotal <small>(optional)</small>
           <input type="number" min="0" step="0.01" value={values.minSubtotal} onChange={set('minSubtotal')} placeholder="None" />
@@ -88,7 +113,7 @@ function DiscountForm({ discount, onSaved, onDeleted, notify }) {
         <input type="checkbox" checked={values.active} onChange={set('active')} />
         <span><b>Active</b><small>Turn off to stop the code working without deleting it</small></span>
       </label>
-      <p className="ad-muted ad-small">The discount comes off the subtotal. Free shipping still uses the subtotal before the discount.</p>
+      <p className="ad-muted ad-small">{scope === 'products' ? 'The discount comes off the chosen products only.' : 'The discount comes off the subtotal.'} Free shipping still uses the subtotal before the discount.</p>
       <div className="ad-row">
         <button type="submit" className="ad-btn" disabled={busy}>{busy ? 'Saving…' : discount ? 'Save changes' : 'Create code'}</button>
         {discount && <button type="button" className="ad-btn ad-btn--danger" onClick={remove}>Delete</button>}
@@ -102,6 +127,11 @@ export default function AdminDiscounts() {
   const [error, setError] = useState('');
   const [open, setOpen] = useState(null); // a discount, or 'new'
   const [notice, notify] = useNotice();
+  const [products, setProducts] = useState(null);
+  useEffect(() => {
+    adminApi.products().then((result) => setProducts(result.ok ? result.data : []));
+  }, []);
+  const productNames = Object.fromEntries((products || []).map((product) => [product.id, product.name.replace(/^Organic\s+/i, '').split(' — ')[0]]));
 
   const load = useCallback(() => {
     adminApi.discounts().then((result) => (result.ok ? setDiscounts(result.data) : setError(result.message)));
@@ -140,7 +170,7 @@ export default function AdminDiscounts() {
                 return (
                   <tr key={discount.id} onClick={() => setOpen(discount)} tabIndex={0} onKeyDown={(event) => event.key === 'Enter' && setOpen(discount)}>
                     <td><b>{discount.code}</b>{discount.minSubtotal > 0 && <small>Orders over {formatPrice(discount.minSubtotal)}</small>}</td>
-                    <td>{describe(discount)}</td>
+                    <td>{describe(discount)}{discount.productIds?.length > 0 && <small>On {discount.productIds.map((productId) => productNames[productId] || 'a removed product').join(', ')}</small>}</td>
                     <td>{discount.usedCount}{discount.maxUses != null ? ` / ${discount.maxUses}` : ''}</td>
                     <td><span className={`ad-badge ad-badge--${tone}`}>{label}</span></td>
                     <td>{discount.endsAt ? formatDateTime(discount.endsAt) : '—'}</td>
@@ -154,7 +184,7 @@ export default function AdminDiscounts() {
 
       {open && (
         <Drawer title={open === 'new' ? 'New discount code' : open.code} onClose={() => setOpen(null)}>
-          <DiscountForm key={open === 'new' ? 'new' : open.id} discount={open === 'new' ? null : open} onSaved={done} onDeleted={done} notify={notify} />
+          <DiscountForm key={open === 'new' ? 'new' : open.id} discount={open === 'new' ? null : open} products={products} onSaved={done} onDeleted={done} notify={notify} />
         </Drawer>
       )}
     </div>

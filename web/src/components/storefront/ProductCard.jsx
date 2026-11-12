@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from './CartProvider';
-import { CATEGORY_LABELS, formatPrice } from '../../lib/store';
+import { CATEGORY_LABELS, formatPrice, offerBadge } from '../../lib/store';
 import ProductVisual from './ProductVisual';
 import { mediaUrl } from '../../lib/media';
 
@@ -45,7 +45,8 @@ export default function ProductCard({ product, size = 'regular' }) {
   const { addToCart } = useCart();
   const navigate = useNavigate();
   const image = product.images?.[0]?.url;
-  const tilePhoto = product.story?.tileImage;
+  // The box photo from Admin → Products, else the product's first photo, fills the box
+  const tilePhoto = product.story?.tileImage || image;
   const hasVariants = product.variants?.length > 0;
   const price = hasVariants
     ? Math.min(...product.variants.map((variant) => variant.price))
@@ -75,7 +76,11 @@ export default function ProductCard({ product, size = 'regular' }) {
           <Link to={`/products/${product.slug}`} className="ap-pill">Learn more</Link>
           <button type="button" className="ap-pill ap-pill--accent" onClick={buy}>{hasVariants ? 'Choose' : 'Buy'}</button>
         </div>
-        <p className="at-price">{hasVariants ? 'From ' : ''}{formatPrice(price)}</p>
+        <p className="at-price">
+          {hasVariants ? 'From ' : ''}{formatPrice(price)}
+          {!hasVariants && product.compareAtPrice > price && <s>{formatPrice(product.compareAtPrice)}</s>}
+          {offerBadge(product) && <span className="offer-badge">{offerBadge(product)}</span>}
+        </p>
       </div>
       {!tilePhoto && (
         <Link to={`/products/${product.slug}`} className="at-art" tabIndex={-1} aria-hidden="true">

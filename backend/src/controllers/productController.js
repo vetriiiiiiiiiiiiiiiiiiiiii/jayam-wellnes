@@ -1,5 +1,9 @@
 const prisma = require('../config/prisma');
 const { productInclude, serializeProduct, serializeReview } = require('../utils/serialize');
+const { withOffer } = require('../services/offers');
+
+// Shop view of a product, with any running offer applied to its prices
+const shopProduct = (product) => serializeProduct(withOffer(product));
 
 exports.getAllProducts = async (req, res) => {
   try {
@@ -32,7 +36,7 @@ exports.getAllProducts = async (req, res) => {
     }
 
     const products = await prisma.product.findMany({ where, orderBy, include: productInclude });
-    res.json(products.map(serializeProduct));
+    res.json(products.map(shopProduct));
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Failed to fetch products' });
@@ -75,14 +79,14 @@ exports.getProductBySlug = async (req, res) => {
     if (!product) return res.status(404).json({ error: 'Product not found' });
 
     const { reviews, bundleItems, ...rest } = product;
-    const obj = serializeProduct({ ...rest, bundleItems });
+    const obj = shopProduct({ ...rest, bundleItems });
     obj.reviews = reviews.map(serializeReview);
 
     // For bundles, include the bundled products
     if (obj.productType === 'BUNDLE' && bundleItems.length > 0) {
       obj.relatedTo = bundleItems.map(rp => ({
         id: rp.id,
-        relatedProduct: serializeProduct(rp)
+        relatedProduct: shopProduct(rp)
       }));
     }
 

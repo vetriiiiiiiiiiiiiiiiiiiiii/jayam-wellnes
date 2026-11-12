@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import ProductVisual from '../storefront/ProductVisual';
 import { useCart } from '../storefront/CartProvider';
-import { formatPrice } from '../../lib/store';
+import { formatPrice, offerBadge } from '../../lib/store';
 
 // One continuous showcase: each product stands on its own panel, a white slanted
 // band runs through every panel and changes direction from one to the next, and the
@@ -82,7 +82,12 @@ export default function ProductShowcase({ products, content }) {
                 <h3>{copy.headline || product.tagline || product.name}</h3>
                 <p className="sw-subtitle">{copy.subtitle || product.name}</p>
                 {(copy.description || product.shortDescription) && <p className="sw-desc">{copy.description || product.shortDescription}</p>}
-                <p className="sw-price">{formatPrice(product.price)}{detail ? ` · ${detail}` : ''}</p>
+                <p className="sw-price">
+                  {formatPrice(product.price)}
+                  {product.compareAtPrice > product.price && <s>{formatPrice(product.compareAtPrice)}</s>}
+                  {detail ? ` · ${detail}` : ''}
+                  {offerBadge(product) && <span className="offer-badge">{offerBadge(product)}</span>}
+                </p>
                 <div className="ap-ctas">
                   <Link to={`/products/${slug}`} className="ap-pill">Learn more</Link>
                   <button type="button" className="ap-pill ap-pill--accent" onClick={() => buy(product)}>Buy</button>

@@ -8,6 +8,7 @@ const { markOrderPaid, releaseOrderStock, toCents } = require('../services/order
 const { publicOrder } = require('../utils/orderLinks');
 const { escapeHtml, money } = require('../services/orderEmails');
 const { applyDiscount } = require('../services/discounts');
+const { activeOffer, offerPrice } = require('../services/offers');
 
 // Stripe's smallest card charge in USD
 const MIN_CHARGE = 0.5;
@@ -163,7 +164,9 @@ exports.createOrder = async (req, res) => {
       }
 
       let variant;
-      let price = product.price;
+      // A running offer on the product (Admin → Products → Offer) lowers every option's price
+      const offer = activeOffer(product.offer);
+      let price = offerPrice(offer, product.price);
       if (product.variants.length > 0) {
         if (!item.variantSku) {
           return res.status(400).json({ success: false, message: `Choose an option for ${product.name}.` });
@@ -173,7 +176,7 @@ exports.createOrder = async (req, res) => {
           return res.status(400).json({ success: false, message: `The selected option for ${product.name} is no longer available.` });
         }
         requestedVariants.push({ productId: product.id, sku: item.variantSku, quantity, name: product.name });
-        price = variant.price ?? product.price;
+        price = offerPrice(offer, variant.price ?? product.price);
       } else {
         // Products without options keep one stock count
         requestedVariants.push({ productId: product.id, sku: null, quantity, name: product.name });
@@ -194,7 +197,7 @@ exports.createOrder = async (req, res) => {
     const shippingFee = shippingFor(subtotal);
     let discount = { code: null, amount: 0 };
     if (discountCode) {
-      discount = await applyDiscount(discountCode, subtotal);
+      discount = await applyDiscount(discountCode, subtotal, orderItems);
       if (discount.error) return res.status(400).json({ success: false, message: discount.error });
     }
     const orderTotal = roundMoney(subtotal - discount.amount + shippingFee);
@@ -304,7 +307,13 @@ exports.previewDiscount = async (req, res) => {
   try {
     const subtotal = Number(req.body.subtotal);
     if (!Number.isFinite(subtotal) || subtotal <= 0) return res.status(400).json({ success: false, message: 'Your bag is empty.' });
-    const result = await applyDiscount(req.body.code, roundMoney(subtotal));
+    // Bag lines from the checkout page, so codes for chosen products can be checked
+    const lines = (Array.isArray(req.body.items) ? req.body.items : []).slice(0, 50).map((item) => ({
+      productId: String(item?.productId || ''),
+      price: Number(item?.price) || 0,
+      quantity: Number(item?.quantity) || 0,
+    }));
+    const result = await applyDiscount(req.body.code, roundMoney(subtotal), lines);
     if (result.error) return res.status(400).json({ success: false, message: result.error });
     res.json({ success: true, ...result });
   } catch (error) {

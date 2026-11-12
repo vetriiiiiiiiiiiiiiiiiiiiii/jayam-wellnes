@@ -7,6 +7,7 @@ const { roundMoney } = require('../config/store');
 const { addProductImages, deleteStoredImage, removeQuietly, storeImage } = require('../services/mediaService');
 const { addMissingProducts } = require('../services/defaultProducts');
 const { productInclude, serializeOrder, serializeProduct, serializeUser } = require('../utils/serialize');
+const { cleanOffer } = require('../services/offers');
 
 const ORDER_STATUSES = ['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
 const ROLES = ['user', 'admin', 'staff'];
@@ -317,6 +318,14 @@ const productDataFrom = (body, { creating }) => {
     const compare = body.compareAtPrice === '' ? null : Number(body.compareAtPrice);
     if (compare !== null && (!Number.isFinite(compare) || compare < 0)) return { error: 'Enter a valid compare-at price' };
     data.compareAtPrice = compare === null ? null : Math.round(compare * 100) / 100;
+  }
+  if (body.offer !== undefined) {
+    const { offer, error } = cleanOffer(parseJson(body.offer, null));
+    if (error) return { error };
+    if (offer?.active && offer.type === 'FIXED' && data.price !== undefined && offer.value >= data.price) {
+      return { error: 'The offer must take off less than the price' };
+    }
+    data.offer = offer;
   }
   if (body.stockQuantity !== undefined) {
     const stock = Number.parseInt(body.stockQuantity || '0', 10);

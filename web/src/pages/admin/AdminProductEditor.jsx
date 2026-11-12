@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowDown, ArrowLeft, ArrowUp, ExternalLink, ImagePlus, Trash2 } from 'lucide-react';
 import { adminApi, mediaUrl } from '../../lib/adminApi';
+import { formatPrice } from '../../lib/store';
 import { ListEditor, PhotoField, useNotice } from './adminBits';
 import ProductStoryEditor, { storyForEditing } from './ProductStoryEditor';
 
@@ -13,7 +14,101 @@ const EMPTY = {
   shortDescription: '', description: '', ingredients: '', usageInstructions: '', warnings: '', disclaimer: '',
   highlights: [], specs: [],
   story: storyForEditing(null),
+  offer: { active: false, type: 'PERCENT', value: '', label: '', startsAt: '', endsAt: '' },
 };
+
+// Offer dates are whole days in the admin's own time zone
+const dayOf = (value) => {
+  if (!value) return '';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? '' : `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+};
+
+const offerFromProduct = (offer) => (offer && typeof offer === 'object' ? {
+  active: Boolean(offer.active),
+  type: offer.type === 'FIXED' ? 'FIXED' : 'PERCENT',
+  value: offer.value ? String(offer.value) : '',
+  label: offer.label || '',
+  startsAt: dayOf(offer.startsAt),
+  endsAt: dayOf(offer.endsAt),
+} : EMPTY.offer);
+
+const offerForSaving = (offer) => ({
+  ...offer,
+  startsAt: offer.startsAt ? new Date(`${offer.startsAt}T00:00:00`).toISOString() : null,
+  endsAt: offer.endsAt ? new Date(`${offer.endsAt}T23:59:59`).toISOString() : null,
+});
+
+// The offer as the shop will show it right now
+const offerStatus = (offer) => {
+  if (!offer.active) return ['Off', 'grey'];
+  const today = dayOf(new Date());
+  if (offer.endsAt && offer.endsAt < today) return ['Ended', 'grey'];
+  if (offer.startsAt && offer.startsAt > today) return ['Scheduled', 'blue'];
+  return ['Live', 'green'];
+};
+
+// The words that sit over a shop box photo, for the crop frame and the preview
+function TileWords({ values }) {
+  const name = (values.name || 'Product name').replace(/^Organic\s+/i, '').split(' — ')[0];
+  const price = Number(values.price);
+  return (
+    <div className="ad-tile-words">
+      <small>{values.category || 'Wellness'}</small>
+      <b>{name}</b>
+      {values.tagline && <span>{values.tagline}</span>}
+      <div><i>Learn more</i><i className="is-buy">Buy</i></div>
+      {price > 0 && <small>{formatPrice(price)}</small>}
+    </div>
+  );
+}
+
+function OfferCard({ offer, price, onChange }) {
+  const set = (key) => (event) => onChange({ ...offer, [key]: event.target.type === 'checkbox' ? event.target.checked : event.target.value });
+  const base = Number(price);
+  const value = Number(offer.value);
+  const salePrice = Number.isFinite(base) && base > 0 && value > 0
+    ? Math.max(0.01, Math.round((offer.type === 'PERCENT' ? base * (1 - value / 100) : base - value) * 100) / 100)
+    : null;
+  const [status, tone] = offerStatus(offer);
+  return (
+    <section className="ad-card">
+      <div className="ad-card-head">
+        <h2>Offer</h2>
+        <span className={`ad-badge ad-badge--${tone}`}>{status}</span>
+      </div>
+      <p className="ad-muted ad-small">A limited-time price for this product only. The shop shows the offer price with the old price crossed out, and checkout charges the offer price.</p>
+      <label className="ad-check">
+        <input type="checkbox" checked={offer.active} onChange={set('active')} />
+        <span><b>Run an offer</b><small>Turn off to end it early</small></span>
+      </label>
+      <div className="ad-field-row">
+        <label className="ad-field">Type
+          <select value={offer.type} onChange={set('type')}>
+            <option value="PERCENT">Percentage off</option>
+            <option value="FIXED">Dollars off</option>
+          </select>
+        </label>
+        <label className="ad-field">{offer.type === 'PERCENT' ? 'Percent' : 'Dollars'}
+          <input type="number" min="0.01" max={offer.type === 'PERCENT' ? 99 : undefined} step="0.01" value={offer.value} onChange={set('value')} required={offer.active} />
+        </label>
+      </div>
+      <label className="ad-field">Offer name <small>(optional, shown on the badge, e.g. Diwali offer)</small>
+        <input value={offer.label} onChange={set('label')} maxLength={60} placeholder="e.g. Launch offer" />
+      </label>
+      <div className="ad-field-row">
+        <label className="ad-field">Starts <small>(optional)</small><input type="date" value={offer.startsAt} onChange={set('startsAt')} /></label>
+        <label className="ad-field">Ends <small>(optional)</small><input type="date" value={offer.endsAt} onChange={set('endsAt')} /></label>
+      </div>
+      {salePrice != null && (
+        <p className="ad-offer-preview">
+          Shop price: <b>{formatPrice(salePrice)}</b> <s>{formatPrice(base)}</s>
+          {offer.type === 'PERCENT' ? ` · ${value}% off` : ` · ${formatPrice(value)} off`}
+        </p>
+      )}
+    </section>
+  );
+}
 
 const fromProduct = (product) => ({
   ...EMPTY,
@@ -24,6 +119,7 @@ const fromProduct = (product) => ({
   highlights: Array.isArray(product.highlights) ? product.highlights : [],
   specs: (product.specs || []).map(({ name, value }) => ({ name, value })),
   story: storyForEditing(product),
+  offer: offerFromProduct(product.offer),
 });
 
 export default function AdminProductEditor() {
@@ -80,7 +176,8 @@ export default function AdminProductEditor() {
     setError('');
     const form = new FormData();
     Object.entries(values).forEach(([key, value]) => {
-      if (key === 'highlights' || key === 'specs' || key === 'story') form.append(key, JSON.stringify(value));
+      if (key === 'offer') form.append(key, JSON.stringify(offerForSaving(value)));
+      else if (key === 'highlights' || key === 'specs' || key === 'story') form.append(key, JSON.stringify(value));
       else form.append(key, typeof value === 'boolean' ? String(value) : value);
     });
     if (!creating) form.append('keepImageIds', JSON.stringify(images.map((image) => image.id)));
@@ -199,6 +296,8 @@ export default function AdminProductEditor() {
             <label className="ad-field">In stock<input type="number" min="0" step="1" value={values.stockQuantity} onChange={set('stockQuantity')} /></label>
           </section>
 
+          <OfferCard offer={values.offer} price={values.price} onChange={(offer) => setValues((current) => ({ ...current, offer }))} />
+
           <section className="ad-card">
             <h2>Organisation</h2>
             <label className="ad-field">Type
@@ -213,13 +312,24 @@ export default function AdminProductEditor() {
 
           <section className="ad-card">
             <h2>Shop box photo</h2>
-            <p className="ad-muted ad-small">Fills the product’s whole box in the shop and under “more products”. Upright photos work best; the name and buttons sit over the top part. Without one, the box shows the pack on its colour.</p>
+            <p className="ad-muted ad-small">Fills the product’s box in the shop and under “more products”. Choose any photo: you can zoom and move it in the square, with the box’s words shown on top so you can keep the product clear of them. Without one, the box uses the product’s first photo.</p>
             <PhotoField
               label="Box photo"
-              hint="portrait, about 3:4"
+              hint="square; cropped when you choose it"
+              ratio={1}
+              overlay={<TileWords values={values} />}
               value={values.story.tileImage}
               onChange={(tileImage) => setValues((current) => ({ ...current, story: { ...current.story, tileImage } }))}
             />
+            {(values.story.tileImage || images[0]?.url) && (
+              <div className="ad-field">
+                <span>Preview <small>— how the box looks in the shop</small></span>
+                <div className="ad-tile-preview">
+                  <img src={mediaUrl(values.story.tileImage || images[0]?.url)} alt="" />
+                  <div className="ad-crop-overlay"><TileWords values={values} /></div>
+                </div>
+              </div>
+            )}
           </section>
 
           <section className="ad-card">
