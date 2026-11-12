@@ -3,6 +3,9 @@
 // story.benefits). The icons are the client's own artwork, cut into round images in
 // public/benefits/. The wording is kept to supplement "structure/function" language, so
 // the ones marked * show with the FDA statement.
+// Each product can also reword any of the 12 (story.benefitLabels) and add its own benefits
+// with an uploaded icon (story.customBenefits: [{ image, label }]).
+import { mediaUrl } from './media';
 
 export const BENEFITS = [
   { key: 'fitness-skin', label: 'Maintains overall fitness & skin health*' },
@@ -30,9 +33,23 @@ export const BENEFIT_DEFAULTS = {
   'beauty-drops-moringa-facial-elixir': ['fitness-skin', 'hair', 'antioxidants', 'aging'],
 };
 
-// The product's chosen benefits, in the fixed order of the list above
+// The product's benefits: the chosen ones of the 12 (in the list's order, with any rewording),
+// then the product's own
+const filled = (value) => typeof value === 'string' && value.trim().length > 0;
+
 export const benefitsFor = (product) => {
-  const saved = product?.story?.benefits;
-  const keys = Array.isArray(saved) ? saved : BENEFIT_DEFAULTS[product?.slug] || [];
-  return BENEFITS.filter((benefit) => keys.includes(benefit.key));
+  const story = product?.story || {};
+  const keys = Array.isArray(story.benefits) ? story.benefits : BENEFIT_DEFAULTS[product?.slug] || [];
+  const labels = story.benefitLabels && typeof story.benefitLabels === 'object' ? story.benefitLabels : {};
+  const chosen = BENEFITS
+    .filter((benefit) => keys.includes(benefit.key))
+    .map((benefit) => (filled(labels[benefit.key]) ? { ...benefit, label: labels[benefit.key].trim() } : benefit));
+  const own = (Array.isArray(story.customBenefits) ? story.customBenefits : [])
+    .filter((item) => filled(item?.image) && filled(item?.label))
+    .map((item, index) => ({
+      key: `own-${index}`,
+      label: item.label.trim(),
+      icon: <img src={mediaUrl(item.image)} alt="" width="180" height="180" loading="lazy" decoding="async" />,
+    }));
+  return [...chosen, ...own];
 };

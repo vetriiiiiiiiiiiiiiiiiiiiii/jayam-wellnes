@@ -9,6 +9,8 @@ const EMPTY_STORY = {
   heroImages: ['', '', ''],
   claims: [],
   benefits: [],
+  benefitLabels: {},
+  customBenefits: [],
   featuresImage: '',
   tileImage: '',
   featuresImage: '',
@@ -46,6 +48,8 @@ export const storyForEditing = (product) => {
   if (!Array.isArray(product?.story?.claims)) story.claims = CLAIM_DEFAULTS[product?.slug] || [];
   // …the default banner…
   if (typeof product?.story?.fit?.banner !== 'string') story.fit = { ...story.fit, banner: BANNER_DEFAULTS[product?.slug] || '' };
+  // Reworded benefits are a free-form map, which the merge above doesn't carry over
+  story.benefitLabels = product?.story?.benefitLabels && typeof product.story.benefitLabels === 'object' ? { ...product.story.benefitLabels } : {};
   // …and from the default benefit icons
   if (!Array.isArray(product?.story?.benefits)) story.benefits = BENEFIT_DEFAULTS[product?.slug] || [];
   return story;
@@ -80,6 +84,9 @@ export default function ProductStoryEditor({ story, onChange }) {
     const next = benefits.includes(key) ? benefits.filter((item) => item !== key) : [...benefits, key];
     onChange({ ...story, benefits: BENEFIT_KEYS.filter((item) => next.includes(item)) });
   };
+  const labels = story.benefitLabels || {};
+  const setLabel = (key, value) => onChange({ ...story, benefitLabels: { ...labels, [key]: value } });
+  const customBenefits = Array.isArray(story.customBenefits) ? story.customBenefits : [];
 
   return (
     <section className="ad-card">
@@ -95,22 +102,44 @@ export default function ProductStoryEditor({ story, onChange }) {
 
       <fieldset className="ad-fieldset">
         <legend>Hero — three lifestyle photos at the top of the page</legend>
-        <PhotoField label="Photo 1" hint="tall portrait, about 3:4" value={story.heroImages?.[0]} onChange={setHeroImage(0)} />
-        <PhotoField label="Photo 2" hint="square, 1:1" value={story.heroImages?.[1]} onChange={setHeroImage(1)} />
-        <PhotoField label="Photo 3" hint="wide landscape, about 4:3" value={story.heroImages?.[2]} onChange={setHeroImage(2)} />
+        <PhotoField label="Photo 1" hint="tall portrait, 3:4" ratio={3 / 4} value={story.heroImages?.[0]} onChange={setHeroImage(0)} />
+        <PhotoField label="Photo 2" hint="square, 1:1" ratio={1} value={story.heroImages?.[1]} onChange={setHeroImage(1)} />
+        <PhotoField label="Photo 3" hint="wide landscape, 4:3" ratio={4 / 3} value={story.heroImages?.[2]} onChange={setHeroImage(2)} />
         <div className="ad-field">
-          <span>Health benefits under the photos <small>— tick the ones to show ({benefits.length} of {BENEFITS.length})</small></span>
+          <span>Health benefits under the photos <small>— tick the ones to show ({benefits.length} of {BENEFITS.length}); you can change the wording of a ticked one</small></span>
           <div className="ad-benefits">
-            {BENEFITS.map((benefit) => (
-              <label key={benefit.key} className={`ad-benefit${benefits.includes(benefit.key) ? ' is-on' : ''}`}>
-                <input type="checkbox" checked={benefits.includes(benefit.key)} onChange={() => toggleBenefit(benefit.key)} />
-                <span className="ad-benefit-icon">{benefit.icon}</span>
-                <span className="ad-benefit-label">{benefit.label}</span>
-              </label>
-            ))}
+            {BENEFITS.map((benefit) => {
+              const on = benefits.includes(benefit.key);
+              return (
+                <div key={benefit.key} className={`ad-benefit${on ? ' is-on' : ''}`}>
+                  <label className="ad-benefit-pick">
+                    <input type="checkbox" checked={on} onChange={() => toggleBenefit(benefit.key)} />
+                    <span className="ad-benefit-icon">{benefit.icon}</span>
+                    {!on && <span className="ad-benefit-label">{benefit.label}</span>}
+                  </label>
+                  {on && (
+                    <textarea
+                      className="ad-benefit-text"
+                      rows={2}
+                      aria-label={`Wording for ${benefit.label}`}
+                      placeholder={benefit.label}
+                      value={labels[benefit.key] ?? benefit.label}
+                      onChange={(event) => setLabel(benefit.key, event.target.value)}
+                    />
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
-        {benefits.length === 0 && (
+        <ListEditor
+          label="Your own benefits — shown after the ticked ones; upload any square-ish icon and it’s cropped to a circle"
+          items={customBenefits}
+          onChange={(items) => onChange({ ...story, customBenefits: items })}
+          fields={[{ key: 'image', placeholder: 'Icon', photo: true, ratio: 1, round: true }, { key: 'label', placeholder: 'Text under the icon, e.g. Supports joint comfort*' }]}
+          addLabel="Add a benefit"
+        />
+        {benefits.length === 0 && customBenefits.length === 0 && (
           <StringList
             label="No benefits ticked: these text claims show instead — end supplement benefit claims with *"
             items={story.claims}
@@ -128,7 +157,7 @@ export default function ProductStoryEditor({ story, onChange }) {
         <Text label="Text" value={story.lifestyle.body} onChange={set('lifestyle', 'body')} long />
         <StringList label="Lifestyle tags" items={story.lifestyle.tags} onChange={set('lifestyle', 'tags')} placeholder="e.g. Training days" addLabel="Add a tag" />
         <Text label="Large background word" hint="one word, e.g. VITALITY" value={story.lifestyle.word} onChange={set('lifestyle', 'word')} />
-        <PhotoField label="Lifestyle photo" hint="the product in use; portrait works best" value={story.lifestyle.image} onChange={set('lifestyle', 'image')} />
+        <PhotoField label="Lifestyle photo" hint="the product in use, 4:5 portrait" ratio={4 / 5} value={story.lifestyle.image} onChange={set('lifestyle', 'image')} />
       </details>
 
       <details className="ad-chapter">
@@ -150,9 +179,9 @@ export default function ProductStoryEditor({ story, onChange }) {
         <Text label="Small heading" hint="optional" value={story.collage.eyebrow} onChange={set('collage', 'eyebrow')} />
         <Text label="Headline" hint="optional" value={story.collage.title} onChange={set('collage', 'title')} />
         <Text label="Text" hint="optional" value={story.collage.body} onChange={set('collage', 'body')} long rows={2} />
-        <PhotoField label="Photo 1" hint="tall portrait, about 3:4" value={story.collage.images?.[0]} onChange={setCollageImage(0)} />
-        <PhotoField label="Photo 2" hint="wide landscape, about 4:3" value={story.collage.images?.[1]} onChange={setCollageImage(1)} />
-        <PhotoField label="Photo 3" hint="square, 1:1" value={story.collage.images?.[2]} onChange={setCollageImage(2)} />
+        <PhotoField label="Photo 1" hint="tall portrait, 3:4" ratio={3 / 4} value={story.collage.images?.[0]} onChange={setCollageImage(0)} />
+        <PhotoField label="Photo 2" hint="wide landscape, 4:3" ratio={4 / 3} value={story.collage.images?.[1]} onChange={setCollageImage(1)} />
+        <PhotoField label="Photo 3" hint="square, 1:1" ratio={1} value={story.collage.images?.[2]} onChange={setCollageImage(2)} />
       </details>
 
       <details className="ad-chapter">
@@ -160,7 +189,7 @@ export default function ProductStoryEditor({ story, onChange }) {
         <Text label="Small heading" hint="e.g. “Meet the seed”" value={story.about.eyebrow} onChange={set('about', 'eyebrow')} />
         <Text label="Headline" value={story.about.title} onChange={set('about', 'title')} />
         <Text label="Text" value={story.about.body} onChange={set('about', 'body')} long />
-        <PhotoField label="Ingredient photo" hint="e.g. the leaves, flowers or seeds" value={story.about.image} onChange={set('about', 'image')} />
+        <PhotoField label="Ingredient photo" hint="e.g. the leaves, flowers or seeds; shown in a circle" ratio={1} round value={story.about.image} onChange={set('about', 'image')} />
         <ListEditor
           label="Big numbers"
           items={story.about.facts}
@@ -176,7 +205,7 @@ export default function ProductStoryEditor({ story, onChange }) {
         <StringList label="Made for you if…" items={story.fit.forYou} onChange={set('fit', 'forYou')} placeholder="e.g. You lead an active life" addLabel="Add a line" />
         <StringList label="Good to know" items={story.fit.goodToKnow} onChange={set('fit', 'goodToKnow')} placeholder="e.g. Take 2 a day with food" addLabel="Add a line" />
         <PhotoField label="Photo beside the lists" hint="portrait" value={story.fit.image} onChange={set('fit', 'image')} />
-        <PhotoField label="Wide banner under this chapter" hint="full width, about 1024 × 420; remove it to hide the banner" value={story.fit.banner} onChange={set('fit', 'banner')} />
+        <PhotoField label="Wide banner under this chapter" hint="full width, 1024 × 420; remove it to hide the banner" ratio={1024 / 420} value={story.fit.banner} onChange={set('fit', 'banner')} />
       </details>
 
       <details className="ad-chapter">

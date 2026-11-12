@@ -71,8 +71,8 @@ export function ListEditor({ label, items, onChange, fields, addLabel }) {
       {items.map((item, index) => (
         <div key={index} className="ad-list-row">
           <div className="ad-list-fields">
-            {fields.map(({ key, placeholder, long, photo }) => (photo
-              ? <PhotoField key={key} label={placeholder} value={item[key] || ''} onChange={(value) => update(index, key, value)} />
+            {fields.map(({ key, placeholder, long, photo, ratio, round }) => (photo
+              ? <PhotoField key={key} label={placeholder} ratio={ratio} round={round} value={item[key] || ''} onChange={(value) => update(index, key, value)} />
               : long
               ? <textarea key={key} rows={2} placeholder={placeholder} value={item[key] || ''} onChange={(event) => update(index, key, event.target.value)} />
               : <input key={key} placeholder={placeholder} value={item[key] || ''} onChange={(event) => update(index, key, event.target.value)} />))}
@@ -104,16 +104,121 @@ export function StringList({ label, items, onChange, placeholder, addLabel }) {
   );
 }
 
-// One photo: upload it or paste an address, with a preview
-export function PhotoField({ label = 'Photo', hint, value, onChange }) {
+// Crops a chosen photo to the frame it is shown in: drag to move, slide to zoom.
+// The cropped picture is what gets uploaded, so it always fits the page exactly.
+const clampCentre = (centre, shown, frame) => (shown <= frame ? 0.5 : Math.min(1 - frame / (2 * shown), Math.max(frame / (2 * shown), centre)));
+
+export function PhotoCropper({ file, ratio, round = false, onCancel, onCrop }) {
+  const [src, setSrc] = useState('');
+  const [natural, setNatural] = useState(null);
+  const [zoom, setZoom] = useState(1);
+  const [centre, setCentre] = useState({ x: 0.5, y: 0.5 });
+  const [busy, setBusy] = useState(false);
+  const drag = useRef(null);
+  const image = useRef(null);
+  const [frame] = useState(() => {
+    let width = Math.min(520, window.innerWidth * 0.84);
+    let height = width / ratio;
+    const maxHeight = window.innerHeight * 0.55;
+    if (height > maxHeight) {
+      height = maxHeight;
+      width = height * ratio;
+    }
+    return { width, height };
+  });
+
+  // Made and released inside the effect, so a remount never leaves a released address behind
+  useEffect(() => {
+    const url = URL.createObjectURL(file);
+    setSrc(url);
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
+  useEffect(() => {
+    const onKey = (event) => event.key === 'Escape' && onCancel();
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onCancel]);
+
+  const scale = natural ? Math.max(frame.width / natural.width, frame.height / natural.height) * zoom : 1;
+  const shownW = natural ? natural.width * scale : 0;
+  const shownH = natural ? natural.height * scale : 0;
+  const cx = clampCentre(centre.x, shownW, frame.width);
+  const cy = clampCentre(centre.y, shownH, frame.height);
+
+  const onPointerDown = (event) => {
+    event.currentTarget.setPointerCapture(event.pointerId);
+    drag.current = { x: event.clientX, y: event.clientY, cx, cy };
+  };
+  const onPointerMove = (event) => {
+    if (!drag.current || !natural) return;
+    const { x, y, cx: startX, cy: startY } = drag.current;
+    setCentre({ x: startX - (event.clientX - x) / shownW, y: startY - (event.clientY - y) / shownH });
+  };
+  const onPointerUp = () => { drag.current = null; };
+
+  const crop = () => {
+    if (!natural) return;
+    setBusy(true);
+    const cropW = frame.width / scale;
+    const cropH = frame.height / scale;
+    const outW = Math.round(Math.min(cropW, 1800));
+    const outH = Math.round(outW / ratio);
+    const canvas = document.createElement('canvas');
+    canvas.width = outW;
+    canvas.height = outH;
+    canvas.getContext('2d').drawImage(image.current, cx * natural.width - cropW / 2, cy * natural.height - cropH / 2, cropW, cropH, 0, 0, outW, outH);
+    canvas.toBlob((blob) => {
+      if (!blob) { setBusy(false); return; }
+      const type = blob.type || 'image/png';
+      const name = `${file.name.replace(/\.[^.]+$/, '') || 'photo'}-cropped.${type.split('/')[1] || 'png'}`;
+      onCrop(new File([blob], name, { type }));
+    }, 'image/webp', 0.92);
+  };
+
+  return (
+    <div className="ad-crop-wrap" role="dialog" aria-modal="true" aria-label="Crop photo">
+      <div className="ad-crop">
+        <h2>Crop the photo</h2>
+        <p className="ad-muted ad-small">Drag the photo to choose what shows, and zoom in if you like. It will fill this frame on the site.</p>
+        <div
+          className={`ad-crop-frame${round ? ' ad-crop-frame--round' : ''}`}
+          style={{ width: frame.width, height: frame.height }}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerUp}
+        >
+          {src && <img
+            ref={image}
+            src={src}
+            alt=""
+            draggable={false}
+            onLoad={(event) => setNatural({ width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight })}
+            style={natural ? { width: shownW, height: shownH, left: frame.width / 2 - cx * shownW, top: frame.height / 2 - cy * shownH } : { opacity: 0 }}
+          />}
+        </div>
+        <label className="ad-crop-zoom">
+          <span>Zoom</span>
+          <input type="range" min="1" max="4" step="0.01" value={zoom} onChange={(event) => setZoom(Number(event.target.value))} />
+        </label>
+        <div className="ad-row ad-crop-actions">
+          <button type="button" className="ad-btn ad-btn--ghost" onClick={onCancel} disabled={busy}>Cancel</button>
+          <button type="button" className="ad-btn" onClick={crop} disabled={busy || !natural}>{busy ? 'Saving…' : 'Use this crop'}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// One photo: upload it or paste an address, with a preview. With a ratio, the photo is
+// cropped to that shape before it is uploaded.
+export function PhotoField({ label = 'Photo', hint, value, onChange, ratio, round = false }) {
   const input = useRef(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [cropping, setCropping] = useState(null);
 
-  const upload = async (event) => {
-    const file = event.target.files[0];
-    event.target.value = '';
-    if (!file) return;
+  const send = async (file) => {
     setBusy(true);
     setError('');
     const result = await adminApi.uploadImage(file);
@@ -122,11 +227,19 @@ export function PhotoField({ label = 'Photo', hint, value, onChange }) {
     else setError(result.message);
   };
 
+  const upload = (event) => {
+    const file = event.target.files[0];
+    event.target.value = '';
+    if (!file) return;
+    if (ratio) setCropping(file);
+    else send(file);
+  };
+
   return (
     <div className="ad-field">
       <span>{label}{hint && <small> — {hint}</small>}</span>
       <div className="ad-photo-field">
-        <span className="ad-photo-preview">{value ? <img src={mediaUrl(value)} alt="" /> : <small>No photo</small>}</span>
+        <span className={`ad-photo-preview${round ? ' ad-photo-preview--round' : ''}`} style={ratio ? { aspectRatio: String(ratio), height: 'auto' } : undefined}>{value ? <img src={mediaUrl(value)} alt="" /> : <small>No photo</small>}</span>
         <div className="ad-stack">
           <div className="ad-row">
             <button type="button" className="ad-btn ad-btn--ghost ad-btn--small" disabled={busy} onClick={() => input.current?.click()}>
@@ -134,10 +247,20 @@ export function PhotoField({ label = 'Photo', hint, value, onChange }) {
             </button>
             {value && <button type="button" className="ad-link-text" onClick={() => onChange('')}>Remove</button>}
           </div>
+          {ratio && <p className="ad-muted ad-small">Any size works: you’ll crop it to fit after choosing it.</p>}
           {error && <p className="ad-error ad-small">{error}</p>}
         </div>
       </div>
       <input ref={input} type="file" accept="image/jpeg,image/png,image/webp,image/avif" hidden onChange={upload} />
+      {cropping && (
+        <PhotoCropper
+          file={cropping}
+          ratio={ratio}
+          round={round}
+          onCancel={() => setCropping(null)}
+          onCrop={(file) => { setCropping(null); send(file); }}
+        />
+      )}
     </div>
   );
 }
