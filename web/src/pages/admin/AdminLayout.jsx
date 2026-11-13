@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
-  ExternalLink, FileText, LayoutDashboard, LogOut, Mail, Menu, Package, Settings, ShoppingBag, Star, TicketPercent, Users, X } from 'lucide-react';
+  ExternalLink, FileText, Images, LayoutDashboard, LogOut, Mail, Menu, Package, Settings, ShoppingBag, Star, TicketPercent, Users, X } from 'lucide-react';
 import { useAuth } from '../../lib/auth';
 import '../../styles/jayam-admin.css';
 
@@ -10,6 +10,7 @@ const LINKS = [
   { to: '/admin/orders', label: 'Orders', icon: ShoppingBag },
   { to: '/admin/products', label: 'Products', icon: Package },
   { to: '/admin/discounts', label: 'Discounts', icon: TicketPercent },
+  { to: '/admin/assets', label: 'Assets', icon: Images },
   { to: '/admin/content', label: 'Site content', icon: FileText },
   { to: '/admin/enquiries', label: 'Enquiries', icon: Mail },
   { to: '/admin/reviews', label: 'Reviews', icon: Star },

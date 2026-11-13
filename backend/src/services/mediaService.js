@@ -79,4 +79,57 @@ function deleteStoredImage(url) {
   removeQuietly(path.join(process.cwd(), 'public', url));
 }
 
-module.exports = { storeImage, addProductImages, deleteStoredImage, removeQuietly };
+// Folders of the photo library (Admin → Assets): content uploads and product photos
+const LIBRARY_KINDS = ['content', 'product'];
+const uploadsRoot = () => path.join(process.cwd(), 'public', 'uploads');
+
+// The local file behind an /uploads/... address, or null if it isn't a library photo
+function libraryFile(url) {
+  const match = /^\/uploads\/(content|product)\/([A-Za-z0-9._-]+\.(?:webp|png|jpe?g|avif|gif))$/.exec(String(url || ''));
+  if (!match) return null;
+  const file = path.join(uploadsRoot(), match[1], match[2]);
+  return file.startsWith(uploadsRoot() + path.sep) ? file : null;
+}
+
+// Every photo in the library, newest first
+function listLibrary() {
+  const items = [];
+  for (const kind of LIBRARY_KINDS) {
+    const dir = path.join(uploadsRoot(), kind);
+    if (!fs.existsSync(dir)) continue;
+    for (const name of fs.readdirSync(dir)) {
+      if (!/\.(webp|png|jpe?g|avif|gif)$/i.test(name)) continue;
+      const stat = fs.statSync(path.join(dir, name));
+      items.push({ url: `/uploads/${kind}/${name}`, kind, size: stat.size, createdAt: stat.mtime.toISOString() });
+    }
+  }
+  return items.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
+// Cut a part of a library photo out as a new photo. crop is in fractions of the photo:
+// { left, top, width, height } between 0 and 1.
+async function cropLibraryImage(url, crop) {
+  const file = libraryFile(url);
+  if (!file || !fs.existsSync(file)) throw new Error('That photo is no longer in the library');
+  const image = sharp(file).rotate();
+  const { width, height } = await image.metadata();
+  const clamp = (value) => Math.min(1, Math.max(0, Number(value) || 0));
+  const left = Math.round(clamp(crop.left) * width);
+  const top = Math.round(clamp(crop.top) * height);
+  const cropW = Math.max(1, Math.min(width - left, Math.round(clamp(crop.width) * width)));
+  const cropH = Math.max(1, Math.min(height - top, Math.round(clamp(crop.height) * height)));
+  const buffer = await sharp(file)
+    .rotate()
+    .extract({ left, top, width: cropW, height: cropH })
+    .resize(1800, 1800, { fit: 'inside', withoutEnlargement: true })
+    .webp({ quality: 86 })
+    .toBuffer();
+  const filename = `content-crop-${Date.now()}-${Math.random().toString(36).slice(2, 10)}.webp`;
+  const storedPath = `/uploads/content/${filename}`;
+  const destination = path.join(process.cwd(), 'public', storedPath);
+  fs.mkdirSync(path.dirname(destination), { recursive: true });
+  fs.writeFileSync(destination, buffer);
+  return storedPath;
+}
+
+module.exports = { storeImage, addProductImages, deleteStoredImage, removeQuietly, libraryFile, listLibrary, cropLibraryImage };

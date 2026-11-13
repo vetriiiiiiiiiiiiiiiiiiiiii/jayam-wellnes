@@ -62,6 +62,12 @@ const contentController = require('../controllers/contentController');
 router.put('/content/:key', contentController.updateContent);
 router.post('/uploads', accept(upload.single('image')), adminController.uploadContentImage);
 
+// Photo library (Admin → Assets)
+const assetsController = require('../controllers/assetsController');
+router.get('/assets', assetsController.listAssets);
+router.post('/assets/crop', assetsController.cropAsset);
+router.delete('/assets', assetsController.deleteAsset);
+
 // Discount codes and the setup check
 const storeSettingsController = require('../controllers/storeSettingsController');
 router.get('/discounts', storeSettingsController.listDiscounts);

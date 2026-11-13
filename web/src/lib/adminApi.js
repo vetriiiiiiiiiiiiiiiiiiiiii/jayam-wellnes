@@ -36,6 +36,10 @@ export const adminApi = {
     return call(() => authApi.post('admin/uploads', form), 'Could not upload the image. Please try a smaller JPEG or PNG.');
   },
 
+  assets: () => call(() => authApi.get('admin/assets'), 'Could not load the photo library'),
+  cropAsset: (body) => call(() => authApi.post('admin/assets/crop', body), 'Could not crop that photo'),
+  deleteAsset: (url) => call(() => authApi.delete('admin/assets', { params: { url } }), 'Could not delete that photo'),
+
   enquiries: (status) => call(() => authApi.get('admin/enquiries', { params: status ? { status } : {} }), 'Could not load enquiries'),
   updateEnquiry: (id, status) => call(() => authApi.put(`admin/enquiries/${id}`, { status }), 'Could not update the enquiry'),
 

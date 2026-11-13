@@ -1,8 +1,8 @@
 import { BANNER_DEFAULTS, CLAIM_DEFAULTS, STORY_DEFAULTS } from '../../lib/content';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { ImagePlus, Plus, RotateCcw, Trash2 } from 'lucide-react';
-import { adminApi, mediaUrl } from '../../lib/adminApi';
-import { ListEditor, PhotoCropper, PhotoField, StringList } from './adminBits';
+import { mediaUrl } from '../../lib/adminApi';
+import { ListEditor, PhotoField, PhotoPicker, StringList } from './adminBits';
 import { BENEFITS, BENEFIT_DEFAULTS, BENEFIT_KEYS } from '../../lib/benefits';
 
 // The product page story, edited with the product. Five chapters, each optional:
@@ -64,19 +64,7 @@ export const storyForEditing = (product) => {
 // One benefit in the editor: show it or not, change its icon (cropped to a circle), change
 // its wording, or remove it
 function BenefitTile({ icon, image, label, placeholder, shown, onShow, onImage, onLabel, onRemove }) {
-  const input = useRef(null);
-  const [cropping, setCropping] = useState(null);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
-
-  const send = async (file) => {
-    setBusy(true);
-    setError('');
-    const result = await adminApi.uploadImage(file);
-    setBusy(false);
-    if (result.ok) onImage(result.data.url);
-    else setError(result.message);
-  };
+  const [picking, setPicking] = useState(false);
 
   return (
     <div className={`ad-benefit${shown ? ' is-on' : ''}`}>
@@ -86,9 +74,9 @@ function BenefitTile({ icon, image, label, placeholder, shown, onShow, onImage, 
       <button type="button" className="ad-benefit-remove" onClick={onRemove} aria-label={`Remove ${label || 'this benefit'}`} title="Remove">
         <Trash2 size={15} aria-hidden="true" />
       </button>
-      <button type="button" className="ad-benefit-icon ad-benefit-icon--edit" onClick={() => input.current?.click()} disabled={busy} title="Change the icon">
+      <button type="button" className="ad-benefit-icon ad-benefit-icon--edit" onClick={() => setPicking(true)} title="Change the icon">
         {image ? <img src={mediaUrl(image)} alt="" /> : icon || <ImagePlus size={20} aria-hidden="true" />}
-        <span className="ad-benefit-icon-tag">{busy ? '…' : 'Change'}</span>
+        <span className="ad-benefit-icon-tag">Change</span>
       </button>
       <textarea
         className="ad-benefit-text"
@@ -98,25 +86,14 @@ function BenefitTile({ icon, image, label, placeholder, shown, onShow, onImage, 
         value={label}
         onChange={(event) => onLabel(event.target.value)}
       />
-      {error && <p className="ad-error ad-small">{error}</p>}
-      <input
-        ref={input}
-        type="file"
-        accept="image/jpeg,image/png,image/webp,image/avif"
-        hidden
-        onChange={(event) => {
-          const file = event.target.files[0];
-          event.target.value = '';
-          if (file) setCropping(file);
-        }}
-      />
-      {cropping && (
-        <PhotoCropper
-          file={cropping}
+      {picking && (
+        <PhotoPicker
+          title="Choose an icon"
           ratio={1}
           round
-          onCancel={() => setCropping(null)}
-          onCrop={(file) => { setCropping(null); send(file); }}
+          current={image}
+          onClose={() => setPicking(false)}
+          onPick={(url) => { setPicking(false); onImage(url); }}
         />
       )}
     </div>

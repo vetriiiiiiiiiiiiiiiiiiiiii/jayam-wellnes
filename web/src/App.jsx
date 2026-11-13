@@ -36,6 +36,7 @@ const AdminReviews = lazy(() => import('./pages/admin/AdminReviews'));
 const AdminEnquiries = lazy(() => import('./pages/admin/AdminEnquiries'));
 const AdminContent = lazy(() => import('./pages/admin/AdminContent'));
 const AdminDiscounts = lazy(() => import('./pages/admin/AdminDiscounts'));
+const AdminAssets = lazy(() => import('./pages/admin/AdminAssets'));
 const AdminSetup = lazy(() => import('./pages/admin/AdminSetup'));
 
 function PageFallback() {
@@ -91,6 +92,7 @@ function App() {
               <Route path="reviews" element={<AdminReviews />} />
               <Route path="users" element={<AdminUsers />} />
               <Route path="discounts" element={<AdminDiscounts />} />
+              <Route path="assets" element={<AdminAssets />} />
               <Route path="setup" element={<AdminSetup />} />
               <Route path="*" element={<Navigate to="/admin" replace />} />
             </Route>

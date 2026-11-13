@@ -104,40 +104,65 @@ export function StringList({ label, items, onChange, placeholder, addLabel }) {
   );
 }
 
-// Crops a chosen photo to the frame it is shown in: drag to move, slide to zoom.
-// The cropped picture is what gets uploaded, so it always fits the page exactly.
+// ---------- Photo library picker ----------
+// Every photo field opens this: pick a photo from the library (Admin → Assets) or upload a
+// new one, crop it to the shape it is shown in (drag, zoom, or Auto fit), check the preview,
+// then use it. Uploads and crops are both kept in the library to reuse.
+
 const clampCentre = (centre, shown, frame) => (shown <= frame ? 0.5 : Math.min(1 - frame / (2 * shown), Math.max(frame / (2 * shown), centre)));
 
-export function PhotoCropper({ file, ratio, round = false, overlay = null, onCancel, onCrop }) {
-  const [src, setSrc] = useState('');
+const frameFor = (ratio) => {
+  let width = Math.min(520, window.innerWidth * 0.84);
+  let height = width / ratio;
+  const maxHeight = window.innerHeight * 0.52;
+  if (height > maxHeight) {
+    height = maxHeight;
+    width = height * ratio;
+  }
+  return { width, height };
+};
+
+const formatSize = (bytes) => (bytes > 1024 * 1024 ? `${(bytes / 1024 / 1024).toFixed(1)} MB` : `${Math.round(bytes / 1024)} KB`);
+
+// Upload one or more files to the library; resolves with the new addresses
+export const uploadToLibrary = async (files) => {
+  const urls = [];
+  for (const file of files) {
+    const result = await adminApi.uploadImage(file);
+    if (!result.ok) return { urls, error: result.message };
+    urls.push(result.data.url);
+  }
+  return { urls };
+};
+
+// The library grid, shared by the picker and the Assets page
+export function AssetGrid({ assets, selected, onSelect, renderActions }) {
+  if (!assets) return <p className="ad-muted ad-small">Loading photos…</p>;
+  if (assets.length === 0) return <p className="ad-muted ad-small">No photos yet. Upload one to start the library.</p>;
+  return (
+    <ul className="ad-assets">
+      {assets.map((asset) => (
+        <li key={asset.url} className={selected === asset.url ? 'is-selected' : ''}>
+          <button type="button" className="ad-asset-thumb" onClick={() => onSelect?.(asset)} title={asset.url.split('/').pop()}>
+            <img src={mediaUrl(asset.url)} alt="" loading="lazy" />
+            {asset.inUse && <span className="ad-asset-tag">In use</span>}
+          </button>
+          <div className="ad-asset-meta">
+            <small>{formatSize(asset.size)} · {new Date(asset.createdAt).toLocaleDateString()}</small>
+            {renderActions?.(asset)}
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function CropStep({ url, ratio, round, overlay, busy, onBack, onCrop }) {
   const [natural, setNatural] = useState(null);
   const [zoom, setZoom] = useState(1);
   const [centre, setCentre] = useState({ x: 0.5, y: 0.5 });
-  const [busy, setBusy] = useState(false);
   const drag = useRef(null);
-  const image = useRef(null);
-  const [frame] = useState(() => {
-    let width = Math.min(520, window.innerWidth * 0.84);
-    let height = width / ratio;
-    const maxHeight = window.innerHeight * 0.55;
-    if (height > maxHeight) {
-      height = maxHeight;
-      width = height * ratio;
-    }
-    return { width, height };
-  });
-
-  // Made and released inside the effect, so a remount never leaves a released address behind
-  useEffect(() => {
-    const url = URL.createObjectURL(file);
-    setSrc(url);
-    return () => URL.revokeObjectURL(url);
-  }, [file]);
-  useEffect(() => {
-    const onKey = (event) => event.key === 'Escape' && onCancel();
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [onCancel]);
+  const [frame] = useState(() => frameFor(ratio));
 
   const scale = natural ? Math.max(frame.width / natural.width, frame.height / natural.height) * zoom : 1;
   const shownW = natural ? natural.width * scale : 0;
@@ -157,111 +182,181 @@ export function PhotoCropper({ file, ratio, round = false, overlay = null, onCan
   const onPointerUp = () => { drag.current = null; };
 
   const crop = () => {
-    if (!natural) return;
-    setBusy(true);
-    const cropW = frame.width / scale;
-    const cropH = frame.height / scale;
-    const outW = Math.round(Math.min(cropW, 1800));
-    const outH = Math.round(outW / ratio);
-    const canvas = document.createElement('canvas');
-    canvas.width = outW;
-    canvas.height = outH;
-    canvas.getContext('2d').drawImage(image.current, cx * natural.width - cropW / 2, cy * natural.height - cropH / 2, cropW, cropH, 0, 0, outW, outH);
-    canvas.toBlob((blob) => {
-      if (!blob) { setBusy(false); return; }
-      const type = blob.type || 'image/png';
-      const name = `${file.name.replace(/\.[^.]+$/, '') || 'photo'}-cropped.${type.split('/')[1] || 'png'}`;
-      onCrop(new File([blob], name, { type }));
-    }, 'image/webp', 0.92);
+    const width = frame.width / shownW;
+    const height = frame.height / shownH;
+    onCrop({ left: cx - width / 2, top: cy - height / 2, width, height });
   };
 
   return (
-    <div className="ad-crop-wrap" role="dialog" aria-modal="true" aria-label="Crop photo">
-      <div className="ad-crop">
-        <h2>Crop the photo</h2>
-        <p className="ad-muted ad-small">Drag the photo to choose what shows, and zoom in if you like. It will fill this frame on the site.</p>
-        <div
-          className={`ad-crop-frame${round ? ' ad-crop-frame--round' : ''}`}
-          style={{ width: frame.width, height: frame.height }}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerCancel={onPointerUp}
-        >
-          {src && <img
-            ref={image}
-            src={src}
-            alt=""
-            draggable={false}
-            onLoad={(event) => setNatural({ width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight })}
-            style={natural ? { width: shownW, height: shownH, left: frame.width / 2 - cx * shownW, top: frame.height / 2 - cy * shownH } : { opacity: 0 }}
-          />}
-          {overlay && <div className="ad-crop-overlay" aria-hidden="true">{overlay}</div>}
+    <>
+      <p className="ad-muted ad-small ad-picker-hint">Drag the photo to choose what shows and zoom in if you like. It fills this shape on the site.</p>
+      <div
+        className={`ad-crop-frame${round ? ' ad-crop-frame--round' : ''}`}
+        style={{ width: frame.width, height: frame.height }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+      >
+        <img
+          src={mediaUrl(url)}
+          alt=""
+          draggable={false}
+          onLoad={(event) => setNatural({ width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight })}
+          style={natural ? { width: shownW, height: shownH, left: frame.width / 2 - cx * shownW, top: frame.height / 2 - cy * shownH } : { opacity: 0 }}
+        />
+        {overlay && <div className="ad-crop-overlay" aria-hidden="true">{overlay}</div>}
+      </div>
+      <label className="ad-crop-zoom">
+        <span>Zoom</span>
+        <input type="range" min="1" max="4" step="0.01" value={zoom} onChange={(event) => setZoom(Number(event.target.value))} />
+      </label>
+      <div className="ad-row ad-crop-actions">
+        <button type="button" className="ad-btn ad-btn--ghost" onClick={onBack} disabled={busy}>Back to photos</button>
+        <button type="button" className="ad-btn ad-btn--ghost" onClick={() => { setZoom(1); setCentre({ x: 0.5, y: 0.5 }); }} disabled={busy}>Auto fit</button>
+        <button type="button" className="ad-btn" onClick={crop} disabled={busy || !natural}>{busy ? 'Cropping…' : 'Crop and preview'}</button>
+      </div>
+    </>
+  );
+}
+
+export function PhotoPicker({ ratio, round = false, overlay = null, title = 'Choose a photo', current, onClose, onPick }) {
+  const [assets, setAssets] = useState(null);
+  const [step, setStep] = useState('library'); // library → crop → preview
+  const [source, setSource] = useState(null); // the library photo being cropped
+  const [result, setResult] = useState(null); // the photo to use
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const input = useRef(null);
+
+  const load = () => adminApi.assets().then((res) => setAssets(res.ok ? res.data.assets : []));
+  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    const onKey = (event) => event.key === 'Escape' && onClose();
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  const choose = (url) => {
+    setError('');
+    setSource(url);
+    setResult(url);
+    setStep(ratio ? 'crop' : 'preview');
+  };
+
+  const upload = async (event) => {
+    const files = [...event.target.files];
+    event.target.value = '';
+    if (!files.length) return;
+    setBusy(true);
+    setError('');
+    const { urls, error: failed } = await uploadToLibrary(files);
+    setBusy(false);
+    if (failed) setError(failed);
+    load();
+    if (urls.length === 1) choose(urls[0]);
+  };
+
+  const crop = async (area) => {
+    setBusy(true);
+    setError('');
+    const res = await adminApi.cropAsset({ url: source, ...area });
+    setBusy(false);
+    if (!res.ok) return setError(res.message);
+    setResult(res.data.url);
+    setStep('preview');
+    load();
+  };
+
+  return (
+    <div className="ad-crop-wrap" role="dialog" aria-modal="true" aria-label={title}>
+      <div className={`ad-crop ad-picker ad-picker--${step}`}>
+        <div className="ad-picker-head">
+          <h2>{step === 'library' ? title : step === 'crop' ? 'Crop to fit' : 'Preview'}</h2>
+          <ol className="ad-picker-steps" aria-label="Steps">
+            <li className={step === 'library' ? 'is-on' : ''}>1 · Photo</li>
+            {ratio && <li className={step === 'crop' ? 'is-on' : ''}>2 · Crop</li>}
+            <li className={step === 'preview' ? 'is-on' : ''}>{ratio ? '3' : '2'} · Preview</li>
+          </ol>
+          <button type="button" className="ad-icon-btn" onClick={onClose} aria-label="Close"><X size={20} /></button>
         </div>
-        <label className="ad-crop-zoom">
-          <span>Zoom</span>
-          <input type="range" min="1" max="4" step="0.01" value={zoom} onChange={(event) => setZoom(Number(event.target.value))} />
-        </label>
-        <div className="ad-row ad-crop-actions">
-          <button type="button" className="ad-btn ad-btn--ghost" onClick={() => { setZoom(1); setCentre({ x: 0.5, y: 0.5 }); }} disabled={busy}>Auto fit</button>
-          <button type="button" className="ad-btn ad-btn--ghost" onClick={onCancel} disabled={busy}>Cancel</button>
-          <button type="button" className="ad-btn" onClick={crop} disabled={busy || !natural}>{busy ? 'Saving…' : 'Use this crop'}</button>
-        </div>
+        {error && <p className="ad-error ad-small">{error}</p>}
+
+        {step === 'library' && (
+          <>
+            <div className="ad-row ad-picker-bar">
+              <button type="button" className="ad-btn" onClick={() => input.current?.click()} disabled={busy}>
+                <ImagePlus size={15} aria-hidden="true" /> {busy ? 'Uploading…' : 'Upload new photo'}
+              </button>
+              <span className="ad-muted ad-small">or pick one you uploaded before</span>
+            </div>
+            <div className="ad-picker-grid">
+              <AssetGrid assets={assets} selected={current} onSelect={(asset) => choose(asset.url)} />
+            </div>
+            <input ref={input} type="file" accept="image/jpeg,image/png,image/webp,image/avif" hidden multiple onChange={upload} />
+          </>
+        )}
+
+        {step === 'crop' && source && (
+          <CropStep url={source} ratio={ratio} round={round} overlay={overlay} busy={busy} onBack={() => setStep('library')} onCrop={crop} />
+        )}
+
+        {step === 'preview' && result && (
+          <>
+            <div
+              className={`ad-crop-frame ad-picker-preview${round ? ' ad-crop-frame--round' : ''}`}
+              style={ratio ? frameFor(ratio) : undefined}
+            >
+              <img src={mediaUrl(result)} alt="" className={ratio ? 'is-cover' : 'is-contain'} />
+              {overlay && <div className="ad-crop-overlay" aria-hidden="true">{overlay}</div>}
+            </div>
+            <div className="ad-row ad-crop-actions">
+              <button type="button" className="ad-btn ad-btn--ghost" onClick={() => setStep(ratio ? 'crop' : 'library')}>{ratio ? 'Back to crop' : 'Back to photos'}</button>
+              <button type="button" className="ad-btn" onClick={() => onPick(result)}>Use this photo</button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
 }
 
-// One photo: upload it or paste an address, with a preview. With a ratio, the photo is
-// cropped to that shape before it is uploaded.
+// One photo field: shows the photo, and opens the library picker to choose, crop and
+// preview a new one. With a ratio, the photo is cropped to that shape.
 export function PhotoField({ label = 'Photo', hint, value, onChange, ratio, round = false, overlay = null }) {
-  const input = useRef(null);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
-  const [cropping, setCropping] = useState(null);
-
-  const send = async (file) => {
-    setBusy(true);
-    setError('');
-    const result = await adminApi.uploadImage(file);
-    setBusy(false);
-    if (result.ok) onChange(result.data.url);
-    else setError(result.message);
-  };
-
-  const upload = (event) => {
-    const file = event.target.files[0];
-    event.target.value = '';
-    if (!file) return;
-    if (ratio) setCropping(file);
-    else send(file);
-  };
+  const [open, setOpen] = useState(false);
 
   return (
     <div className="ad-field">
       <span>{label}{hint && <small> — {hint}</small>}</span>
       <div className="ad-photo-field">
-        <span className={`ad-photo-preview${round ? ' ad-photo-preview--round' : ''}`} style={ratio ? { aspectRatio: String(ratio), height: 'auto' } : undefined}>{value ? <img src={mediaUrl(value)} alt="" /> : <small>No photo</small>}</span>
+        <button
+          type="button"
+          className={`ad-photo-preview${round ? ' ad-photo-preview--round' : ''}`}
+          style={ratio ? { aspectRatio: String(ratio), height: 'auto' } : undefined}
+          onClick={() => setOpen(true)}
+          title="Choose a photo"
+        >
+          {value ? <img src={mediaUrl(value)} alt="" /> : <small>No photo</small>}
+        </button>
         <div className="ad-stack">
           <div className="ad-row">
-            <button type="button" className="ad-btn ad-btn--ghost ad-btn--small" disabled={busy} onClick={() => input.current?.click()}>
-              <ImagePlus size={14} aria-hidden="true" /> {busy ? 'Uploading…' : value ? 'Replace photo' : 'Upload photo'}
+            <button type="button" className="ad-btn ad-btn--ghost ad-btn--small" onClick={() => setOpen(true)}>
+              <ImagePlus size={14} aria-hidden="true" /> {value ? 'Change photo' : 'Choose photo'}
             </button>
             {value && <button type="button" className="ad-link-text" onClick={() => onChange('')}>Remove</button>}
           </div>
-          {ratio && <p className="ad-muted ad-small">Any size works: you’ll crop it to fit after choosing it.</p>}
-          {error && <p className="ad-error ad-small">{error}</p>}
+          <p className="ad-muted ad-small">Pick from your photo library or upload a new one{ratio ? ', then crop and preview it' : ''}.</p>
         </div>
       </div>
-      <input ref={input} type="file" accept="image/jpeg,image/png,image/webp,image/avif" hidden onChange={upload} />
-      {cropping && (
-        <PhotoCropper
-          file={cropping}
+      {open && (
+        <PhotoPicker
           ratio={ratio}
           round={round}
           overlay={overlay}
-          onCancel={() => setCropping(null)}
-          onCrop={(file) => { setCropping(null); send(file); }}
+          current={value}
+          onClose={() => setOpen(false)}
+          onPick={(url) => { setOpen(false); onChange(url); }}
         />
       )}
     </div>
